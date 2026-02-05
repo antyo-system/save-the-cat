@@ -1,0 +1,1462 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🐱 Save The Cat — Side Story</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        image-rendering: pixelated;
+      }
+
+      body {
+        background: #1a1a2e;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "VT323", monospace;
+        overflow: hidden;
+      }
+
+      .game-wrapper {
+        position: relative;
+        border: 4px solid #3d3d5c;
+        border-radius: 8px;
+        box-shadow: 0 0 40px rgba(100, 100, 200, 0.3);
+      }
+
+      .music-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid #5a5a8a;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .music-toggle:hover {
+        background: rgba(0, 0, 0, 0.7);
+        transform: scale(1.1);
+      }
+
+      .music-toggle.muted {
+        opacity: 0.5;
+      }
+
+      #gameCanvas {
+        display: block;
+        background: #87ceeb;
+      }
+
+      .controls-hint {
+        color: #888;
+        font-size: 14px;
+        margin-top: 15px;
+        text-align: center;
+        font-family: "VT323", monospace;
+      }
+
+      .controls-hint span {
+        color: #ffd700;
+        background: #333;
+        padding: 2px 8px;
+        border-radius: 3px;
+        margin: 0 3px;
+      }
+
+      /* Dialog Box */
+      .dialog-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+
+      .dialog-overlay.active {
+        display: flex;
+      }
+
+      .dialog-box {
+        background: #2a2a4a;
+        border: 4px solid #5a5a8a;
+        border-radius: 8px;
+        padding: 20px 25px;
+        max-width: 380px;
+        color: #fff;
+        font-family: "VT323", monospace;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        animation: dialogPop 0.2s ease-out;
+      }
+
+      @keyframes dialogPop {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .dialog-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 12px;
+        color: #ffd700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .dialog-title .icon {
+        font-size: 18px;
+      }
+
+      .dialog-content {
+        font-size: 18px;
+        line-height: 1.6;
+        color: #ddd;
+        margin-bottom: 20px;
+        white-space: pre-line;
+      }
+
+      .dialog-content .rule {
+        display: block;
+        margin: 8px 0;
+        padding-left: 15px;
+        color: #aaddff;
+      }
+
+      .dialog-content .rule::before {
+        content: "▸ ";
+        color: #ffd700;
+      }
+
+      .dialog-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .dialog-btn {
+        font-family: "Press Start 2P", cursive;
+        font-size: 10px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .dialog-btn.primary {
+        background: #4a7c59;
+        color: white;
+      }
+
+      .dialog-btn.primary:hover {
+        background: #5a9c69;
+        transform: translateY(-2px);
+      }
+
+      .dialog-btn.secondary {
+        background: #4a4a6a;
+        color: #ccc;
+      }
+
+      .dialog-btn.secondary:hover {
+        background: #5a5a7a;
+      }
+
+      .whatsapp-btn {
+        display: none;
+        width: 100%;
+        padding: 12px 20px;
+        background: #25d366;
+        color: #fff;
+        border: 3px solid #128c7e;
+        border-radius: 8px;
+        font-family: "Press Start 2P", cursive;
+        font-size: 9px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.2s;
+      }
+
+      .whatsapp-btn:hover {
+        background: #128c7e;
+        transform: scale(1.02);
+      }
+
+      .whatsapp-btn .wa-icon {
+        font-size: 14px;
+        margin-right: 8px;
+      }
+
+      /* Code Input */
+      .code-input-wrapper {
+        margin: 15px 0;
+      }
+
+      .code-input {
+        font-family: "Press Start 2P", cursive;
+        font-size: 14px;
+        padding: 12px 15px;
+        width: 100%;
+        background: #1a1a2e;
+        border: 3px solid #5a5a8a;
+        border-radius: 4px;
+        color: #ffd700;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+      }
+
+      .code-input:focus {
+        outline: none;
+        border-color: #8a8aba;
+        box-shadow: 0 0 10px rgba(138, 138, 186, 0.3);
+      }
+
+      .code-input::placeholder {
+        color: #555;
+        letter-spacing: 1px;
+      }
+
+      /* Ending Screen */
+      .ending-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #1a1a2e;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        z-index: 200;
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
+
+      .ending-overlay.active {
+        display: flex;
+      }
+
+      .ending-overlay.visible {
+        opacity: 1;
+      }
+
+      .ending-text {
+        font-family: "VT323", monospace;
+        font-size: 24px;
+        color: #aaa;
+        text-align: center;
+        line-height: 2;
+      }
+
+      .ending-text .main {
+        color: #88ccff;
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+
+      /* Interaction Prompt */
+      .interact-prompt {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: #ffd700;
+        font-family: "Press Start 2P", cursive;
+        font-size: 8px;
+        padding: 6px 10px;
+        border-radius: 4px;
+        display: none;
+        pointer-events: none;
+        z-index: 50;
+        white-space: nowrap;
+      }
+
+      .interact-prompt.visible {
+        display: block;
+        animation: promptBounce 0.5s ease-in-out infinite;
+      }
+
+      @keyframes promptBounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-3px);
+        }
+      }
+
+      /* Mobile Controls */
+      .mobile-controls {
+        display: none;
+        margin-top: 20px;
+        gap: 15px;
+      }
+
+      .mobile-btn {
+        width: 60px;
+        height: 60px;
+        background: #3d3d5c;
+        border: 3px solid #5a5a8a;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+      }
+
+      .mobile-btn:active {
+        background: #5a5a8a;
+        transform: scale(0.95);
+      }
+
+      .mobile-btn.action {
+        background: #4a7c59;
+        width: 80px;
+      }
+
+      @media (max-width: 800px) {
+        .mobile-controls {
+          display: flex;
+        }
+        .controls-hint {
+          display: none;
+        }
+      }
+
+      @media (max-width: 700px) {
+        #gameCanvas {
+          width: 100vw;
+          height: auto;
+        }
+        .game-wrapper {
+          border: none;
+          border-radius: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-wrapper">
+      <!-- Lofi Music -->
+      <audio id="bgMusic" loop preload="auto">
+        <source
+          src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3"
+          type="audio/mpeg"
+        />
+      </audio>
+
+      <button class="music-toggle" id="musicToggle" title="Toggle Music">
+        🎵
+      </button>
+
+      <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+      <div class="interact-prompt" id="interactPrompt">Tekan E</div>
+
+      <!-- Dialog Overlay -->
+      <div class="dialog-overlay" id="dialogOverlay">
+        <div class="dialog-box">
+          <div class="dialog-title">
+            <span class="icon" id="dialogIcon">📕</span>
+            <span id="dialogTitle">Judul</span>
+          </div>
+          <div class="dialog-content" id="dialogContent">Konten dialog</div>
+          <div
+            class="code-input-wrapper"
+            id="codeInputWrapper"
+            style="display: none"
+          >
+            <input
+              type="text"
+              class="code-input"
+              id="codeInput"
+              placeholder="_ _ _ _ _"
+              maxlength="10"
+            />
+          </div>
+          <a
+            href="https://wa.me/6285777203153?text=Halo%2C%20saya%20butuh%20kode%20untuk%20Save%20the%20Cat!"
+            target="_blank"
+            class="whatsapp-btn"
+            id="whatsappBtn"
+          >
+            <span class="wa-icon">💬</span>Minta Kode via WhatsApp
+          </a>
+          <div class="dialog-buttons" id="dialogButtons">
+            <button class="dialog-btn secondary" id="btnSecondary">
+              Tutup
+            </button>
+            <button class="dialog-btn primary" id="btnPrimary">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ending Overlay -->
+      <div class="ending-overlay" id="endingOverlay">
+        <div class="ending-text">
+          <div class="main">🐾 Bantuan datang tepat waktu.</div>
+          <div>Kucing itu turun dengan selamat.</div>
+          <br />
+          <div style="color: #666; font-size: 18px">
+            Terima kasih sudah mencoba.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="controls-hint">
+      <span>←</span> <span>→</span> Jalan &nbsp;&nbsp; <span>E</span> atau
+      <span>↑</span> Interaksi
+    </p>
+
+    <div class="mobile-controls">
+      <button class="mobile-btn" id="btnLeft">◀</button>
+      <button class="mobile-btn action" id="btnAction">E</button>
+      <button class="mobile-btn" id="btnRight">▶</button>
+    </div>
+
+    <script>
+      // ==================== MUSIC CONTROL ====================
+      const bgMusic = document.getElementById("bgMusic");
+      const musicToggle = document.getElementById("musicToggle");
+      let musicStarted = false;
+      bgMusic.volume = 0.3;
+
+      function startMusic() {
+        if (!musicStarted) {
+          bgMusic.play().catch(() => {});
+          musicStarted = true;
+        }
+      }
+
+      musicToggle.addEventListener("click", () => {
+        if (bgMusic.paused) {
+          bgMusic.play();
+          musicToggle.textContent = "🎵";
+          musicToggle.classList.remove("muted");
+        } else {
+          bgMusic.pause();
+          musicToggle.textContent = "🔇";
+          musicToggle.classList.add("muted");
+        }
+        musicStarted = true;
+      });
+
+      document.addEventListener("keydown", startMusic, { once: true });
+      document.addEventListener("click", startMusic, { once: true });
+      document.addEventListener("touchstart", startMusic, { once: true });
+
+      // ==================== GAME CONFIG ====================
+      const CONFIG = {
+        SECRET_CODE: "MEOW",
+        GAME_WIDTH: 800,
+        GAME_HEIGHT: 400,
+        GROUND_Y: 320,
+        PLAYER_SPEED: 3,
+      };
+
+      // ==================== ANIMATION STATE ====================
+      const anim = {
+        time: 0,
+        clouds: [
+          { x: 100, speed: 0.3 },
+          { x: 350, speed: 0.2 },
+          { x: 600, speed: 0.35 },
+          { x: 750, speed: 0.25 },
+        ],
+        catTail: 0,
+        treeSway: 0,
+        lampFlicker: 1,
+        grassWave: 0,
+      };
+
+      // ==================== GAME STATE ====================
+      const state = {
+        ladderTried: false,
+        stoneTried: false,
+        foodTried: false,
+        bookRead: false,
+        phoneUnlocked: false,
+        codeEntered: false,
+        gameComplete: false,
+        currentDialog: null,
+      };
+
+      // ==================== CANVAS SETUP ====================
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // ==================== PLAYER ====================
+      const player = {
+        x: 400,
+        y: CONFIG.GROUND_Y,
+        width: 32,
+        height: 48,
+        speed: CONFIG.PLAYER_SPEED,
+        direction: 1,
+        frame: 0,
+        frameTimer: 0,
+        isWalking: false,
+      };
+
+      // ==================== OBJECTS ====================
+      const objects = {
+        tree: {
+          x: 60,
+          y: CONFIG.GROUND_Y - 120,
+          width: 100,
+          height: 120,
+          interactRange: 60,
+        },
+        cat: {
+          x: 85,
+          y: CONFIG.GROUND_Y - 155,
+          width: 30,
+          height: 25,
+          rescued: false,
+        },
+        ladder: {
+          x: 180,
+          y: CONFIG.GROUND_Y - 50,
+          width: 30,
+          height: 50,
+          tried: false,
+          interactRange: 40,
+        },
+        stone: {
+          x: 280,
+          y: CONFIG.GROUND_Y - 20,
+          width: 25,
+          height: 20,
+          tried: false,
+          interactRange: 35,
+        },
+        food: {
+          x: 370,
+          y: CONFIG.GROUND_Y - 15,
+          width: 20,
+          height: 15,
+          tried: false,
+          interactRange: 35,
+        },
+        bench: { x: 470, y: CONFIG.GROUND_Y - 35, width: 60, height: 35 },
+        book: {
+          x: 485,
+          y: CONFIG.GROUND_Y - 50,
+          width: 20,
+          height: 15,
+          interactRange: 45,
+        },
+        lampPost: { x: 560, y: CONFIG.GROUND_Y - 100, width: 20, height: 100 },
+        phone: {
+          x: 680,
+          y: CONFIG.GROUND_Y - 70,
+          width: 35,
+          height: 70,
+          interactRange: 45,
+        },
+      };
+
+      // ==================== BUILDINGS ====================
+      const buildings = [
+        {
+          x: 0,
+          width: 150,
+          height: 180,
+          color: "#8B4513",
+          roofColor: "#4a3728",
+          windows: [
+            [20, 60],
+            [80, 60],
+            [20, 120],
+          ],
+        },
+        {
+          x: 200,
+          width: 120,
+          height: 150,
+          color: "#CD5C5C",
+          roofColor: "#8B3A3A",
+          windows: [
+            [30, 50],
+            [70, 50],
+          ],
+        },
+        {
+          x: 350,
+          width: 180,
+          height: 200,
+          color: "#A0522D",
+          roofColor: "#6B3E26",
+          windows: [
+            [30, 60],
+            [90, 60],
+            [150, 60],
+            [60, 130],
+          ],
+        },
+        {
+          x: 580,
+          width: 100,
+          height: 140,
+          color: "#BC8F8F",
+          roofColor: "#8B6969",
+          windows: [
+            [25, 50],
+            [65, 50],
+          ],
+        },
+        {
+          x: 700,
+          width: 120,
+          height: 170,
+          color: "#8B7355",
+          roofColor: "#5D4E3A",
+          windows: [
+            [30, 60],
+            [80, 60],
+          ],
+        },
+      ];
+
+      // ==================== INPUT ====================
+      const keys = { left: false, right: false, interact: false };
+
+      document.addEventListener("keydown", (e) => {
+        if (state.currentDialog || state.gameComplete) return;
+        if (e.key === "ArrowLeft" || e.key === "a") keys.left = true;
+        if (e.key === "ArrowRight" || e.key === "d") keys.right = true;
+        if (e.key === "ArrowUp" || e.key === "e" || e.key === "E") {
+          if (!keys.interact) {
+            keys.interact = true;
+            handleInteraction();
+          }
+        }
+      });
+
+      document.addEventListener("keyup", (e) => {
+        if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
+        if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
+        if (e.key === "ArrowUp" || e.key === "e" || e.key === "E")
+          keys.interact = false;
+      });
+
+      // Mobile controls
+      const btnLeft = document.getElementById("btnLeft");
+      const btnRight = document.getElementById("btnRight");
+      const btnAction = document.getElementById("btnAction");
+
+      btnLeft.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        keys.left = true;
+      });
+      btnLeft.addEventListener("touchend", () => (keys.left = false));
+      btnRight.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        keys.right = true;
+      });
+      btnRight.addEventListener("touchend", () => (keys.right = false));
+      btnAction.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        handleInteraction();
+      });
+
+      // ==================== INTERACTION SYSTEM ====================
+      function getNearbyObject() {
+        const playerCenter = player.x + player.width / 2;
+        const interactables = [
+          { name: "ladder", obj: objects.ladder },
+          { name: "stone", obj: objects.stone },
+          { name: "food", obj: objects.food },
+          { name: "book", obj: objects.book },
+          { name: "phone", obj: objects.phone },
+        ];
+
+        for (const item of interactables) {
+          const objCenter = item.obj.x + item.obj.width / 2;
+          const distance = Math.abs(playerCenter - objCenter);
+          if (distance < (item.obj.interactRange || 40)) {
+            return item.name;
+          }
+        }
+        return null;
+      }
+
+      function handleInteraction() {
+        if (state.currentDialog || state.gameComplete) return;
+        const nearby = getNearbyObject();
+        if (!nearby) return;
+
+        switch (nearby) {
+          case "ladder":
+            if (!state.ladderTried) {
+              state.ladderTried = true;
+              objects.ladder.tried = true;
+              showDialog(
+                "ladder",
+                "🪜",
+                "Tangga",
+                '"Terlalu pendek.\nTidak akan sampai."',
+              );
+            }
+            break;
+          case "stone":
+            if (!state.stoneTried) {
+              state.stoneTried = true;
+              objects.stone.tried = true;
+              showDialog(
+                "stone",
+                "🪨",
+                "Batu",
+                '"Bukan ide yang baik.\nKucing itu bisa terluka."',
+              );
+            }
+            break;
+          case "food":
+            if (!state.foodTried) {
+              state.foodTried = true;
+              objects.food.tried = true;
+              showDialog(
+                "food",
+                "🐟",
+                "Makanan",
+                '"Ia melihatmu sejenak...\nlalu memalingkan wajah."',
+              );
+            }
+            break;
+          case "book":
+            showBookDialog();
+            break;
+          case "phone":
+            handlePhoneInteraction();
+            break;
+        }
+      }
+
+      function showBookDialog() {
+        const content = state.bookRead
+          ? `<span class="rule">Cobalah semua cara yang kamu tahu.</span>
+<span class="rule">Jangan terburu-buru meminta bantuan.</span>
+<span class="rule">Jika kucing belum selamat, gunakan kode yang diberikan.</span>`
+          : `"Jika semua cara telah dicoba,
+bantuan hanya bisa dipanggil
+dengan kode yang tepat."`;
+
+        showDialog(
+          "book",
+          "📕",
+          "Buku Catatan",
+          content,
+          state.bookRead ? null : "Baca Aturan",
+          "Tutup",
+          state.bookRead
+            ? null
+            : () => {
+                state.bookRead = true;
+                showBookDialog();
+              },
+        );
+      }
+
+      function handlePhoneInteraction() {
+        const allTried =
+          state.ladderTried && state.stoneTried && state.foodTried;
+
+        if (!allTried) {
+          showDialog(
+            "phone",
+            "📞",
+            "Telepon",
+            '"Belum saatnya.\nMasih ada yang bisa dicoba."',
+          );
+          return;
+        }
+
+        if (!state.bookRead) {
+          showDialog(
+            "phone",
+            "📞",
+            "Telepon",
+            '"Sepertinya ada sesuatu\nyang perlu kamu baca dulu."',
+          );
+          return;
+        }
+
+        state.phoneUnlocked = true;
+        showCodeInputDialog();
+      }
+
+      function showCodeInputDialog() {
+        showDialog(
+          "code",
+          "📞",
+          "Masukkan Kode Bantuan",
+          "Masukkan kode yang diberikan\nuntuk memanggil bantuan.",
+          "Kirim",
+          "Batal",
+          () => {
+            const input = document.getElementById("codeInput");
+            const code = input.value.trim().toUpperCase();
+
+            if (code === CONFIG.SECRET_CODE) {
+              closeDialog();
+              triggerEnding();
+            } else {
+              input.value = "";
+              input.placeholder = "Tidak ada yang terjadi...";
+              setTimeout(() => {
+                input.placeholder = "_ _ _ _ _";
+              }, 2000);
+            }
+          },
+          true,
+        );
+      }
+
+      function triggerEnding() {
+        state.gameComplete = true;
+        objects.cat.rescued = true;
+
+        const rescueInterval = setInterval(() => {
+          objects.cat.y += 2;
+          if (objects.cat.y >= CONFIG.GROUND_Y - 30) {
+            clearInterval(rescueInterval);
+            setTimeout(() => {
+              const ending = document.getElementById("endingOverlay");
+              ending.classList.add("active");
+              setTimeout(() => ending.classList.add("visible"), 100);
+            }, 1000);
+          }
+        }, 30);
+      }
+
+      // ==================== DIALOG SYSTEM ====================
+      function showDialog(
+        type,
+        icon,
+        title,
+        content,
+        primaryBtn = null,
+        secondaryBtn = "Tutup",
+        primaryAction = null,
+        showCodeInput = false,
+      ) {
+        state.currentDialog = type;
+
+        document.getElementById("dialogIcon").textContent = icon;
+        document.getElementById("dialogTitle").textContent = title;
+        document.getElementById("dialogContent").innerHTML = content;
+
+        const btnPrimary = document.getElementById("btnPrimary");
+        const btnSecondary = document.getElementById("btnSecondary");
+        const codeWrapper = document.getElementById("codeInputWrapper");
+        const codeInput = document.getElementById("codeInput");
+        const whatsappBtn = document.getElementById("whatsappBtn");
+
+        codeWrapper.style.display = showCodeInput ? "block" : "none";
+        whatsappBtn.style.display = showCodeInput ? "block" : "none";
+        if (showCodeInput) {
+          codeInput.value = "";
+          codeInput.placeholder = "_ _ _ _ _";
+          setTimeout(() => codeInput.focus(), 100);
+        }
+
+        if (primaryBtn) {
+          btnPrimary.style.display = "block";
+          btnPrimary.textContent = primaryBtn;
+          btnPrimary.onclick = () => {
+            if (primaryAction) primaryAction();
+            else closeDialog();
+          };
+        } else {
+          btnPrimary.style.display = "none";
+        }
+
+        btnSecondary.textContent = secondaryBtn;
+        btnSecondary.onclick = closeDialog;
+
+        document.getElementById("dialogOverlay").classList.add("active");
+      }
+
+      function closeDialog() {
+        document.getElementById("dialogOverlay").classList.remove("active");
+        state.currentDialog = null;
+      }
+
+      document.getElementById("codeInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.getElementById("btnPrimary").click();
+      });
+
+      // ==================== ANIMATIONS ====================
+      function updateAnimations() {
+        anim.time++;
+
+        // Cloud drift
+        anim.clouds.forEach((cloud) => {
+          cloud.x += cloud.speed;
+          if (cloud.x > CONFIG.GAME_WIDTH + 80) cloud.x = -80;
+        });
+
+        // Cat tail wag
+        anim.catTail = Math.sin(anim.time * 0.1) * 0.3;
+
+        // Tree sway
+        anim.treeSway = Math.sin(anim.time * 0.03) * 3;
+
+        // Lamp flicker
+        anim.lampFlicker = 0.9 + Math.random() * 0.1;
+
+        // Grass wave
+        anim.grassWave = Math.sin(anim.time * 0.05);
+      }
+
+      // ==================== UPDATE ====================
+      function update() {
+        if (state.currentDialog || state.gameComplete) {
+          player.isWalking = false;
+          return;
+        }
+
+        player.isWalking = false;
+        if (keys.left) {
+          player.x -= player.speed;
+          player.direction = -1;
+          player.isWalking = true;
+        }
+        if (keys.right) {
+          player.x += player.speed;
+          player.direction = 1;
+          player.isWalking = true;
+        }
+
+        player.x = Math.max(
+          10,
+          Math.min(CONFIG.GAME_WIDTH - player.width - 10, player.x),
+        );
+
+        if (player.isWalking) {
+          player.frameTimer++;
+          if (player.frameTimer > 8) {
+            player.frame = (player.frame + 1) % 4;
+            player.frameTimer = 0;
+          }
+        } else {
+          player.frame = 0;
+        }
+
+        updateInteractPrompt();
+      }
+
+      function updateInteractPrompt() {
+        const nearby = getNearbyObject();
+        const prompt = document.getElementById("interactPrompt");
+
+        if (nearby && !state.currentDialog) {
+          if (
+            (nearby === "ladder" && state.ladderTried) ||
+            (nearby === "stone" && state.stoneTried) ||
+            (nearby === "food" && state.foodTried)
+          ) {
+            prompt.classList.remove("visible");
+            return;
+          }
+
+          const obj = objects[nearby];
+          prompt.style.left = obj.x + obj.width / 2 - 30 + "px";
+          prompt.style.top = obj.y - 30 + "px";
+          prompt.classList.add("visible");
+        } else {
+          prompt.classList.remove("visible");
+        }
+      }
+
+      // ==================== RENDER ====================
+      function render() {
+        ctx.clearRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
+        drawSky();
+        drawClouds();
+        drawBuildings();
+        drawTree();
+        drawCat();
+        drawStreet();
+        drawObjects();
+        drawPlayer();
+      }
+
+      function drawSky() {
+        const gradient = ctx.createLinearGradient(0, 0, 0, CONFIG.GAME_HEIGHT);
+        gradient.addColorStop(0, "#87CEEB");
+        gradient.addColorStop(0.5, "#B0E2FF");
+        gradient.addColorStop(1, "#E0F6FF");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
+      }
+
+      function drawClouds() {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        const cloudY = [50, 30, 60, 40];
+        const cloudScale = [1, 0.8, 1.2, 0.7];
+        anim.clouds.forEach((cloud, i) => {
+          drawCloud(cloud.x, cloudY[i], cloudScale[i]);
+        });
+      }
+
+      function drawCloud(x, y, scale) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, 0, Math.PI * 2);
+        ctx.arc(25, -5, 25, 0, Math.PI * 2);
+        ctx.arc(50, 0, 20, 0, Math.PI * 2);
+        ctx.arc(15, 10, 15, 0, Math.PI * 2);
+        ctx.arc(35, 10, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawBuildings() {
+        buildings.forEach((b, i) => {
+          const baseY = CONFIG.GROUND_Y - b.height + 50;
+
+          ctx.fillStyle = b.color;
+          ctx.fillRect(b.x, baseY, b.width, b.height);
+
+          ctx.fillStyle = b.roofColor;
+          ctx.fillRect(b.x - 5, baseY - 15, b.width + 10, 20);
+
+          ctx.strokeStyle = "rgba(0,0,0,0.1)";
+          ctx.lineWidth = 1;
+          for (let row = 0; row < b.height / 12; row++) {
+            for (let col = 0; col < b.width / 25; col++) {
+              const bx = b.x + col * 25 + (row % 2 === 0 ? 0 : 12);
+              const by = baseY + row * 12;
+              ctx.strokeRect(bx, by, 25, 12);
+            }
+          }
+
+          b.windows.forEach(([wx, wy]) => {
+            ctx.fillStyle = "#5a8fba";
+            ctx.fillRect(b.x + wx, baseY + wy, 25, 30);
+            ctx.strokeStyle = "#3d5a73";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(b.x + wx, baseY + wy, 25, 30);
+            ctx.beginPath();
+            ctx.moveTo(b.x + wx + 12, baseY + wy);
+            ctx.lineTo(b.x + wx + 12, baseY + wy + 30);
+            ctx.moveTo(b.x + wx, baseY + wy + 15);
+            ctx.lineTo(b.x + wx + 25, baseY + wy + 15);
+            ctx.stroke();
+          });
+
+          if (i === 0 || i === 2) {
+            ctx.fillStyle = "#4a3020";
+            ctx.fillRect(
+              b.x + b.width / 2 - 15,
+              CONFIG.GROUND_Y - 45 + 50,
+              30,
+              45,
+            );
+            ctx.fillStyle = "#FFD700";
+            ctx.beginPath();
+            ctx.arc(
+              b.x + b.width / 2 + 8,
+              CONFIG.GROUND_Y - 20 + 50,
+              3,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+          }
+        });
+      }
+
+      function drawTree() {
+        const tree = objects.tree;
+        const sway = anim.treeSway;
+
+        ctx.fillStyle = "#5D4037";
+        ctx.fillRect(tree.x + 35, tree.y + 40, 30, 80);
+
+        ctx.fillStyle = "#4E342E";
+        ctx.fillRect(tree.x + 40, tree.y + 50, 5, 60);
+
+        ctx.fillStyle = "#2E7D32";
+        drawTreeCrown(tree.x + 50 + sway * 0.3, tree.y + 60, 55);
+
+        ctx.fillStyle = "#388E3C";
+        drawTreeCrown(tree.x + 50 + sway * 0.6, tree.y + 35, 50);
+
+        ctx.fillStyle = "#43A047";
+        drawTreeCrown(tree.x + 50 + sway, tree.y + 15, 40);
+      }
+
+      function drawTreeCrown(x, y, radius) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawCat() {
+        const cat = objects.cat;
+        if (cat.rescued && cat.y >= CONFIG.GROUND_Y - 30) return;
+
+        ctx.save();
+        ctx.translate(cat.x, cat.y);
+
+        ctx.fillStyle = "#FF9800";
+        ctx.fillRect(0, 10, 25, 15);
+
+        ctx.beginPath();
+        ctx.arc(12, 8, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(4, 2);
+        ctx.lineTo(8, -6);
+        ctx.lineTo(12, 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(12, 2);
+        ctx.lineTo(16, -6);
+        ctx.lineTo(20, 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#333";
+        ctx.beginPath();
+        ctx.arc(8, 7, 2, 0, Math.PI * 2);
+        ctx.arc(16, 7, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Animated tail
+        ctx.strokeStyle = "#FF9800";
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(25, 15);
+        const tailWag = Math.sin(anim.time * 0.15) * 8;
+        ctx.quadraticCurveTo(35 + tailWag, 10, 32 + tailWag * 0.5, 0);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      function drawStreet() {
+        ctx.fillStyle = "#9E9E9E";
+        ctx.fillRect(0, CONFIG.GROUND_Y, CONFIG.GAME_WIDTH, 30);
+
+        drawGrass();
+
+        ctx.fillStyle = "#757575";
+        ctx.fillRect(0, CONFIG.GROUND_Y + 25, CONFIG.GAME_WIDTH, 5);
+
+        ctx.fillStyle = "#424242";
+        ctx.fillRect(0, CONFIG.GROUND_Y + 30, CONFIG.GAME_WIDTH, 50);
+
+        ctx.fillStyle = "#FFF";
+        for (let i = 0; i < 10; i++) {
+          ctx.fillRect(50 + i * 85, CONFIG.GROUND_Y + 52, 40, 6);
+        }
+
+        ctx.fillStyle = "#616161";
+        ctx.fillRect(0, CONFIG.GROUND_Y + 28, CONFIG.GAME_WIDTH, 4);
+
+        ctx.fillStyle = "#FFF";
+        for (let i = 0; i < 6; i++) {
+          ctx.fillRect(620 + i * 25, CONFIG.GROUND_Y + 30, 15, 50);
+        }
+      }
+
+      function drawGrass() {
+        const grassPositions = [160, 240, 330, 420, 550, 650];
+        grassPositions.forEach((gx, i) => {
+          const wave = Math.sin(anim.time * 0.08 + i) * 2;
+          ctx.fillStyle = "#4CAF50";
+
+          for (let j = 0; j < 3; j++) {
+            ctx.save();
+            ctx.translate(gx + j * 6, CONFIG.GROUND_Y);
+            ctx.rotate((wave + j * 0.5) * 0.05);
+            ctx.fillRect(-1, -12, 2, 12);
+            ctx.restore();
+          }
+
+          if (i % 2 === 0) {
+            ctx.fillStyle = i % 4 === 0 ? "#FF5722" : "#E91E63";
+            ctx.beginPath();
+            ctx.arc(
+              gx + 8 + wave * 0.5,
+              CONFIG.GROUND_Y - 14,
+              3,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+            ctx.fillStyle = "#FFEB3B";
+            ctx.beginPath();
+            ctx.arc(
+              gx + 8 + wave * 0.5,
+              CONFIG.GROUND_Y - 14,
+              1.5,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+          }
+        });
+      }
+
+      function drawObjects() {
+        if (!objects.ladder.tried) {
+          drawLadder(objects.ladder.x, objects.ladder.y);
+        } else {
+          ctx.globalAlpha = 0.3;
+          drawLadder(objects.ladder.x, objects.ladder.y);
+          ctx.globalAlpha = 1;
+        }
+
+        if (!objects.stone.tried) {
+          drawStone(objects.stone.x, objects.stone.y);
+        } else {
+          ctx.globalAlpha = 0.3;
+          drawStone(objects.stone.x, objects.stone.y);
+          ctx.globalAlpha = 1;
+        }
+
+        if (!objects.food.tried) {
+          drawFood(objects.food.x, objects.food.y);
+        } else {
+          ctx.globalAlpha = 0.3;
+          drawFood(objects.food.x, objects.food.y);
+          ctx.globalAlpha = 1;
+        }
+
+        drawBench(objects.bench.x, objects.bench.y);
+        drawBook(objects.book.x, objects.book.y);
+        drawLampPost(objects.lampPost.x, objects.lampPost.y);
+        drawPhoneBooth(objects.phone.x, objects.phone.y);
+      }
+
+      function drawLadder(x, y) {
+        ctx.fillStyle = "#8D6E63";
+        ctx.fillRect(x, y, 5, 50);
+        ctx.fillRect(x + 22, y, 5, 50);
+        for (let i = 0; i < 5; i++) {
+          ctx.fillRect(x + 3, y + 5 + i * 10, 21, 3);
+        }
+      }
+
+      function drawStone(x, y) {
+        ctx.fillStyle = "#757575";
+        ctx.beginPath();
+        ctx.ellipse(x + 12, y + 10, 15, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#9E9E9E";
+        ctx.beginPath();
+        ctx.ellipse(x + 8, y + 6, 5, 3, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawFood(x, y) {
+        ctx.fillStyle = "#64B5F6";
+        ctx.beginPath();
+        ctx.ellipse(x + 10, y + 8, 12, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x + 20, y + 8);
+        ctx.lineTo(x + 28, y + 2);
+        ctx.lineTo(x + 28, y + 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#333";
+        ctx.beginPath();
+        ctx.arc(x + 5, y + 6, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawBench(x, y) {
+        ctx.fillStyle = "#8D6E63";
+        ctx.fillRect(x, y + 15, 60, 8);
+        ctx.fillRect(x + 5, y, 50, 5);
+        ctx.fillRect(x + 5, y + 7, 50, 5);
+        ctx.fillStyle = "#5D4037";
+        ctx.fillRect(x + 5, y + 20, 6, 18);
+        ctx.fillRect(x + 49, y + 20, 6, 18);
+        ctx.fillRect(x + 5, y, 4, 20);
+        ctx.fillRect(x + 51, y, 4, 20);
+      }
+
+      function drawBook(x, y) {
+        ctx.fillStyle = "#C62828";
+        ctx.fillRect(x, y, 20, 15);
+        ctx.fillStyle = "#FFF8E1";
+        ctx.fillRect(x + 2, y + 2, 16, 11);
+        ctx.fillStyle = "#8E0000";
+        ctx.fillRect(x, y, 3, 15);
+      }
+
+      function drawLampPost(x, y) {
+        ctx.fillStyle = "#37474F";
+        ctx.fillRect(x + 8, y + 20, 6, 80);
+        ctx.fillRect(x + 2, y + 95, 18, 8);
+
+        ctx.fillStyle = "#455A64";
+        ctx.fillRect(x - 5, y, 32, 25);
+
+        const flicker = anim.lampFlicker;
+        ctx.fillStyle = `rgba(255, 249, 196, ${flicker})`;
+        ctx.fillRect(x, y + 20, 22, 5);
+
+        ctx.fillStyle = `rgba(255, 249, 196, ${0.3 * flicker})`;
+        ctx.beginPath();
+        ctx.moveTo(x, y + 25);
+        ctx.lineTo(x - 15, y + 80);
+        ctx.lineTo(x + 37, y + 80);
+        ctx.lineTo(x + 22, y + 25);
+        ctx.fill();
+      }
+
+      function drawPhoneBooth(x, y) {
+        ctx.fillStyle = "#C62828";
+        ctx.fillRect(x, y, 35, 70);
+        ctx.fillStyle = "#FFEBEE";
+        ctx.fillRect(x + 4, y + 4, 27, 50);
+        ctx.fillStyle = "#81D4FA";
+        ctx.fillRect(x + 6, y + 6, 23, 30);
+        ctx.fillStyle = "#333";
+        ctx.fillRect(x + 12, y + 40, 12, 8);
+        ctx.fillStyle = "#B71C1C";
+        ctx.fillRect(x - 2, y - 5, 39, 8);
+        ctx.fillStyle = "#FFF";
+        ctx.font = "8px Arial";
+        ctx.fillText("TEL", x + 10, y + 62);
+      }
+
+      function drawPlayer() {
+        ctx.save();
+        ctx.translate(player.x + player.width / 2, player.y);
+        ctx.scale(player.direction, 1);
+        ctx.translate(-player.width / 2, 0);
+
+        const bobOffset = player.isWalking
+          ? Math.sin((player.frame * Math.PI) / 2) * 2
+          : 0;
+
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.beginPath();
+        ctx.ellipse(16, 48, 12, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#5D4037";
+        if (player.isWalking) {
+          const legOffset = Math.sin((player.frame * Math.PI) / 2) * 6;
+          ctx.fillRect(8 + legOffset, 35 - bobOffset, 7, 13);
+          ctx.fillRect(17 - legOffset, 35 - bobOffset, 7, 13);
+        } else {
+          ctx.fillRect(10, 35, 6, 13);
+          ctx.fillRect(16, 35, 6, 13);
+        }
+
+        ctx.fillStyle = "#7B1FA2";
+        ctx.fillRect(6, 20 - bobOffset, 20, 18);
+
+        ctx.fillStyle = "#9C27B0";
+        ctx.fillRect(8, 22 - bobOffset, 16, 4);
+
+        ctx.fillStyle = "#FFCCBC";
+        if (player.isWalking) {
+          const armOffset = Math.sin((player.frame * Math.PI) / 2) * 4;
+          ctx.fillRect(3, 22 - bobOffset + armOffset, 5, 12);
+          ctx.fillRect(24, 22 - bobOffset - armOffset, 5, 12);
+        } else {
+          ctx.fillRect(3, 24, 5, 10);
+          ctx.fillRect(24, 24, 5, 10);
+        }
+
+        ctx.fillStyle = "#FFCCBC";
+        ctx.beginPath();
+        ctx.arc(16, 12 - bobOffset, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#4E342E";
+        ctx.beginPath();
+        ctx.arc(16, 10 - bobOffset, 10, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(6, 8 - bobOffset, 4, 14);
+        ctx.fillRect(22, 8 - bobOffset, 4, 14);
+
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(12, 12 - bobOffset, 4, 0, Math.PI * 2);
+        ctx.arc(20, 12 - bobOffset, 4, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(16, 12 - bobOffset);
+        ctx.lineTo(16, 12 - bobOffset);
+        ctx.moveTo(8, 12 - bobOffset);
+        ctx.lineTo(6, 11 - bobOffset);
+        ctx.moveTo(24, 12 - bobOffset);
+        ctx.lineTo(26, 11 - bobOffset);
+        ctx.stroke();
+
+        ctx.fillStyle = "#333";
+        ctx.beginPath();
+        ctx.arc(12, 12 - bobOffset, 1.5, 0, Math.PI * 2);
+        ctx.arc(20, 12 - bobOffset, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // ==================== GAME LOOP ====================
+      function gameLoop() {
+        updateAnimations();
+        update();
+        render();
+        requestAnimationFrame(gameLoop);
+      }
+
+      gameLoop();
+    </script>
+  </body>
+</html>
