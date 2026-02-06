@@ -667,8 +667,8 @@
       .mobile-btn {
         width: 70px;
         height: 70px;
-        background: #3d3d5c;
-        border: 3px solid #5a5a8a;
+        background: rgba(61, 61, 92, 0.85);
+        border: 3px solid rgba(90, 90, 138, 0.9);
         border-radius: 12px;
         color: #fff;
         font-size: 28px;
@@ -693,7 +693,7 @@
       }
 
       .mobile-btn.action {
-        background: #4a7c59;
+        background: rgba(74, 124, 89, 0.85);
         width: 90px;
         font-size: 20px;
       }
@@ -710,6 +710,13 @@
       @media (max-width: 800px) {
         .mobile-controls {
           display: flex;
+          position: absolute;
+          bottom: 15px;
+          left: 0;
+          right: 0;
+          z-index: 90;
+          margin: 0;
+          padding: 0 15px;
         }
         .controls-hint {
           display: none;
@@ -720,31 +727,52 @@
           justify-content: flex-start;
         }
 
+        .game-wrapper {
+          width: 100vw;
+          height: 100vh;
+          height: 100dvh;
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
+          overflow: hidden;
+        }
+
+        #gameCanvas {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
         .music-toggle {
-          width: 50px;
-          height: 50px;
-          font-size: 24px;
-          top: 15px;
-          right: 15px;
+          width: 44px;
+          height: 44px;
+          font-size: 20px;
+          top: 12px;
+          right: 12px;
         }
 
         .time-toggle {
-          top: 15px;
-          left: 15px;
-          padding: 10px 14px;
+          top: 12px;
+          left: 12px;
+          padding: 8px 12px;
         }
 
         .time-icon {
-          font-size: 18px;
+          font-size: 16px;
         }
 
         .time-label {
           font-size: 7px;
         }
 
+        .dialog-overlay {
+          padding: 15px;
+        }
+
         .dialog-box {
-          padding: 20px;
-          margin: 15px;
+          padding: 18px;
+          margin: 10px;
+          max-height: 70vh;
         }
 
         .dialog-title {
@@ -752,18 +780,18 @@
         }
 
         .dialog-content {
-          font-size: 20px;
+          font-size: 18px;
         }
 
         .dialog-btn {
-          font-size: 11px;
-          padding: 14px 24px;
-          min-width: 100px;
+          font-size: 10px;
+          padding: 12px 20px;
+          min-width: 90px;
         }
 
         .whatsapp-btn {
-          padding: 14px 20px;
-          font-size: 10px;
+          padding: 12px 16px;
+          font-size: 9px;
         }
 
         .prompt-icon {
@@ -776,17 +804,50 @@
           font-size: 10px;
           padding: 8px 12px;
         }
-      }
 
-      @media (max-width: 700px) {
-        #gameCanvas {
-          width: 100vw;
-          height: auto;
+        .intro-overlay {
+          padding: 15px;
         }
-        .game-wrapper {
-          border: none;
-          border-radius: 0;
-          box-shadow: none;
+
+        .intro-title {
+          font-size: 20px;
+          margin-bottom: 12px;
+        }
+
+        .narrative-text {
+          font-size: 18px;
+          min-height: 80px;
+          padding: 15px;
+          margin-bottom: 15px;
+        }
+
+        .tutorials {
+          gap: 8px;
+          margin-bottom: 15px;
+        }
+
+        .tutorial-item {
+          padding: 8px;
+          font-size: 13px;
+        }
+
+        .tutorial-icon {
+          font-size: 18px;
+          margin-bottom: 3px;
+        }
+
+        .start-button {
+          font-size: 12px;
+          padding: 12px 30px;
+        }
+
+        .ending-text {
+          padding: 20px;
+          max-width: 90vw;
+        }
+
+        .ending-text .main {
+          font-size: 22px;
         }
       }
 
@@ -823,12 +884,13 @@
         }
 
         .game-wrapper {
-          margin: 10px 0;
+          margin: 0;
+          width: 100vw;
+          height: 100vh;
         }
 
         .mobile-controls {
-          margin-top: 10px;
-          margin-bottom: 10px;
+          bottom: 10px;
         }
       }
     </style>
@@ -981,31 +1043,32 @@
       </div>
     </div>
 
+      <div class="mobile-controls">
+        <button
+          class="mobile-btn"
+          id="btnLeft"
+          data-label="◀"
+          aria-label="Gerak Kiri"
+        ></button>
+        <button
+          class="mobile-btn action"
+          id="btnAction"
+          data-label="E"
+          aria-label="Interaksi"
+        ></button>
+        <button
+          class="mobile-btn"
+          id="btnRight"
+          data-label="▶"
+          aria-label="Gerak Kanan"
+        ></button>
+      </div>
+    </div>
+
     <p class="controls-hint">
       <span>←</span> <span>→</span> Jalan &nbsp;&nbsp; <span>E</span> atau
       <span>↑</span> Interaksi
     </p>
-
-    <div class="mobile-controls">
-      <button
-        class="mobile-btn"
-        id="btnLeft"
-        data-label="◀"
-        aria-label="Gerak Kiri"
-      ></button>
-      <button
-        class="mobile-btn action"
-        id="btnAction"
-        data-label="E"
-        aria-label="Interaksi"
-      ></button>
-      <button
-        class="mobile-btn"
-        id="btnRight"
-        data-label="▶"
-        aria-label="Gerak Kanan"
-      ></button>
-    </div>
 
     <script>
       // ==================== MUSIC CONTROL ====================
@@ -1441,6 +1504,52 @@
       // ==================== CANVAS SETUP ====================
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
+
+      // ==================== MOBILE CAMERA ====================
+      const mobileCamera = {
+        enabled: false,
+        translateX: 0,
+        targetTranslateX: 0,
+        smoothSpeed: 0.12,
+        initialized: false,
+      };
+
+      function detectMobile() {
+        return window.innerWidth <= 800;
+      }
+
+      function updateMobileCamera() {
+        mobileCamera.enabled = detectMobile();
+        if (!mobileCamera.enabled) {
+          mobileCamera.translateX = 0;
+          mobileCamera.initialized = false;
+          return;
+        }
+
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+
+        // CSS object-fit:cover crops the canvas horizontally in portrait.
+        // Calculate how many game-pixels are visible after the crop.
+        const coverScale = Math.max(screenW / CONFIG.GAME_WIDTH, screenH / CONFIG.GAME_HEIGHT);
+        const visibleGameWidth = screenW / coverScale;
+        const halfVisible = visibleGameWidth / 2;
+
+        // Follow player horizontally
+        const playerCenterX = player.x + player.width / 2;
+        const clampedX = Math.max(halfVisible, Math.min(CONFIG.GAME_WIDTH - halfVisible, playerCenterX));
+
+        // Translate so the player appears at the canvas center (which cover shows on screen)
+        mobileCamera.targetTranslateX = CONFIG.GAME_WIDTH / 2 - clampedX;
+
+        // On first frame, snap immediately instead of smoothing
+        if (!mobileCamera.initialized) {
+          mobileCamera.translateX = mobileCamera.targetTranslateX;
+          mobileCamera.initialized = true;
+        } else {
+          mobileCamera.translateX += (mobileCamera.targetTranslateX - mobileCamera.translateX) * mobileCamera.smoothSpeed;
+        }
+      }
 
       // ==================== PLAYER ====================
       const player = {
@@ -2188,14 +2297,27 @@ dengan kode yang tepat."`;
 
           const obj = objects[nearby];
 
-          // Calculate scale factor for mobile
+          // Game-world position of the prompt target
+          let gameX = obj.x + obj.width / 2;
+          let gameY = obj.y;
+
+          // Account for mobile camera horizontal pan
+          if (mobileCamera.enabled) {
+            gameX += mobileCamera.translateX;
+          }
+
+          // With object-fit:cover the canvas keeps aspect ratio using max scale
           const canvasRect = canvas.getBoundingClientRect();
           const scaleX = canvasRect.width / CONFIG.GAME_WIDTH;
           const scaleY = canvasRect.height / CONFIG.GAME_HEIGHT;
+          const coverScale = Math.max(scaleX, scaleY);
 
-          // Position with scaling - adjusted for icon + text height
-          const scaledX = (obj.x + obj.width / 2) * scaleX;
-          const scaledY = obj.y * scaleY;
+          // Offset from cover crop (canvas is centered within the container)
+          const offsetX = (canvasRect.width - CONFIG.GAME_WIDTH * coverScale) / 2;
+          const offsetY = (canvasRect.height - CONFIG.GAME_HEIGHT * coverScale) / 2;
+
+          const scaledX = gameX * coverScale + offsetX;
+          const scaledY = gameY * coverScale + offsetY;
 
           prompt.style.left = scaledX - 35 + "px";
           prompt.style.top = scaledY - 60 + "px";
@@ -2213,17 +2335,20 @@ dengan kode yang tepat."`;
         drawSky();
         if (currentTime.stars) drawStars();
 
-        // Apply camera transformation for cutscene
+        // Apply camera transformation
         ctx.save();
+
         if (state.cutscene.active) {
+          // Cutscene camera (zoom + pan)
           const zoom = state.cutscene.zoomLevel;
           const centerX = CONFIG.GAME_WIDTH / 2;
           const centerY = CONFIG.GAME_HEIGHT / 2;
-
-          // Translate to center, apply zoom, translate to camera position
           ctx.translate(centerX, centerY);
           ctx.scale(zoom, zoom);
           ctx.translate(-state.cutscene.cameraX, -state.cutscene.cameraY);
+        } else if (mobileCamera.enabled) {
+          // Mobile camera: horizontal pan only (CSS cover handles portrait zoom)
+          ctx.translate(mobileCamera.translateX, 0);
         }
 
         drawClouds();
@@ -3011,6 +3136,7 @@ dengan kode yang tepat."`;
       // ==================== GAME LOOP ====================
       function gameLoop() {
         updateAnimations();
+        updateMobileCamera();
         update();
         render();
         requestAnimationFrame(gameLoop);
