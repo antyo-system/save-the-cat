@@ -51,6 +51,7 @@
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
       }
 
       .music-toggle:hover {
@@ -58,8 +59,49 @@
         transform: scale(1.1);
       }
 
+      .music-toggle:active {
+        transform: scale(0.95);
+      }
+
       .music-toggle.muted {
         opacity: 0.5;
+      }
+
+      .time-toggle {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid #5a5a8a;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: "Press Start 2P", cursive;
+      }
+
+      .time-toggle:hover {
+        background: rgba(0, 0, 0, 0.7);
+        transform: scale(1.05);
+      }
+
+      .time-toggle:active {
+        transform: scale(0.95);
+      }
+
+      .time-icon {
+        font-size: 16px;
+      }
+
+      .time-label {
+        font-size: 8px;
       }
 
       #gameCanvas {
@@ -95,6 +137,7 @@
         align-items: center;
         justify-content: center;
         z-index: 100;
+        padding: 10px;
       }
 
       .dialog-overlay.active {
@@ -107,10 +150,13 @@
         border-radius: 8px;
         padding: 20px 25px;
         max-width: 380px;
+        width: 100%;
         color: #fff;
         font-family: "VT323", monospace;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         animation: dialogPop 0.2s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
       }
 
       @keyframes dialogPop {
@@ -172,6 +218,9 @@
         border-radius: 4px;
         cursor: pointer;
         transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        min-width: 80px;
+        touch-action: manipulation;
       }
 
       .dialog-btn.primary {
@@ -184,6 +233,11 @@
         transform: translateY(-2px);
       }
 
+      .dialog-btn.primary:active {
+        background: #3a6c49;
+        transform: translateY(0);
+      }
+
       .dialog-btn.secondary {
         background: #4a4a6a;
         color: #ccc;
@@ -191,6 +245,10 @@
 
       .dialog-btn.secondary:hover {
         background: #5a5a7a;
+      }
+
+      .dialog-btn.secondary:active {
+        background: #3a3a5a;
       }
 
       .whatsapp-btn {
@@ -208,11 +266,18 @@
         text-decoration: none;
         text-align: center;
         transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
       }
 
       .whatsapp-btn:hover {
         background: #128c7e;
         transform: scale(1.02);
+      }
+
+      .whatsapp-btn:active {
+        background: #0f7a6d;
+        transform: scale(0.98);
       }
 
       .whatsapp-btn .wa-icon {
@@ -292,21 +357,43 @@
       /* Interaction Prompt */
       .interact-prompt {
         position: absolute;
+        display: none;
+        pointer-events: none;
+        z-index: 50;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        transform-origin: center;
+      }
+
+      .interact-prompt.visible {
+        display: flex;
+        animation: promptBounce 0.5s ease-in-out infinite;
+      }
+
+      .prompt-icon {
+        background: #ffd700;
+        color: #000;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+      }
+
+      .prompt-text {
         background: rgba(0, 0, 0, 0.8);
         color: #ffd700;
         font-family: "Press Start 2P", cursive;
         font-size: 8px;
         padding: 6px 10px;
         border-radius: 4px;
-        display: none;
-        pointer-events: none;
-        z-index: 50;
         white-space: nowrap;
-      }
-
-      .interact-prompt.visible {
-        display: block;
-        animation: promptBounce 0.5s ease-in-out infinite;
+        border: 2px solid #ffd700;
       }
 
       @keyframes promptBounce {
@@ -315,7 +402,7 @@
           transform: translateY(0);
         }
         50% {
-          transform: translateY(-3px);
+          transform: translateY(-5px);
         }
       }
 
@@ -324,16 +411,19 @@
         display: none;
         margin-top: 20px;
         gap: 15px;
+        padding: 10px;
+        justify-content: center;
+        align-items: center;
       }
 
       .mobile-btn {
-        width: 60px;
-        height: 60px;
+        width: 70px;
+        height: 70px;
         background: #3d3d5c;
         border: 3px solid #5a5a8a;
-        border-radius: 10px;
+        border-radius: 12px;
         color: #fff;
-        font-size: 24px;
+        font-size: 28px;
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -341,16 +431,32 @@
         user-select: none;
         -webkit-user-select: none;
         touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        transition: all 0.1s;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        font-family: "Press Start 2P", cursive;
+        font-size: 12px;
       }
 
       .mobile-btn:active {
         background: #5a5a8a;
-        transform: scale(0.95);
+        transform: scale(0.92);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
       }
 
       .mobile-btn.action {
         background: #4a7c59;
-        width: 80px;
+        width: 90px;
+        font-size: 20px;
+      }
+
+      .mobile-btn.action:active {
+        background: #5a9c69;
+      }
+
+      .mobile-btn::before {
+        content: attr(data-label);
+        font-size: 24px;
       }
 
       @media (max-width: 800px) {
@@ -359,6 +465,68 @@
         }
         .controls-hint {
           display: none;
+        }
+
+        body {
+          padding: 0;
+          justify-content: flex-start;
+        }
+
+        .music-toggle {
+          width: 50px;
+          height: 50px;
+          font-size: 24px;
+          top: 15px;
+          right: 15px;
+        }
+
+        .time-toggle {
+          top: 15px;
+          left: 15px;
+          padding: 10px 14px;
+        }
+
+        .time-icon {
+          font-size: 18px;
+        }
+
+        .time-label {
+          font-size: 7px;
+        }
+
+        .dialog-box {
+          padding: 20px;
+          margin: 15px;
+        }
+
+        .dialog-title {
+          font-size: 11px;
+        }
+
+        .dialog-content {
+          font-size: 20px;
+        }
+
+        .dialog-btn {
+          font-size: 11px;
+          padding: 14px 24px;
+          min-width: 100px;
+        }
+
+        .whatsapp-btn {
+          padding: 14px 20px;
+          font-size: 10px;
+        }
+
+        .prompt-icon {
+          width: 28px;
+          height: 28px;
+          font-size: 18px;
+        }
+
+        .prompt-text {
+          font-size: 10px;
+          padding: 8px 12px;
         }
       }
 
@@ -370,6 +538,49 @@
         .game-wrapper {
           border: none;
           border-radius: 0;
+          box-shadow: none;
+        }
+      }
+
+      @media (max-width: 500px) {
+        .mobile-btn {
+          width: 65px;
+          height: 65px;
+        }
+
+        .mobile-btn.action {
+          width: 80px;
+        }
+
+        .dialog-title {
+          font-size: 10px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 5px;
+        }
+
+        .dialog-buttons {
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .dialog-btn {
+          width: 100%;
+        }
+      }
+
+      @media (orientation: landscape) and (max-height: 500px) {
+        body {
+          overflow-y: auto;
+        }
+
+        .game-wrapper {
+          margin: 10px 0;
+        }
+
+        .mobile-controls {
+          margin-top: 10px;
+          margin-bottom: 10px;
         }
       }
     </style>
@@ -388,9 +599,17 @@
         🎵
       </button>
 
+      <button class="time-toggle" id="timeToggle" title="Change Time">
+        <span class="time-icon" id="timeIcon">☀️</span>
+        <span class="time-label" id="timeLabel">PAGI</span>
+      </button>
+
       <canvas id="gameCanvas" width="800" height="400"></canvas>
 
-      <div class="interact-prompt" id="interactPrompt">Tekan E</div>
+      <div class="interact-prompt" id="interactPrompt">
+        <div class="prompt-icon">!</div>
+        <div class="prompt-text">Tekan E</div>
+      </div>
 
       <!-- Dialog Overlay -->
       <div class="dialog-overlay" id="dialogOverlay">
@@ -449,9 +668,24 @@
     </p>
 
     <div class="mobile-controls">
-      <button class="mobile-btn" id="btnLeft">◀</button>
-      <button class="mobile-btn action" id="btnAction">E</button>
-      <button class="mobile-btn" id="btnRight">▶</button>
+      <button
+        class="mobile-btn"
+        id="btnLeft"
+        data-label="◀"
+        aria-label="Gerak Kiri"
+      ></button>
+      <button
+        class="mobile-btn action"
+        id="btnAction"
+        data-label="E"
+        aria-label="Interaksi"
+      ></button>
+      <button
+        class="mobile-btn"
+        id="btnRight"
+        data-label="▶"
+        aria-label="Gerak Kanan"
+      ></button>
     </div>
 
     <script>
@@ -485,6 +719,201 @@
       document.addEventListener("click", startMusic, { once: true });
       document.addEventListener("touchstart", startMusic, { once: true });
 
+      // ==================== SOUND EFFECTS ====================
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioContext();
+      let soundEnabled = true;
+
+      // Sound effect functions using Web Audio API
+      function playFootstep() {
+        if (!soundEnabled) return;
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.value = 100;
+        oscillator.type = "sine";
+
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + 0.05,
+        );
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.05);
+      }
+
+      function playDing() {
+        if (!soundEnabled) return;
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.value = 800;
+        oscillator.type = "sine";
+
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + 0.3,
+        );
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.3);
+      }
+
+      function playBuzz() {
+        if (!soundEnabled) return;
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.value = 150;
+        oscillator.type = "sawtooth";
+
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + 0.2,
+        );
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.2);
+      }
+
+      function playMeow() {
+        if (!soundEnabled) return;
+        // Simple meow simulation with frequency sweep
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = "sawtooth";
+        oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(
+          600,
+          audioCtx.currentTime + 0.1,
+        );
+        oscillator.frequency.linearRampToValueAtTime(
+          300,
+          audioCtx.currentTime + 0.3,
+        );
+
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + 0.4,
+        );
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.4);
+      }
+
+      function playVictory() {
+        if (!soundEnabled) return;
+        // Happy victory jingle
+        const notes = [523.25, 587.33, 659.25, 783.99]; // C, D, E, G
+        notes.forEach((freq, i) => {
+          const oscillator = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+
+          oscillator.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+
+          oscillator.frequency.value = freq;
+          oscillator.type = "sine";
+
+          const startTime = audioCtx.currentTime + i * 0.15;
+          gainNode.gain.setValueAtTime(0.2, startTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+
+          oscillator.start(startTime);
+          oscillator.stop(startTime + 0.3);
+        });
+      }
+
+      function playAmbient() {
+        if (!soundEnabled) return;
+        // Subtle bird chirp
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(2000, audioCtx.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(
+          2500,
+          audioCtx.currentTime + 0.05,
+        );
+        oscillator.frequency.linearRampToValueAtTime(
+          2200,
+          audioCtx.currentTime + 0.1,
+        );
+
+        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + 0.15,
+        );
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.15);
+      }
+
+      // Ambient sound loop
+      let ambientInterval;
+      function startAmbientSounds() {
+        if (ambientInterval) return;
+        ambientInterval = setInterval(() => {
+          if (Math.random() < 0.3) {
+            // 30% chance every interval
+            playAmbient();
+          }
+        }, 3000);
+      }
+
+      // Start ambient sounds on user interaction
+      document.addEventListener(
+        "keydown",
+        () => {
+          audioCtx.resume();
+          startAmbientSounds();
+        },
+        { once: true },
+      );
+      document.addEventListener(
+        "click",
+        () => {
+          audioCtx.resume();
+          startAmbientSounds();
+        },
+        { once: true },
+      );
+      document.addEventListener(
+        "touchstart",
+        () => {
+          audioCtx.resume();
+          startAmbientSounds();
+        },
+        { once: true },
+      );
+
+      // Toggle sound effects with music button
+      musicToggle.addEventListener("click", () => {
+        soundEnabled = !bgMusic.paused;
+      });
+
       // ==================== GAME CONFIG ====================
       const CONFIG = {
         SECRET_CODE: "MEOW23",
@@ -493,6 +922,88 @@
         GROUND_Y: 320,
         PLAYER_SPEED: 3,
       };
+
+      // ==================== TIME OF DAY SYSTEM ====================
+      const TIME_OF_DAY = {
+        MORNING: {
+          name: "PAGI",
+          icon: "☀️",
+          skyGradient: ["#87CEEB", "#B0E2FF", "#E0F6FF"],
+          cloudOpacity: 0.9,
+          lampBrightness: 0,
+          windowLights: false,
+          stars: false,
+          ambientSound: true,
+        },
+        NOON: {
+          name: "SIANG",
+          icon: "🌤️",
+          skyGradient: ["#4A90E2", "#87CEEB", "#B0E2FF"],
+          cloudOpacity: 0.95,
+          lampBrightness: 0,
+          windowLights: false,
+          stars: false,
+          ambientSound: true,
+        },
+        EVENING: {
+          name: "SORE",
+          icon: "🌅",
+          skyGradient: ["#FF6B35", "#FF8C61", "#FFB88C"],
+          cloudOpacity: 0.7,
+          lampBrightness: 0.5,
+          windowLights: true,
+          stars: false,
+          ambientSound: false,
+        },
+        NIGHT: {
+          name: "MALAM",
+          icon: "🌙",
+          skyGradient: ["#0A1128", "#1B2845", "#2E4057"],
+          cloudOpacity: 0.3,
+          lampBrightness: 1,
+          windowLights: true,
+          stars: true,
+          ambientSound: false,
+        },
+      };
+
+      const timeOrder = ["MORNING", "NOON", "EVENING", "NIGHT"];
+      let currentTimeIndex = 0;
+      let currentTime = TIME_OF_DAY[timeOrder[currentTimeIndex]];
+
+      // Star positions for night sky
+      const stars = [];
+      for (let i = 0; i < 50; i++) {
+        stars.push({
+          x: Math.random() * CONFIG.GAME_WIDTH,
+          y: Math.random() * (CONFIG.GROUND_Y - 100),
+          size: Math.random() * 2 + 1,
+          brightness: Math.random(),
+          twinkleSpeed: Math.random() * 0.02 + 0.01,
+        });
+      }
+
+      // Time toggle button
+      const timeToggle = document.getElementById("timeToggle");
+      const timeIcon = document.getElementById("timeIcon");
+      const timeLabel = document.getElementById("timeLabel");
+
+      function changeTimeOfDay() {
+        currentTimeIndex = (currentTimeIndex + 1) % timeOrder.length;
+        currentTime = TIME_OF_DAY[timeOrder[currentTimeIndex]];
+        timeIcon.textContent = currentTime.icon;
+        timeLabel.textContent = currentTime.name;
+
+        // Update ambient sounds
+        if (currentTime.ambientSound && !ambientInterval) {
+          startAmbientSounds();
+        } else if (!currentTime.ambientSound && ambientInterval) {
+          clearInterval(ambientInterval);
+          ambientInterval = null;
+        }
+      }
+
+      timeToggle.addEventListener("click", changeTimeOfDay);
 
       // ==================== ANIMATION STATE ====================
       const anim = {
@@ -511,6 +1022,7 @@
 
       // ==================== GAME STATE ====================
       const state = {
+        treeInteracted: false,
         ladderTried: false,
         stoneTried: false,
         foodTried: false,
@@ -704,6 +1216,7 @@
       function getNearbyObject() {
         const playerCenter = player.x + player.width / 2;
         const interactables = [
+          { name: "tree", obj: objects.tree },
           { name: "ladder", obj: objects.ladder },
           { name: "stone", obj: objects.stone },
           { name: "food", obj: objects.food },
@@ -727,8 +1240,28 @@
         if (!nearby) return;
 
         switch (nearby) {
+          case "tree":
+            playMeow();
+            if (!state.treeInteracted) {
+              state.treeInteracted = true;
+              showDialog(
+                "tree",
+                "🌳",
+                "Pohon Tua",
+                '"Seekor kucing tersangkut di cabang atas.\nTerlalu tinggi untuk dijangkau.\nBagaimana cara menolongnya?"',
+              );
+            } else {
+              showDialog(
+                "tree",
+                "🐱",
+                "Kucing di Pohon",
+                '"Ia masih di sana,\nmenunggumu menemukan cara."',
+              );
+            }
+            break;
           case "ladder":
             if (!state.ladderTried) {
+              playBuzz();
               state.ladderTried = true;
               objects.ladder.tried = true;
               showDialog(
@@ -741,6 +1274,7 @@
             break;
           case "stone":
             if (!state.stoneTried) {
+              playBuzz();
               state.stoneTried = true;
               objects.stone.tried = true;
               showDialog(
@@ -753,6 +1287,7 @@
             break;
           case "food":
             if (!state.foodTried) {
+              playBuzz();
               state.foodTried = true;
               objects.food.tried = true;
               showDialog(
@@ -764,6 +1299,7 @@
             }
             break;
           case "book":
+            playDing();
             showBookDialog();
             break;
           case "phone":
@@ -776,6 +1312,7 @@
         const content = state.bookRead
           ? `<span class="rule">Cobalah semua cara yang kamu tahu.</span>
 <span class="rule">Jangan terburu-buru meminta bantuan.</span>
+<span class="rule">Telepon darurat hanya aktif di malam hari.</span>
 <span class="rule">Jika kucing belum selamat, gunakan kode yang diberikan.</span>`
           : `"Jika semua cara telah dicoba,
 bantuan hanya bisa dipanggil
@@ -791,6 +1328,7 @@ dengan kode yang tepat."`;
           state.bookRead
             ? null
             : () => {
+                playDing();
                 state.bookRead = true;
                 showBookDialog();
               },
@@ -798,10 +1336,23 @@ dengan kode yang tepat."`;
       }
 
       function handlePhoneInteraction() {
+        // GAMEPLAY TWIST: Phone only works at night (emergency hotline)
+        if (timeOrder[currentTimeIndex] !== "NIGHT") {
+          playBuzz();
+          showDialog(
+            "phone",
+            "📞",
+            "Telepon Darurat",
+            '"Layanan ini hanya tersedia\npada malam hari.\n\n💡 Coba ubah waktu ke MALAM"',
+          );
+          return;
+        }
+
         const allTried =
           state.ladderTried && state.stoneTried && state.foodTried;
 
         if (!allTried) {
+          playBuzz();
           showDialog(
             "phone",
             "📞",
@@ -812,6 +1363,7 @@ dengan kode yang tepat."`;
         }
 
         if (!state.bookRead) {
+          playBuzz();
           showDialog(
             "phone",
             "📞",
@@ -821,6 +1373,7 @@ dengan kode yang tepat."`;
           return;
         }
 
+        playDing();
         state.phoneUnlocked = true;
         showCodeInputDialog();
       }
@@ -838,9 +1391,11 @@ dengan kode yang tepat."`;
             const code = input.value.trim().toUpperCase();
 
             if (code === CONFIG.SECRET_CODE) {
+              playDing();
               closeDialog();
               triggerEnding();
             } else {
+              playBuzz();
               input.value = "";
               input.placeholder = "Tidak ada yang terjadi...";
               setTimeout(() => {
@@ -855,12 +1410,14 @@ dengan kode yang tepat."`;
       function triggerEnding() {
         state.gameComplete = true;
         objects.cat.rescued = true;
+        playVictory();
 
         const rescueInterval = setInterval(() => {
           objects.cat.y += 2;
           if (objects.cat.y >= CONFIG.GROUND_Y - 30) {
             clearInterval(rescueInterval);
             setTimeout(() => {
+              playMeow();
               const ending = document.getElementById("endingOverlay");
               ending.classList.add("active");
               setTimeout(() => ending.classList.add("visible"), 100);
@@ -930,9 +1487,10 @@ dengan kode yang tepat."`;
       function updateAnimations() {
         anim.time++;
 
-        // Cloud drift
+        // Cloud drift - slower at evening/night
+        const cloudSpeedMultiplier = currentTime.ambientSound ? 1 : 0.5;
         anim.clouds.forEach((cloud) => {
-          cloud.x += cloud.speed;
+          cloud.x += cloud.speed * cloudSpeedMultiplier;
           if (cloud.x > CONFIG.GAME_WIDTH + 80) cloud.x = -80;
         });
 
@@ -942,14 +1500,20 @@ dengan kode yang tepat."`;
         // Tree sway
         anim.treeSway = Math.sin(anim.time * 0.03) * 3;
 
-        // Lamp flicker
-        anim.lampFlicker = 0.9 + Math.random() * 0.1;
+        // Lamp flicker - more active at night
+        if (currentTime.lampBrightness > 0.5) {
+          anim.lampFlicker = 0.85 + Math.random() * 0.15;
+        } else {
+          anim.lampFlicker = 0.9 + Math.random() * 0.1;
+        }
 
         // Grass wave
         anim.grassWave = Math.sin(anim.time * 0.05);
       }
 
       // ==================== UPDATE ====================
+      let lastFootstepFrame = 0;
+
       function update() {
         if (state.currentDialog || state.gameComplete) {
           player.isWalking = false;
@@ -978,6 +1542,14 @@ dengan kode yang tepat."`;
           if (player.frameTimer > 8) {
             player.frame = (player.frame + 1) % 4;
             player.frameTimer = 0;
+            // Play footstep sound on frame change
+            if (
+              player.frame !== lastFootstepFrame &&
+              (player.frame === 0 || player.frame === 2)
+            ) {
+              playFootstep();
+              lastFootstepFrame = player.frame;
+            }
           }
         } else {
           player.frame = 0;
@@ -1001,8 +1573,18 @@ dengan kode yang tepat."`;
           }
 
           const obj = objects[nearby];
-          prompt.style.left = obj.x + obj.width / 2 - 30 + "px";
-          prompt.style.top = obj.y - 30 + "px";
+
+          // Calculate scale factor for mobile
+          const canvasRect = canvas.getBoundingClientRect();
+          const scaleX = canvasRect.width / CONFIG.GAME_WIDTH;
+          const scaleY = canvasRect.height / CONFIG.GAME_HEIGHT;
+
+          // Position with scaling - adjusted for icon + text height
+          const scaledX = (obj.x + obj.width / 2) * scaleX;
+          const scaledY = obj.y * scaleY;
+
+          prompt.style.left = scaledX - 35 + "px";
+          prompt.style.top = scaledY - 60 + "px";
           prompt.classList.add("visible");
         } else {
           prompt.classList.remove("visible");
@@ -1013,6 +1595,7 @@ dengan kode yang tepat."`;
       function render() {
         ctx.clearRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
         drawSky();
+        if (currentTime.stars) drawStars();
         drawClouds();
         drawBuildings();
         drawTree();
@@ -1024,15 +1607,25 @@ dengan kode yang tepat."`;
 
       function drawSky() {
         const gradient = ctx.createLinearGradient(0, 0, 0, CONFIG.GAME_HEIGHT);
-        gradient.addColorStop(0, "#87CEEB");
-        gradient.addColorStop(0.5, "#B0E2FF");
-        gradient.addColorStop(1, "#E0F6FF");
+        gradient.addColorStop(0, currentTime.skyGradient[0]);
+        gradient.addColorStop(0.5, currentTime.skyGradient[1]);
+        gradient.addColorStop(1, currentTime.skyGradient[2]);
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
       }
 
+      function drawStars() {
+        stars.forEach((star) => {
+          const twinkle = Math.sin(anim.time * star.twinkleSpeed) * 0.5 + 0.5;
+          ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * twinkle})`;
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
       function drawClouds() {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillStyle = `rgba(255, 255, 255, ${currentTime.cloudOpacity})`;
         const cloudY = [50, 30, 60, 40];
         const cloudScale = [1, 0.8, 1.2, 0.7];
         anim.clouds.forEach((cloud, i) => {
@@ -1075,7 +1668,12 @@ dengan kode yang tepat."`;
           }
 
           b.windows.forEach(([wx, wy]) => {
-            ctx.fillStyle = "#5a8fba";
+            // Window lights based on time of day
+            if (currentTime.windowLights) {
+              ctx.fillStyle = "#FFE5B4";
+            } else {
+              ctx.fillStyle = "#5a8fba";
+            }
             ctx.fillRect(b.x + wx, baseY + wy, 25, 30);
             ctx.strokeStyle = "#3d5a73";
             ctx.lineWidth = 2;
@@ -1096,16 +1694,19 @@ dengan kode yang tepat."`;
               30,
               45,
             );
-            ctx.fillStyle = "#FFD700";
-            ctx.beginPath();
-            ctx.arc(
-              b.x + b.width / 2 + 8,
-              CONFIG.GROUND_Y - 20 + 50,
-              3,
-              0,
-              Math.PI * 2,
-            );
-            ctx.fill();
+            // Door light only at evening/night
+            if (currentTime.windowLights) {
+              ctx.fillStyle = "#FFD700";
+              ctx.beginPath();
+              ctx.arc(
+                b.x + b.width / 2 + 8,
+                CONFIG.GROUND_Y - 20 + 50,
+                3,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+            }
           }
         });
       }
@@ -1342,17 +1943,19 @@ dengan kode yang tepat."`;
         ctx.fillStyle = "#455A64";
         ctx.fillRect(x - 5, y, 32, 25);
 
-        const flicker = anim.lampFlicker;
+        const flicker = anim.lampFlicker * currentTime.lampBrightness;
         ctx.fillStyle = `rgba(255, 249, 196, ${flicker})`;
         ctx.fillRect(x, y + 20, 22, 5);
 
-        ctx.fillStyle = `rgba(255, 249, 196, ${0.3 * flicker})`;
-        ctx.beginPath();
-        ctx.moveTo(x, y + 25);
-        ctx.lineTo(x - 15, y + 80);
-        ctx.lineTo(x + 37, y + 80);
-        ctx.lineTo(x + 22, y + 25);
-        ctx.fill();
+        if (currentTime.lampBrightness > 0) {
+          ctx.fillStyle = `rgba(255, 249, 196, ${0.3 * flicker})`;
+          ctx.beginPath();
+          ctx.moveTo(x, y + 25);
+          ctx.lineTo(x - 15, y + 80);
+          ctx.lineTo(x + 37, y + 80);
+          ctx.lineTo(x + 22, y + 25);
+          ctx.fill();
+        }
       }
 
       function drawPhoneBooth(x, y) {
