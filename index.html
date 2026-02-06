@@ -928,7 +928,7 @@
         MORNING: {
           name: "PAGI",
           icon: "☀️",
-          skyGradient: ["#87CEEB", "#B0E2FF", "#E0F6FF"],
+          skyGradient: ["#9EC8E8", "#B8E0F6", "#E3F4FF", "#FFF8E7"],
           cloudOpacity: 0.9,
           lampBrightness: 0,
           windowLights: false,
@@ -938,7 +938,7 @@
         NOON: {
           name: "SIANG",
           icon: "🌤️",
-          skyGradient: ["#4A90E2", "#87CEEB", "#B0E2FF"],
+          skyGradient: ["#4A90E2", "#6BB3F1", "#87CEEB", "#B8E2F7"],
           cloudOpacity: 0.95,
           lampBrightness: 0,
           windowLights: false,
@@ -948,7 +948,7 @@
         EVENING: {
           name: "SORE",
           icon: "🌅",
-          skyGradient: ["#FF6B35", "#FF8C61", "#FFB88C"],
+          skyGradient: ["#7B2869", "#E85D75", "#FFAB73", "#FFD6A5"],
           cloudOpacity: 0.7,
           lampBrightness: 0.5,
           windowLights: true,
@@ -958,7 +958,7 @@
         NIGHT: {
           name: "MALAM",
           icon: "🌙",
-          skyGradient: ["#0A1128", "#1B2845", "#2E4057"],
+          skyGradient: ["#0A0E27", "#1A1F3A", "#2B3A5C", "#3D506E"],
           cloudOpacity: 0.3,
           lampBrightness: 1,
           windowLights: true,
@@ -1251,12 +1251,11 @@
                 '"Seekor kucing tersangkut di cabang atas.\nTerlalu tinggi untuk dijangkau.\nBagaimana cara menolongnya?"',
               );
             } else {
-              showDialog(
-                "tree",
-                "🐱",
-                "Kucing di Pohon",
-                '"Ia masih di sana,\nmenunggumu menemukan cara."',
-              );
+              const isNight = timeOrder[currentTimeIndex] === "NIGHT";
+              const message = isNight
+                ? '"Ia masih di sana,\nmenunggumu menemukan cara.\n\nMalamnya semakin dingin..."'
+                : '"Ia masih di sana,\nmenunggumu menemukan cara."';
+              showDialog("tree", "🐱", "Kucing di Pohon", message);
             }
             break;
           case "ladder":
@@ -1607,9 +1606,14 @@ dengan kode yang tepat."`;
 
       function drawSky() {
         const gradient = ctx.createLinearGradient(0, 0, 0, CONFIG.GAME_HEIGHT);
-        gradient.addColorStop(0, currentTime.skyGradient[0]);
-        gradient.addColorStop(0.5, currentTime.skyGradient[1]);
-        gradient.addColorStop(1, currentTime.skyGradient[2]);
+        const colors = currentTime.skyGradient;
+
+        // Distribute color stops evenly
+        colors.forEach((color, index) => {
+          const position = index / (colors.length - 1);
+          gradient.addColorStop(position, color);
+        });
+
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
       }
@@ -1625,7 +1629,17 @@ dengan kode yang tepat."`;
       }
 
       function drawClouds() {
-        ctx.fillStyle = `rgba(255, 255, 255, ${currentTime.cloudOpacity})`;
+        // Morning clouds get soft golden tint
+        if (timeOrder[currentTimeIndex] === "MORNING") {
+          ctx.fillStyle = `rgba(255, 250, 240, ${currentTime.cloudOpacity})`;
+        }
+        // Evening clouds get warm pink/orange tint
+        else if (timeOrder[currentTimeIndex] === "EVENING") {
+          ctx.fillStyle = `rgba(255, 182, 193, ${currentTime.cloudOpacity})`;
+        } else {
+          ctx.fillStyle = `rgba(255, 255, 255, ${currentTime.cloudOpacity})`;
+        }
+
         const cloudY = [50, 30, 60, 40];
         const cloudScale = [1, 0.8, 1.2, 0.7];
         anim.clouds.forEach((cloud, i) => {
@@ -1651,21 +1665,44 @@ dengan kode yang tepat."`;
         buildings.forEach((b, i) => {
           const baseY = CONFIG.GROUND_Y - b.height + 50;
 
+          // Draw building body
           ctx.fillStyle = b.color;
           ctx.fillRect(b.x, baseY, b.width, b.height);
 
+          // Draw roof
           ctx.fillStyle = b.roofColor;
           ctx.fillRect(b.x - 5, baseY - 15, b.width + 10, 20);
 
+          // Draw brick texture - with proper clipping
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(b.x, baseY, b.width, b.height);
+          ctx.clip();
+
           ctx.strokeStyle = "rgba(0,0,0,0.1)";
           ctx.lineWidth = 1;
-          for (let row = 0; row < b.height / 12; row++) {
-            for (let col = 0; col < b.width / 25; col++) {
-              const bx = b.x + col * 25 + (row % 2 === 0 ? 0 : 12);
-              const by = baseY + row * 12;
-              ctx.strokeRect(bx, by, 25, 12);
+
+          const brickHeight = 12;
+          const brickWidth = 25;
+
+          for (let row = 0; row < Math.ceil(b.height / brickHeight); row++) {
+            const offset = row % 2 === 0 ? 0 : -12;
+            for (
+              let col = 0;
+              col < Math.ceil((b.width + 12) / brickWidth);
+              col++
+            ) {
+              const bx = b.x + col * brickWidth + offset;
+              const by = baseY + row * brickHeight;
+
+              // Only draw if within building bounds
+              if (bx >= b.x && bx < b.x + b.width && by < baseY + b.height) {
+                ctx.strokeRect(bx, by, brickWidth, brickHeight);
+              }
             }
           }
+
+          ctx.restore();
 
           b.windows.forEach(([wx, wy]) => {
             // Window lights based on time of day
