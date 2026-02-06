@@ -658,15 +658,15 @@
       .mobile-controls {
         display: none;
         margin-top: 20px;
-        gap: 15px;
+        gap: 8px;
         padding: 10px;
         justify-content: center;
         align-items: center;
       }
 
       .mobile-btn {
-        width: 70px;
-        height: 70px;
+        width: 58px;
+        height: 58px;
         background: rgba(61, 61, 92, 0.85);
         border: 3px solid rgba(90, 90, 138, 0.9);
         border-radius: 12px;
@@ -694,7 +694,6 @@
 
       .mobile-btn.action {
         background: rgba(74, 124, 89, 0.85);
-        width: 90px;
         font-size: 20px;
       }
 
@@ -702,9 +701,27 @@
         background: #5a9c69;
       }
 
+      .mobile-btn.jump {
+        background: rgba(56, 96, 176, 0.85);
+        border-color: rgba(90, 130, 200, 0.9);
+      }
+
+      .mobile-btn.jump:active {
+        background: #5a82c8;
+      }
+
+      .mobile-btn.attack {
+        background: rgba(183, 28, 28, 0.85);
+        border-color: rgba(220, 60, 60, 0.9);
+      }
+
+      .mobile-btn.attack:active {
+        background: #c62828;
+      }
+
       .mobile-btn::before {
         content: attr(data-label);
-        font-size: 24px;
+        font-size: 22px;
       }
 
       @media (max-width: 800px) {
@@ -853,12 +870,13 @@
 
       @media (max-width: 500px) {
         .mobile-btn {
-          width: 65px;
-          height: 65px;
+          width: 52px;
+          height: 52px;
         }
 
-        .mobile-btn.action {
-          width: 80px;
+        .mobile-controls {
+          gap: 6px;
+          padding: 0 8px;
         }
 
         .dialog-title {
@@ -1051,10 +1069,22 @@
           aria-label="Gerak Kiri"
         ></button>
         <button
+          class="mobile-btn jump"
+          id="btnJump"
+          data-label="⬆"
+          aria-label="Lompat"
+        ></button>
+        <button
           class="mobile-btn action"
           id="btnAction"
           data-label="E"
           aria-label="Interaksi"
+        ></button>
+        <button
+          class="mobile-btn attack"
+          id="btnAttack"
+          data-label="🏹"
+          aria-label="Tembak"
         ></button>
         <button
           class="mobile-btn"
@@ -1066,8 +1096,9 @@
     </div>
 
     <p class="controls-hint">
-      <span>←</span> <span>→</span> Jalan &nbsp;&nbsp; <span>E</span> atau
-      <span>↑</span> Interaksi
+      <span>←</span> <span>→</span> Jalan &nbsp;&nbsp; <span>E</span>
+      Interaksi &nbsp;&nbsp; <span>Space</span> Lompat &nbsp;&nbsp;
+      <span>F</span> Tembak
     </p>
 
     <script>
@@ -1505,6 +1536,57 @@
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
 
+      // roundRect polyfill for older browsers
+      if (!ctx.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+          if (typeof r === 'number') r = [r, r, r, r];
+          const [tl, tr, br, bl] = r;
+          this.moveTo(x + tl, y);
+          this.lineTo(x + w - tr, y);
+          this.quadraticCurveTo(x + w, y, x + w, y + tr);
+          this.lineTo(x + w, y + h - br);
+          this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+          this.lineTo(x + bl, y + h);
+          this.quadraticCurveTo(x, y + h, x, y + h - bl);
+          this.lineTo(x, y + tl);
+          this.quadraticCurveTo(x, y, x + tl, y);
+          this.closePath();
+          return this;
+        };
+      }
+
+      // ==================== HiDPI / RETINA SCALING ====================
+      let canvasDPR = 1;
+
+      function setupHiDPI() {
+        const dpr = window.devicePixelRatio || 1;
+        canvasDPR = dpr;
+
+        // Set the actual pixel dimensions (high-res)
+        canvas.width = CONFIG.GAME_WIDTH * dpr;
+        canvas.height = CONFIG.GAME_HEIGHT * dpr;
+
+        // On mobile, CSS handles sizing via game-wrapper
+        if (detectMobile()) {
+          canvas.style.width = '100%';
+          canvas.style.height = '100%';
+        } else {
+          canvas.style.width = CONFIG.GAME_WIDTH + 'px';
+          canvas.style.height = CONFIG.GAME_HEIGHT + 'px';
+        }
+
+        // Disable image smoothing for crisp pixel art
+        ctx.imageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.msImageSmoothingEnabled = false;
+      }
+
+      setupHiDPI();
+      window.addEventListener('resize', () => {
+        setupHiDPI();
+      });
+
       // ==================== MOBILE CAMERA ====================
       const mobileCamera = {
         enabled: false,
@@ -1563,7 +1645,22 @@
         carryingCat: false,
         frameTimer: 0,
         isWalking: false,
+        // Jump
+        velocityY: 0,
+        isJumping: false,
+        jumpPower: -8,
+        gravity: 0.45,
+        groundY: CONFIG.GROUND_Y,
+        // Attack
+        isAttacking: false,
+        attackTimer: 0,
+        attackCooldown: 0,
       };
+
+      // ==================== ARROWS ====================
+      const arrows = [];
+      const ARROW_SPEED = 7;
+      const ARROW_LIFETIME = 90; // frames
 
       // ==================== OBJECTS ====================
       const objects = {
@@ -1693,7 +1790,7 @@
       ];
 
       // ==================== INPUT ====================
-      const keys = { left: false, right: false, interact: false };
+      const keys = { left: false, right: false, interact: false, jump: false, attack: false };
 
       document.addEventListener("keydown", (e) => {
         if (state.currentDialog || state.gameComplete) return;
@@ -1705,6 +1802,19 @@
             handleInteraction();
           }
         }
+        if (e.key === " " || e.key === "w" || e.key === "W") {
+          e.preventDefault();
+          if (!keys.jump) {
+            keys.jump = true;
+            playerJump();
+          }
+        }
+        if (e.key === "f" || e.key === "F") {
+          if (!keys.attack) {
+            keys.attack = true;
+            playerShootArrow();
+          }
+        }
       });
 
       document.addEventListener("keyup", (e) => {
@@ -1712,7 +1822,48 @@
         if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
         if (e.key === "ArrowUp" || e.key === "e" || e.key === "E")
           keys.interact = false;
+        if (e.key === " " || e.key === "w" || e.key === "W") keys.jump = false;
+        if (e.key === "f" || e.key === "F") keys.attack = false;
       });
+
+      function playerJump() {
+        if (!player.isJumping && !state.cutscene.active && state.introPassed) {
+          player.isJumping = true;
+          player.velocityY = player.jumpPower;
+          playFootstep(); // jump sound
+        }
+      }
+
+      function playerShootArrow() {
+        if (player.attackCooldown > 0 || player.carryingCat || state.cutscene.active || !state.introPassed) return;
+        player.isAttacking = true;
+        player.attackTimer = 12;
+        player.attackCooldown = 20;
+
+        // Create arrow (y uses player.y which already accounts for jump height)
+        arrows.push({
+          x: player.x + player.width / 2 + (player.direction * 14),
+          y: player.y + 6,
+          direction: player.direction,
+          life: ARROW_LIFETIME,
+          speed: ARROW_SPEED,
+        });
+
+        // Arrow whoosh sound
+        try {
+          const actx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = actx.createOscillator();
+          const gain = actx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(800, actx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(200, actx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.08, actx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.15);
+          osc.connect(gain).connect(actx.destination);
+          osc.start();
+          osc.stop(actx.currentTime + 0.15);
+        } catch(e) {}
+      }
 
       // Mobile controls
       const btnLeft = document.getElementById("btnLeft");
@@ -1732,6 +1883,20 @@
       btnAction.addEventListener("touchstart", (e) => {
         e.preventDefault();
         handleInteraction();
+      });
+
+      // Jump button
+      const btnJump = document.getElementById("btnJump");
+      btnJump.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        playerJump();
+      });
+
+      // Attack button
+      const btnAttack = document.getElementById("btnAttack");
+      btnAttack.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        playerShootArrow();
       });
 
       // ==================== INTERACTION SYSTEM ====================
@@ -2080,6 +2245,34 @@ dengan kode yang tepat."`;
           Math.min(CONFIG.GAME_WIDTH - player.width - 10, player.x),
         );
 
+        // ---- JUMP PHYSICS ----
+        if (player.isJumping) {
+          player.velocityY += player.gravity;
+          player.y += player.velocityY;
+          if (player.y >= player.groundY) {
+            player.y = player.groundY;
+            player.velocityY = 0;
+            player.isJumping = false;
+          }
+        }
+
+        // ---- ATTACK COOLDOWN ----
+        if (player.attackCooldown > 0) player.attackCooldown--;
+        if (player.attackTimer > 0) {
+          player.attackTimer--;
+          if (player.attackTimer === 0) player.isAttacking = false;
+        }
+
+        // ---- UPDATE ARROWS ----
+        for (let i = arrows.length - 1; i >= 0; i--) {
+          const a = arrows[i];
+          a.x += a.direction * a.speed;
+          a.life--;
+          if (a.life <= 0 || a.x < -20 || a.x > CONFIG.GAME_WIDTH + 20) {
+            arrows.splice(i, 1);
+          }
+        }
+
         if (player.isWalking) {
           player.frameTimer++;
           if (player.frameTimer > 8) {
@@ -2329,9 +2522,14 @@ dengan kode yang tepat."`;
 
       // ==================== RENDER ====================
       function render() {
-        ctx.clearRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
+        // Clear the full hi-res canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw sky first without transformation (fills entire canvas)
+        // Apply DPR scaling so all draw calls use game-logical coordinates
+        ctx.save();
+        ctx.scale(canvasDPR, canvasDPR);
+
+        // Draw sky first without camera transformation (fills entire canvas)
         drawSky();
         if (currentTime.stars) drawStars();
 
@@ -2358,8 +2556,10 @@ dengan kode yang tepat."`;
         drawStreet();
         drawObjects();
         drawPlayer();
+        drawArrows();
 
-        ctx.restore();
+        ctx.restore(); // camera transform
+        ctx.restore(); // DPR scale
       }
 
       function drawSky() {
@@ -3009,47 +3209,234 @@ dengan kode yang tepat."`;
           ? Math.sin((player.frame * Math.PI) / 2) * 2
           : 0;
 
-        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        // Shadow
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
         ctx.beginPath();
-        ctx.ellipse(16, 48, 12, 4, 0, 0, Math.PI * 2);
+        ctx.ellipse(16, 48, 14, 5, 0, 0, Math.PI * 2);
         ctx.fill();
 
+        // ---- BOW ----
+        if (!player.carryingCat) {
+          if (player.isAttacking) {
+            // Bow held forward (shooting pose)
+            ctx.save();
+            ctx.translate(26, 22 - bobOffset);
+            // Bow limb
+            ctx.strokeStyle = "#6D4C41";
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(4, -8);
+            ctx.quadraticCurveTo(12, 6, 4, 20);
+            ctx.stroke();
+            // Grip
+            ctx.fillStyle = "#8D6E63";
+            ctx.fillRect(2, 4, 3, 6);
+            // Bowstring (pulled back)
+            ctx.strokeStyle = "#BDBDBD";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(4, -8);
+            ctx.lineTo(-4, 6);
+            ctx.lineTo(4, 20);
+            ctx.stroke();
+            // Arrow nocked
+            ctx.fillStyle = "#8D6E63";
+            ctx.fillRect(-6, 5, 14, 2);
+            // Arrowhead
+            ctx.fillStyle = "#B0BEC5";
+            ctx.beginPath();
+            ctx.moveTo(10, 6);
+            ctx.lineTo(7, 3);
+            ctx.lineTo(7, 9);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          } else {
+            // Bow on back (idle/walking)
+            ctx.save();
+            ctx.translate(4, 18 - bobOffset);
+            ctx.strokeStyle = "#6D4C41";
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -8);
+            ctx.quadraticCurveTo(-8, 6, 0, 20);
+            ctx.stroke();
+            ctx.fillStyle = "#8D6E63";
+            ctx.fillRect(-2, 4, 3, 6);
+            ctx.strokeStyle = "#BDBDBD";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, -8);
+            ctx.lineTo(0, 20);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+
+        // ---- BOOTS ----
         ctx.fillStyle = "#5D4037";
         if (player.isWalking) {
-          const legOffset = Math.sin((player.frame * Math.PI) / 2) * 6;
-          ctx.fillRect(8 + legOffset, 35 - bobOffset, 7, 13);
-          ctx.fillRect(17 - legOffset, 35 - bobOffset, 7, 13);
+          const legOffset = Math.sin((player.frame * Math.PI) / 2) * 5;
+          // Left boot
+          ctx.fillRect(8 + legOffset, 42 - bobOffset, 8, 6);
+          ctx.fillRect(16 - legOffset, 42 - bobOffset, 8, 6);
+          // Boot cuff
+          ctx.fillStyle = "#795548";
+          ctx.fillRect(8 + legOffset, 42 - bobOffset, 8, 2);
+          ctx.fillRect(16 - legOffset, 42 - bobOffset, 8, 2);
+          // Boot sole
+          ctx.fillStyle = "#3E2723";
+          ctx.fillRect(8 + legOffset, 46 - bobOffset, 8, 2);
+          ctx.fillRect(16 - legOffset, 46 - bobOffset, 8, 2);
         } else {
-          ctx.fillRect(10, 35, 6, 13);
-          ctx.fillRect(16, 35, 6, 13);
+          ctx.fillRect(8, 42, 8, 6);
+          ctx.fillRect(16, 42, 8, 6);
+          ctx.fillStyle = "#795548";
+          ctx.fillRect(8, 42, 8, 2);
+          ctx.fillRect(16, 42, 8, 2);
+          ctx.fillStyle = "#3E2723";
+          ctx.fillRect(8, 46, 8, 2);
+          ctx.fillRect(16, 46, 8, 2);
         }
 
-        ctx.fillStyle = "#7B1FA2";
-        ctx.fillRect(6, 20 - bobOffset, 20, 18);
+        // ---- LEGS / PANTS ----
+        ctx.fillStyle = "#37474F";
+        if (player.isWalking) {
+          const legOffset = Math.sin((player.frame * Math.PI) / 2) * 5;
+          ctx.fillRect(9 + legOffset, 34 - bobOffset, 7, 10);
+          ctx.fillRect(16 - legOffset, 34 - bobOffset, 7, 10);
+        } else {
+          ctx.fillRect(9, 34, 7, 10);
+          ctx.fillRect(16, 34, 7, 10);
+        }
 
-        ctx.fillStyle = "#9C27B0";
-        ctx.fillRect(8, 22 - bobOffset, 16, 4);
+        // ---- BODY / MAGE ROBE ----
+        // Main robe (golden yellow)
+        ctx.fillStyle = "#FFC107";
+        ctx.fillRect(6, 19 - bobOffset, 20, 17);
 
-        ctx.fillStyle = "#FFCCBC";
+        // Robe front opening (darker inner)
+        ctx.fillStyle = "#F9A825";
+        ctx.fillRect(13, 22 - bobOffset, 6, 14);
+
+        // Shoulder pads
+        ctx.fillStyle = "#FFD54F";
+        ctx.fillRect(5, 19 - bobOffset, 6, 4);
+        ctx.fillRect(21, 19 - bobOffset, 6, 4);
+
+        // Robe trim (bottom edge)
+        ctx.fillStyle = "#FF8F00";
+        ctx.fillRect(6, 34 - bobOffset, 20, 2);
+
+        // Robe pattern - diamond motifs
+        ctx.fillStyle = "#FF8F00";
+        // Left diamond
+        ctx.beginPath();
+        ctx.moveTo(10, 26 - bobOffset);
+        ctx.lineTo(12, 24 - bobOffset);
+        ctx.lineTo(14, 26 - bobOffset);
+        ctx.lineTo(12, 28 - bobOffset);
+        ctx.closePath();
+        ctx.fill();
+        // Right diamond
+        ctx.beginPath();
+        ctx.moveTo(18, 26 - bobOffset);
+        ctx.lineTo(20, 24 - bobOffset);
+        ctx.lineTo(22, 26 - bobOffset);
+        ctx.lineTo(20, 28 - bobOffset);
+        ctx.closePath();
+        ctx.fill();
+
+        // Collar / neckpiece
+        ctx.fillStyle = "#FF8F00";
+        ctx.fillRect(10, 19 - bobOffset, 12, 3);
+        // Collar gem
+        ctx.fillStyle = "#E53935";
+        ctx.beginPath();
+        ctx.arc(16, 20 - bobOffset, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#EF5350";
+        ctx.beginPath();
+        ctx.arc(15.5, 19.5 - bobOffset, 0.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Belt / sash
+        ctx.fillStyle = "#4E342E";
+        ctx.fillRect(8, 32 - bobOffset, 16, 2);
+        // Belt buckle (ornate)
+        ctx.fillStyle = "#FFD54F";
+        ctx.fillRect(13, 32 - bobOffset, 6, 2);
+        ctx.fillStyle = "#FF8F00";
+        ctx.fillRect(15, 32 - bobOffset, 2, 2);
+
+        // ---- ARMS ----
         if (player.isWalking) {
           const armOffset = Math.sin((player.frame * Math.PI) / 2) * 4;
-          // If carrying cat, arms hold cat
           if (player.carryingCat) {
-            ctx.fillRect(3, 22 - bobOffset, 5, 10);
-            ctx.fillRect(24, 22 - bobOffset, 5, 10);
+            // Arms holding cat
+            ctx.fillStyle = "#FFC107";
+            ctx.fillRect(3, 21 - bobOffset, 5, 7);
+            ctx.fillRect(24, 21 - bobOffset, 5, 7);
+            ctx.fillStyle = "#FFD54F";
+            ctx.fillRect(3, 21 - bobOffset, 5, 2);
+            ctx.fillRect(24, 21 - bobOffset, 5, 2);
+            ctx.fillStyle = "#FFCCBC";
+            ctx.fillRect(3, 28 - bobOffset, 5, 4);
+            ctx.fillRect(24, 28 - bobOffset, 5, 4);
           } else {
-            ctx.fillRect(3, 22 - bobOffset + armOffset, 5, 12);
-            ctx.fillRect(24, 22 - bobOffset - armOffset, 5, 12);
+            // Left arm (sleeve + hand)
+            ctx.fillStyle = "#FFC107";
+            ctx.fillRect(3, 21 - bobOffset + armOffset, 5, 9);
+            ctx.fillStyle = "#FFD54F";
+            ctx.fillRect(3, 21 - bobOffset + armOffset, 5, 2);
+            ctx.fillStyle = "#FFCCBC";
+            ctx.fillRect(3, 30 - bobOffset + armOffset, 5, 4);
+            // Right arm
+            ctx.fillStyle = "#FFC107";
+            ctx.fillRect(24, 21 - bobOffset - armOffset, 5, 9);
+            ctx.fillStyle = "#FFD54F";
+            ctx.fillRect(24, 21 - bobOffset - armOffset, 5, 2);
+            ctx.fillStyle = "#FFCCBC";
+            ctx.fillRect(24, 30 - bobOffset - armOffset, 5, 4);
           }
         } else {
-          ctx.fillRect(3, 24, 5, 10);
-          ctx.fillRect(24, 24, 5, 10);
+          // Static arms
+          ctx.fillStyle = "#FFC107";
+          ctx.fillRect(3, 23, 5, 9);
+          ctx.fillRect(24, 23, 5, 9);
+          ctx.fillStyle = "#FFD54F";
+          ctx.fillRect(3, 23, 5, 2);
+          ctx.fillRect(24, 23, 5, 2);
+          ctx.fillStyle = "#FFCCBC";
+          ctx.fillRect(3, 32, 5, 4);
+          ctx.fillRect(24, 32, 5, 4);
         }
 
-        // Draw cat in player's arms
+        // ---- QUIVER (on back, right side) ----
+        if (!player.carryingCat) {
+          ctx.fillStyle = "#5D4037";
+          ctx.fillRect(23, 14 - bobOffset, 5, 16);
+          ctx.fillStyle = "#795548";
+          ctx.fillRect(23, 14 - bobOffset, 5, 2);
+          ctx.fillRect(23, 28 - bobOffset, 5, 2);
+          // Arrow feathers sticking out
+          ctx.fillStyle = "#E0E0E0";
+          ctx.fillRect(24, 11 - bobOffset, 1, 4);
+          ctx.fillRect(26, 12 - bobOffset, 1, 3);
+          ctx.fillRect(25, 10 - bobOffset, 1, 4);
+          // Arrow tip colors
+          ctx.fillStyle = "#FF8F00";
+          ctx.fillRect(24, 10 - bobOffset, 1, 2);
+          ctx.fillStyle = "#E53935";
+          ctx.fillRect(26, 11 - bobOffset, 1, 2);
+          ctx.fillStyle = "#FFD54F";
+          ctx.fillRect(25, 9 - bobOffset, 1, 2);
+        }
+
+        // ---- CAT IN ARMS ----
         if (player.carryingCat) {
           ctx.save();
-          ctx.translate(16, 26 - bobOffset);
+          ctx.translate(16, 28 - bobOffset);
           ctx.scale(0.7, 0.7);
 
           // Cat body
@@ -3097,40 +3484,156 @@ dengan kode yang tepat."`;
           ctx.restore();
         }
 
+        // ---- HEAD ----
         ctx.fillStyle = "#FFCCBC";
         ctx.beginPath();
-        ctx.arc(16, 12 - bobOffset, 10, 0, Math.PI * 2);
+        ctx.arc(16, 10 - bobOffset, 12, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = "#4E342E";
+        // ---- HAIR (black, messy mage style) ----
+        ctx.fillStyle = "#1a1a1a";
+        // Top dome
         ctx.beginPath();
-        ctx.arc(16, 10 - bobOffset, 10, Math.PI, Math.PI * 2);
+        ctx.arc(16, 6 - bobOffset, 13, Math.PI, Math.PI * 2);
         ctx.fill();
-        ctx.fillRect(6, 8 - bobOffset, 4, 14);
-        ctx.fillRect(22, 8 - bobOffset, 4, 14);
+        // Left side hair
+        ctx.fillRect(3, 4 - bobOffset, 6, 16);
+        // Right side hair
+        ctx.fillRect(23, 4 - bobOffset, 6, 16);
+        // Spiky bangs (messy mage fringe)
+        ctx.fillStyle = "#222";
+        ctx.fillRect(5, 1 - bobOffset, 5, 7);
+        ctx.fillRect(9, -1 - bobOffset, 5, 8);
+        ctx.fillRect(14, 0 - bobOffset, 4, 7);
+        ctx.fillRect(18, -1 - bobOffset, 5, 8);
+        ctx.fillRect(22, 1 - bobOffset, 5, 7);
+        // Back spikes (poking out)
+        ctx.fillStyle = "#1a1a1a";
+        ctx.beginPath();
+        ctx.moveTo(3, 4 - bobOffset);
+        ctx.lineTo(0, 0 - bobOffset);
+        ctx.lineTo(5, 3 - bobOffset);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(29, 4 - bobOffset);
+        ctx.lineTo(32, 0 - bobOffset);
+        ctx.lineTo(27, 3 - bobOffset);
+        ctx.closePath();
+        ctx.fill();
+        // Hair highlight/sheen
+        ctx.fillStyle = "#333";
+        ctx.fillRect(11, 0 - bobOffset, 2, 3);
+        ctx.fillRect(19, 0 - bobOffset, 2, 3);
 
-        ctx.strokeStyle = "#333";
+        // ---- GLASSES ----
+        ctx.strokeStyle = "#555";
         ctx.lineWidth = 1.5;
+        ctx.fillStyle = "rgba(200, 230, 255, 0.25)";
+        // Left lens
         ctx.beginPath();
-        ctx.arc(12, 12 - bobOffset, 4, 0, Math.PI * 2);
-        ctx.arc(20, 12 - bobOffset, 4, 0, Math.PI * 2);
+        ctx.roundRect(8, 9 - bobOffset, 8, 6, 2);
+        ctx.fill();
         ctx.stroke();
+        // Right lens
+        ctx.beginPath();
+        ctx.roundRect(17, 9 - bobOffset, 8, 6, 2);
+        ctx.fill();
+        ctx.stroke();
+        // Bridge
         ctx.beginPath();
         ctx.moveTo(16, 12 - bobOffset);
-        ctx.lineTo(16, 12 - bobOffset);
-        ctx.moveTo(8, 12 - bobOffset);
-        ctx.lineTo(6, 11 - bobOffset);
-        ctx.moveTo(24, 12 - bobOffset);
-        ctx.lineTo(26, 11 - bobOffset);
+        ctx.lineTo(17, 12 - bobOffset);
+        ctx.stroke();
+        // Temple arms
+        ctx.beginPath();
+        ctx.moveTo(8, 11 - bobOffset);
+        ctx.lineTo(5, 11 - bobOffset);
+        ctx.moveTo(25, 11 - bobOffset);
+        ctx.lineTo(28, 11 - bobOffset);
         ctx.stroke();
 
+        // ---- EYES (behind glasses) ----
         ctx.fillStyle = "#333";
         ctx.beginPath();
         ctx.arc(12, 12 - bobOffset, 1.5, 0, Math.PI * 2);
-        ctx.arc(20, 12 - bobOffset, 1.5, 0, Math.PI * 2);
+        ctx.arc(21, 12 - bobOffset, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        // Eye shine
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(12.5, 11.5 - bobOffset, 0.7, 0, Math.PI * 2);
+        ctx.arc(21.5, 11.5 - bobOffset, 0.7, 0, Math.PI * 2);
         ctx.fill();
 
+        // ---- MOUTH ----
+        ctx.strokeStyle = "#555";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(16, 16 - bobOffset, 2, 0.1, Math.PI - 0.1);
+        ctx.stroke();
+
+        // ---- BLUSH ----
+        ctx.fillStyle = "rgba(255, 138, 128, 0.3)";
+        ctx.beginPath();
+        ctx.ellipse(9, 15 - bobOffset, 3, 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(23, 15 - bobOffset, 3, 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ---- NECK ----
+        ctx.fillStyle = "#FFCCBC";
+        ctx.fillRect(13, 19 - bobOffset, 6, 3);
+
         ctx.restore();
+      }
+
+      // ==================== DRAW ARROWS ====================
+      function drawArrows() {
+        for (const a of arrows) {
+          ctx.save();
+          ctx.translate(a.x, a.y);
+          if (a.direction < 0) ctx.scale(-1, 1);
+
+          // Arrow shaft
+          ctx.fillStyle = "#8D6E63";
+          ctx.fillRect(-12, -1, 24, 2);
+
+          // Arrowhead
+          ctx.fillStyle = "#B0BEC5";
+          ctx.beginPath();
+          ctx.moveTo(14, 0);
+          ctx.lineTo(10, -3);
+          ctx.lineTo(10, 3);
+          ctx.closePath();
+          ctx.fill();
+
+          // Arrow fletching (feathers)
+          ctx.fillStyle = "#F44336";
+          ctx.beginPath();
+          ctx.moveTo(-12, 0);
+          ctx.lineTo(-16, -4);
+          ctx.lineTo(-10, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = "#FFD54F";
+          ctx.beginPath();
+          ctx.moveTo(-12, 0);
+          ctx.lineTo(-16, 4);
+          ctx.lineTo(-10, 0);
+          ctx.closePath();
+          ctx.fill();
+
+          // Trail glow (fading based on life)
+          const alpha = Math.min(a.life / ARROW_LIFETIME, 1) * 0.3;
+          ctx.fillStyle = `rgba(255, 193, 7, ${alpha})`;
+          ctx.beginPath();
+          ctx.ellipse(-14, 0, 6, 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
       }
 
       // ==================== GAME LOOP ====================
