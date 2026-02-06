@@ -342,16 +342,264 @@
 
       .ending-text {
         font-family: "VT323", monospace;
-        font-size: 24px;
+        font-size: 18px;
         color: #aaa;
         text-align: center;
-        line-height: 2;
+        line-height: 1.5;
+        max-width: 680px;
+        padding: 25px 30px;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 15px;
+        border: 2px solid rgba(136, 204, 255, 0.3);
+        box-shadow: 0 0 30px rgba(136, 204, 255, 0.2);
       }
 
       .ending-text .main {
         color: #88ccff;
+        font-size: 26px;
+        margin-bottom: 8px;
+        font-weight: bold;
+        text-shadow: 0 0 10px rgba(136, 204, 255, 0.5);
+        animation: fadeInDown 1s ease-out;
+      }
+
+      .ending-text .cat-emoji {
+        animation: bounceIn 1s ease-out;
+      }
+
+      .ending-text .line1 {
+        animation: fadeIn 1.2s ease-out 0.3s backwards;
+      }
+
+      .ending-text .line2 {
+        animation: fadeIn 1.2s ease-out 0.6s backwards;
+      }
+
+      .ending-text .question {
+        animation: fadeIn 1.2s ease-out 0.9s backwards;
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes bounceIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        70% {
+          transform: scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes buttonGlow {
+        0%,
+        100% {
+          box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+        50% {
+          box-shadow: 0 6px 30px rgba(37, 211, 102, 0.7);
+        }
+      }
+
+      .wa-button {
+        margin-top: 18px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #25d366, #128c7e);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-family: "Press Start 2P", cursive;
+        font-size: 11px;
+        cursor: pointer;
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        animation:
+          fadeIn 1.2s ease-out 1.2s backwards,
+          buttonGlow 2s ease-in-out infinite;
+        align-items: center;
+        gap: 10px;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .wa-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
+        background: linear-gradient(135deg, #2ee673, #15a889);
+      }
+
+      .wa-button:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.5);
+      }
+
+      /* Intro Overlay */
+      .intro-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        z-index: 300;
+        opacity: 1;
+        transition: opacity 0.8s ease;
+        padding: 20px;
+      }
+
+      .intro-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .intro-content {
+        max-width: 700px;
+        text-align: center;
+        color: #fff;
+      }
+
+      .intro-title {
+        font-family: "Press Start 2P", cursive;
         font-size: 28px;
+        color: #88ccff;
         margin-bottom: 20px;
+        text-shadow: 0 0 20px rgba(136, 204, 255, 0.8);
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      @keyframes glow {
+        0%,
+        100% {
+          text-shadow: 0 0 20px rgba(136, 204, 255, 0.8);
+        }
+        50% {
+          text-shadow:
+            0 0 30px rgba(136, 204, 255, 1),
+            0 0 40px rgba(136, 204, 255, 0.6);
+        }
+      }
+
+      .narrative-text {
+        font-family: "VT323", monospace;
+        font-size: 22px;
+        line-height: 1.6;
+        color: #ddd;
+        margin-bottom: 30px;
+        min-height: 120px;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        border: 1px solid rgba(136, 204, 255, 0.2);
+      }
+
+      .typing-cursor {
+        display: inline-block;
+        width: 8px;
+        height: 20px;
+        background: #88ccff;
+        margin-left: 4px;
+        animation: blink 0.8s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .tutorials {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+        opacity: 0;
+        animation: fadeIn 0.8s ease-out 4s forwards;
+      }
+
+      .tutorial-item {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(136, 204, 255, 0.3);
+        font-family: "VT323", monospace;
+        font-size: 16px;
+        color: #ccc;
+      }
+
+      .tutorial-icon {
+        font-size: 24px;
+        margin-bottom: 5px;
+      }
+
+      .start-button {
+        font-family: "Press Start 2P", cursive;
+        font-size: 14px;
+        padding: 15px 40px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+        transition: all 0.3s ease;
+        opacity: 0;
+        animation:
+          fadeIn 0.8s ease-out 4.5s forwards,
+          pulse 2s ease-in-out 5s infinite;
+      }
+
+      .start-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.7);
+      }
+
+      .start-button:active {
+        transform: translateY(-1px);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
       }
 
       /* Interaction Prompt */
@@ -606,6 +854,46 @@
 
       <canvas id="gameCanvas" width="800" height="400"></canvas>
 
+      <!-- Intro Overlay -->
+      <div class="intro-overlay" id="introOverlay">
+        <div class="intro-content">
+          <div class="intro-title">🐱 Save The Cat</div>
+          <div class="narrative-text" id="narrativeText">
+            <span id="typedText"></span
+            ><span class="typing-cursor" id="cursor"></span>
+          </div>
+          <div class="tutorials" id="tutorials">
+            <div class="tutorial-item">
+              <div class="tutorial-icon">⬅️➡️</div>
+              <div>Gerak: Arrow Keys</div>
+              <div style="font-size: 14px; color: #999">atau tombol mobile</div>
+            </div>
+            <div class="tutorial-item">
+              <div class="tutorial-icon">❗</div>
+              <div>Interaksi: Tekan E</div>
+              <div style="font-size: 14px; color: #999">saat ada tanda !</div>
+            </div>
+            <div class="tutorial-item">
+              <div class="tutorial-icon">☀️🌙</div>
+              <div>Ganti Waktu</div>
+              <div style="font-size: 14px; color: #999">
+                klik tombol kiri atas
+              </div>
+            </div>
+            <div class="tutorial-item">
+              <div class="tutorial-icon">🎵</div>
+              <div>Toggle Music</div>
+              <div style="font-size: 14px; color: #999">
+                klik tombol kanan atas
+              </div>
+            </div>
+          </div>
+          <button class="start-button" id="startButton">
+            Mulai Petualangan
+          </button>
+        </div>
+      </div>
+
       <div class="interact-prompt" id="interactPrompt">
         <div class="prompt-icon">!</div>
         <div class="prompt-text">Tekan E</div>
@@ -652,12 +940,43 @@
       <!-- Ending Overlay -->
       <div class="ending-overlay" id="endingOverlay">
         <div class="ending-text">
-          <div class="main">🐾 Bantuan datang tepat waktu.</div>
-          <div>Kucing itu turun dengan selamat.</div>
-          <br />
-          <div style="color: #666; font-size: 18px">
-            Terima kasih sudah mencoba.
+          <div class="cat-emoji" style="font-size: 38px; margin-bottom: 8px">
+            �
           </div>
+          <div class="main">
+            Congrats, kamu berhasil<br />nyelametin si kucing
+          </div>
+          <div
+            class="line1"
+            style="color: #ccc; font-size: 19px; margin: 8px 0"
+          >
+            Kayaknya dia aman sekarang…
+          </div>
+          <div
+            class="line2"
+            style="color: #aaa; font-size: 17px; margin: 10px 0 6px 0"
+          >
+            tapi aku masih penasaran:
+          </div>
+          <div
+            class="question"
+            style="
+              color: #88ccff;
+              font-size: 19px;
+              margin-top: 6px;
+              font-weight: bold;
+              text-shadow: 0 0 8px rgba(136, 204, 255, 0.4);
+            "
+          >
+            menurut kamu, dia bakal hidup<br />paling bahagia sama siapa?
+          </div>
+          <button
+            class="wa-button"
+            onclick="window.open('https://wa.me/6285777203153', '_blank')"
+          >
+            <span style="font-size: 16px">💬</span>
+            Lanjutin ceritanya di WhatsApp
+          </button>
         </div>
       </div>
     </div>
@@ -718,6 +1037,50 @@
       document.addEventListener("keydown", startMusic, { once: true });
       document.addEventListener("click", startMusic, { once: true });
       document.addEventListener("touchstart", startMusic, { once: true });
+
+      // ==================== INTRO SCREEN ====================
+      const introOverlay = document.getElementById("introOverlay");
+      const narrativeText = document.getElementById("narrativeText");
+      const typedText = document.getElementById("typedText");
+      const cursor = document.getElementById("cursor");
+      const startButton = document.getElementById("startButton");
+      const tutorials = document.getElementById("tutorials");
+
+      const storyText =
+        "Malam yang dingin... Di sudut kota, seekor kucing terjebak di atas pohon. Dia menangis meminta tolong, tapi jalanan sepi. Kamu adalah satu-satunya harapannya. Bisakah kamu menyelamatkannya?";
+      let charIndex = 0;
+      let typingInterval;
+
+      function typeWriter() {
+        if (charIndex < storyText.length) {
+          typedText.textContent += storyText.charAt(charIndex);
+          charIndex++;
+        } else {
+          clearInterval(typingInterval);
+          cursor.style.display = "none";
+        }
+      }
+
+      // Start typing animation
+      setTimeout(() => {
+        typingInterval = setInterval(typeWriter, 50);
+      }, 500);
+
+      startButton.addEventListener("click", () => {
+        state.introPassed = true;
+        introOverlay.classList.add("hidden");
+        setTimeout(() => {
+          introOverlay.style.display = "none";
+        }, 800);
+        startMusic();
+      });
+
+      // Skip intro with Enter key
+      document.addEventListener("keydown", (e) => {
+        if (!state.introPassed && e.key === "Enter") {
+          startButton.click();
+        }
+      });
 
       // ==================== SOUND EFFECTS ====================
       const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -839,6 +1202,38 @@
           oscillator.start(startTime);
           oscillator.stop(startTime + 0.3);
         });
+      }
+
+      function playPurr() {
+        if (!soundEnabled) return;
+        // Continuous purring sound
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        const lfo = audioCtx.createOscillator();
+        const lfoGain = audioCtx.createGain();
+
+        lfo.frequency.value = 25; // Purr vibrato
+        lfoGain.gain.value = 10;
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(oscillator.frequency);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.value = 100;
+        oscillator.type = "sine";
+
+        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + 1.5,
+        );
+
+        oscillator.start(audioCtx.currentTime);
+        lfo.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 1.5);
+        lfo.stop(audioCtx.currentTime + 1.5);
       }
 
       function playAmbient() {
@@ -1022,6 +1417,7 @@
 
       // ==================== GAME STATE ====================
       const state = {
+        introPassed: false,
         treeInteracted: false,
         ladderTried: false,
         stoneTried: false,
@@ -1031,6 +1427,15 @@
         codeEntered: false,
         gameComplete: false,
         currentDialog: null,
+        cutscene: {
+          active: false,
+          phase: 0, // 0: zoom to cat, 1: pickup, 2: thank you, 3: walk home, 4: photo
+          timer: 0,
+          zoomLevel: 1,
+          targetZoom: 1,
+          cameraX: 0,
+          cameraY: 0,
+        },
       };
 
       // ==================== CANVAS SETUP ====================
@@ -1046,6 +1451,7 @@
         speed: CONFIG.PLAYER_SPEED,
         direction: 1,
         frame: 0,
+        carryingCat: false,
         frameTimer: 0,
         isWalking: false,
       };
@@ -1065,6 +1471,13 @@
           width: 30,
           height: 25,
           rescued: false,
+          state: "stuck", // stuck, descending, walkingToPlayer, rubbing, following, idle
+          targetX: 0,
+          frame: 0,
+          frameTimer: 0,
+          direction: 1,
+          rubbingTimer: 0,
+          carried: false,
         },
         ladder: {
           x: 180,
@@ -1409,18 +1822,18 @@ dengan kode yang tepat."`;
       function triggerEnding() {
         state.gameComplete = true;
         objects.cat.rescued = true;
+        objects.cat.state = "descending";
         playVictory();
 
         const rescueInterval = setInterval(() => {
           objects.cat.y += 2;
           if (objects.cat.y >= CONFIG.GROUND_Y - 30) {
             clearInterval(rescueInterval);
-            setTimeout(() => {
-              playMeow();
-              const ending = document.getElementById("endingOverlay");
-              ending.classList.add("active");
-              setTimeout(() => ending.classList.add("visible"), 100);
-            }, 1000);
+            objects.cat.y = CONFIG.GROUND_Y - 30;
+            objects.cat.state = "walkingToPlayer";
+            objects.cat.targetX = player.x;
+            playMeow();
+            setTimeout(() => playPurr(), 500);
           }
         }, 30);
       }
@@ -1514,11 +1927,33 @@ dengan kode yang tepat."`;
       let lastFootstepFrame = 0;
 
       function update() {
-        if (state.currentDialog || state.gameComplete) {
+        // Don't update game until intro is passed
+        if (!state.introPassed) {
           player.isWalking = false;
           return;
         }
 
+        // Update cutscene
+        if (state.cutscene.active) {
+          updateCutscene();
+          // During cutscene phase 3, let update handle walking animation
+          if (state.cutscene.phase !== 3) {
+            player.isWalking = false;
+            return;
+          }
+        }
+
+        // Update cat behavior if rescued
+        if (objects.cat.rescued) {
+          updateCatBehavior();
+        }
+
+        if (state.currentDialog) {
+          player.isWalking = false;
+          return;
+        }
+
+        // Allow player movement even after rescue (for cat following)
         player.isWalking = false;
         if (keys.left) {
           player.x -= player.speed;
@@ -1557,6 +1992,186 @@ dengan kode yang tepat."`;
         updateInteractPrompt();
       }
 
+      function updateCatBehavior() {
+        const cat = objects.cat;
+
+        if (cat.state === "walkingToPlayer") {
+          const distanceToPlayer = player.x - cat.x;
+
+          if (Math.abs(distanceToPlayer) > 35) {
+            // Calculate midpoint
+            const midpoint = (cat.x + player.x) / 2;
+
+            // Cat walks towards midpoint
+            cat.direction = distanceToPlayer > 0 ? 1 : -1;
+            cat.x += cat.direction * 1.5;
+
+            // Player also walks towards midpoint
+            const distanceToMidpoint = midpoint - player.x;
+            if (Math.abs(distanceToMidpoint) > 5) {
+              player.direction = distanceToMidpoint > 0 ? 1 : -1;
+              player.x += player.direction * 1.2;
+              player.isWalking = true;
+
+              // Player walking animation
+              player.frameTimer++;
+              if (player.frameTimer > 8) {
+                player.frame = (player.frame + 1) % 4;
+                player.frameTimer = 0;
+              }
+            }
+
+            // Cat walking animation
+            cat.frameTimer++;
+            if (cat.frameTimer > 6) {
+              cat.frame = (cat.frame + 1) % 4;
+              cat.frameTimer = 0;
+            }
+          } else {
+            // Reached each other, start rubbing
+            cat.state = "rubbing";
+            cat.frame = 0;
+            cat.rubbingTimer = 0;
+            player.isWalking = false;
+            player.frame = 0;
+            playPurr();
+          }
+        } else if (cat.state === "rubbing") {
+          cat.rubbingTimer++;
+
+          // Rubbing animation (moving around player's feet)
+          const rubAngle = (cat.rubbingTimer * 0.1) % (Math.PI * 2);
+          cat.x = player.x + Math.cos(rubAngle) * 20;
+          cat.direction = Math.cos(rubAngle) > 0 ? 1 : -1;
+
+          // After rubbing for a while, trigger cutscene
+          if (cat.rubbingTimer > 120) {
+            cat.state = "idle";
+            cat.x = player.x;
+            // Start cutscene
+            state.cutscene.active = true;
+            state.cutscene.phase = 0;
+            state.cutscene.timer = 0;
+          }
+        } else if (cat.state === "following") {
+          // Follow player at a distance
+          const distanceToPlayer = player.x - cat.x;
+          const followDistance = 40;
+
+          if (Math.abs(distanceToPlayer) > followDistance + 10) {
+            cat.direction = distanceToPlayer > 0 ? 1 : -1;
+            cat.x += cat.direction * 2;
+
+            cat.frameTimer++;
+            if (cat.frameTimer > 6) {
+              cat.frame = (cat.frame + 1) % 4;
+              cat.frameTimer = 0;
+            }
+          } else {
+            cat.frame = 0;
+          }
+        }
+      }
+
+      function updateCutscene() {
+        if (!state.cutscene.active) return;
+
+        const cs = state.cutscene;
+        cs.timer++;
+
+        // Smooth zoom interpolation
+        cs.zoomLevel += (cs.targetZoom - cs.zoomLevel) * 0.05;
+
+        // Phase 0: Zoom into happy cat (close-up)
+        if (cs.phase === 0) {
+          cs.targetZoom = 2.5;
+          cs.cameraX = objects.cat.x;
+          cs.cameraY = objects.cat.y - 20;
+
+          if (cs.timer > 90) {
+            cs.phase = 1;
+            cs.timer = 0;
+            cs.targetZoom = 1.5;
+          }
+        }
+        // Phase 1: Player picks up cat
+        else if (cs.phase === 1) {
+          cs.targetZoom = 1.5;
+          cs.cameraX = player.x;
+          cs.cameraY = player.y - 20;
+
+          if (cs.timer === 1) {
+            playMeow();
+          }
+          if (cs.timer > 30 && cs.timer < 60) {
+            // Animate cat moving to player's arms
+            objects.cat.y = player.y - 20 - ((cs.timer - 30) / 30) * 20;
+          }
+          if (cs.timer === 60) {
+            player.carryingCat = true;
+            objects.cat.carried = true;
+          }
+
+          if (cs.timer > 90) {
+            cs.phase = 2;
+            cs.timer = 0;
+          }
+        }
+        // Phase 2: "Thank you!" dialog from cat
+        else if (cs.phase === 2) {
+          if (cs.timer === 1) {
+            playPurr();
+            showDialog(
+              "cat",
+              "🐱",
+              "Kucing",
+              '"Terima kasih sudah menolongku!\n\nAku hampir tidak percaya\nada yang peduli..."\n\n💛',
+              null,
+              "Sama-sama! 😊",
+              null,
+            );
+          }
+
+          // Wait for dialog to close
+          if (!state.currentDialog && cs.timer > 10) {
+            cs.phase = 3;
+            cs.timer = 0;
+            cs.targetZoom = 1;
+          }
+        }
+        // Phase 3: Walk home together
+        else if (cs.phase === 3) {
+          cs.targetZoom = 1;
+          cs.cameraX = CONFIG.GAME_WIDTH / 2;
+          cs.cameraY = CONFIG.GAME_HEIGHT / 2;
+
+          // Auto-walk player to right
+          if (cs.timer < 120) {
+            player.x += 2;
+            player.direction = 1;
+            player.isWalking = true;
+
+            if (cs.timer % 15 === 0) {
+              playFootstep();
+            }
+          }
+
+          if (cs.timer > 150) {
+            cs.phase = 4;
+            cs.timer = 0;
+          }
+        }
+        // Phase 4: Show photo ending
+        else if (cs.phase === 4) {
+          if (cs.timer === 1) {
+            playVictory();
+            const ending = document.getElementById("endingOverlay");
+            ending.classList.add("active");
+            setTimeout(() => ending.classList.add("visible"), 100);
+          }
+        }
+      }
+
       function updateInteractPrompt() {
         const nearby = getNearbyObject();
         const prompt = document.getElementById("interactPrompt");
@@ -1593,8 +2208,24 @@ dengan kode yang tepat."`;
       // ==================== RENDER ====================
       function render() {
         ctx.clearRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
+
+        // Draw sky first without transformation (fills entire canvas)
         drawSky();
         if (currentTime.stars) drawStars();
+
+        // Apply camera transformation for cutscene
+        ctx.save();
+        if (state.cutscene.active) {
+          const zoom = state.cutscene.zoomLevel;
+          const centerX = CONFIG.GAME_WIDTH / 2;
+          const centerY = CONFIG.GAME_HEIGHT / 2;
+
+          // Translate to center, apply zoom, translate to camera position
+          ctx.translate(centerX, centerY);
+          ctx.scale(zoom, zoom);
+          ctx.translate(-state.cutscene.cameraX, -state.cutscene.cameraY);
+        }
+
         drawClouds();
         drawBuildings();
         drawTree();
@@ -1602,6 +2233,8 @@ dengan kode yang tepat."`;
         drawStreet();
         drawObjects();
         drawPlayer();
+
+        ctx.restore();
       }
 
       function drawSky() {
@@ -1776,46 +2409,276 @@ dengan kode yang tepat."`;
 
       function drawCat() {
         const cat = objects.cat;
-        if (cat.rescued && cat.y >= CONFIG.GROUND_Y - 30) return;
 
-        ctx.save();
-        ctx.translate(cat.x, cat.y);
+        // Don't draw cat separately if being carried by player
+        if (cat.carried) return;
 
-        ctx.fillStyle = "#FF9800";
-        ctx.fillRect(0, 10, 25, 15);
+        // Special happy cat rendering for cutscene phase 0 (close-up)
+        if (state.cutscene.active && state.cutscene.phase === 0) {
+          ctx.save();
+          ctx.translate(cat.x, cat.y);
 
-        ctx.beginPath();
-        ctx.arc(12, 8, 10, 0, Math.PI * 2);
-        ctx.fill();
+          // Bigger, happier cat for closeup
+          ctx.fillStyle = "#FF9800";
+          ctx.fillRect(-5, 10, 30, 20);
 
-        ctx.beginPath();
-        ctx.moveTo(4, 2);
-        ctx.lineTo(8, -6);
-        ctx.lineTo(12, 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(12, 2);
-        ctx.lineTo(16, -6);
-        ctx.lineTo(20, 2);
-        ctx.fill();
+          // Head
+          ctx.beginPath();
+          ctx.arc(12, 6, 12, 0, Math.PI * 2);
+          ctx.fill();
 
-        ctx.fillStyle = "#333";
-        ctx.beginPath();
-        ctx.arc(8, 7, 2, 0, Math.PI * 2);
-        ctx.arc(16, 7, 2, 0, Math.PI * 2);
-        ctx.fill();
+          // Ears
+          ctx.beginPath();
+          ctx.moveTo(2, 0);
+          ctx.lineTo(6, -8);
+          ctx.lineTo(10, 0);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(14, 0);
+          ctx.lineTo(18, -8);
+          ctx.lineTo(22, 0);
+          ctx.fill();
 
-        // Animated tail
-        ctx.strokeStyle = "#FF9800";
-        ctx.lineWidth = 4;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(25, 15);
-        const tailWag = Math.sin(anim.time * 0.15) * 8;
-        ctx.quadraticCurveTo(35 + tailWag, 10, 32 + tailWag * 0.5, 0);
-        ctx.stroke();
+          // Happy closed eyes
+          ctx.strokeStyle = "#333";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(7, 5, 3, 0, Math.PI);
+          ctx.arc(17, 5, 3, 0, Math.PI);
+          ctx.stroke();
 
-        ctx.restore();
+          // Big happy smile
+          ctx.beginPath();
+          ctx.arc(12, 8, 5, 0, Math.PI);
+          ctx.stroke();
+
+          // Pink cheeks
+          ctx.fillStyle = "rgba(255, 105, 180, 0.5)";
+          ctx.beginPath();
+          ctx.ellipse(3, 8, 3, 2, 0, 0, Math.PI * 2);
+          ctx.ellipse(21, 8, 3, 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Whiskers
+          ctx.strokeStyle = "#333";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(2, 6);
+          ctx.lineTo(-3, 5);
+          ctx.moveTo(2, 8);
+          ctx.lineTo(-3, 9);
+          ctx.moveTo(22, 6);
+          ctx.lineTo(27, 5);
+          ctx.moveTo(22, 8);
+          ctx.lineTo(27, 9);
+          ctx.stroke();
+
+          // Happy waggy tail
+          ctx.strokeStyle = "#FF9800";
+          ctx.lineWidth = 4;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(25, 18);
+          const tailWag = Math.sin(anim.time * 0.3) * 12;
+          ctx.quadraticCurveTo(35 + tailWag, 12, 32 + tailWag * 0.5, 0);
+          ctx.stroke();
+
+          // Sparkles around happy cat
+          ctx.fillStyle = "#FFD700";
+          ctx.font = "16px Arial";
+          const sparkleOffset = Math.sin(anim.time * 0.2) * 3;
+          ctx.fillText("✨", -10 + sparkleOffset, 0);
+          ctx.fillText("✨", 30 - sparkleOffset, 0);
+          ctx.fillText("⭐", 5, -15 + sparkleOffset);
+          ctx.fillText("⭐", 15, -15 - sparkleOffset);
+
+          ctx.restore();
+          return;
+        }
+
+        // Don't draw cat if in tree and not rescued yet
+        if (!cat.rescued && cat.state === "stuck") {
+          ctx.save();
+          ctx.translate(cat.x, cat.y);
+
+          ctx.fillStyle = "#FF9800";
+          ctx.fillRect(0, 10, 25, 15);
+
+          ctx.beginPath();
+          ctx.arc(12, 8, 10, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(4, 2);
+          ctx.lineTo(8, -6);
+          ctx.lineTo(12, 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(12, 2);
+          ctx.lineTo(16, -6);
+          ctx.lineTo(20, 2);
+          ctx.fill();
+
+          ctx.fillStyle = "#333";
+          ctx.beginPath();
+          ctx.arc(8, 7, 2, 0, Math.PI * 2);
+          ctx.arc(16, 7, 2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Animated tail
+          ctx.strokeStyle = "#FF9800";
+          ctx.lineWidth = 4;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(25, 15);
+          const tailWag = Math.sin(anim.time * 0.15) * 8;
+          ctx.quadraticCurveTo(35 + tailWag, 10, 32 + tailWag * 0.5, 0);
+          ctx.stroke();
+
+          ctx.restore();
+          return;
+        }
+
+        // Draw walking/following/rubbing/idle cat
+        if (
+          cat.rescued &&
+          (cat.state === "walkingToPlayer" ||
+            cat.state === "rubbing" ||
+            cat.state === "following" ||
+            cat.state === "idle")
+        ) {
+          ctx.save();
+          ctx.translate(cat.x, cat.y);
+          ctx.scale(cat.direction, 1);
+
+          // Walking animation bob
+          const bobOffset =
+            cat.state !== "rubbing" && cat.frame > 0
+              ? Math.sin((cat.frame * Math.PI) / 2) * 2
+              : 0;
+
+          // Shadow
+          ctx.fillStyle = "rgba(0,0,0,0.2)";
+          ctx.beginPath();
+          ctx.ellipse(12, 28, 10, 3, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Body
+          ctx.fillStyle = "#FF9800";
+          ctx.fillRect(2, 12 - bobOffset, 20, 12);
+
+          // Head
+          ctx.beginPath();
+          ctx.arc(12, 8 - bobOffset, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Ears
+          ctx.beginPath();
+          ctx.moveTo(6, 2 - bobOffset);
+          ctx.lineTo(8, -4 - bobOffset);
+          ctx.lineTo(10, 2 - bobOffset);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(14, 2 - bobOffset);
+          ctx.lineTo(16, -4 - bobOffset);
+          ctx.lineTo(18, 2 - bobOffset);
+          ctx.fill();
+
+          // Eyes
+          ctx.fillStyle = "#333";
+          ctx.beginPath();
+          ctx.arc(8, 7 - bobOffset, 1.5, 0, Math.PI * 2);
+          ctx.arc(16, 7 - bobOffset, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Legs animation
+          if (cat.state === "walkingToPlayer" || cat.state === "following") {
+            ctx.fillStyle = "#FF9800";
+            const legOffset = Math.sin((cat.frame * Math.PI) / 2) * 4;
+
+            // Front legs
+            ctx.fillRect(6 + legOffset, 24 - bobOffset, 3, 6);
+            ctx.fillRect(12 - legOffset, 24 - bobOffset, 3, 6);
+
+            // Back legs
+            ctx.fillRect(15 + legOffset, 24 - bobOffset, 3, 6);
+            ctx.fillRect(9 - legOffset, 24 - bobOffset, 3, 6);
+          } else {
+            // Standing legs
+            ctx.fillStyle = "#FF9800";
+            ctx.fillRect(6, 24, 3, 6);
+            ctx.fillRect(12, 24, 3, 6);
+            ctx.fillRect(15, 24, 3, 6);
+            ctx.fillRect(9, 24, 3, 6);
+          }
+
+          // Tail - happier wag when rubbing
+          ctx.strokeStyle = "#FF9800";
+          ctx.lineWidth = 3;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(20, 15 - bobOffset);
+          const tailSpeed = cat.state === "rubbing" ? 0.3 : 0.15;
+          const tailWag =
+            Math.sin(anim.time * tailSpeed) *
+            (cat.state === "rubbing" ? 15 : 8);
+          ctx.quadraticCurveTo(
+            28 + tailWag,
+            10 - bobOffset,
+            26 + tailWag * 0.5,
+            2 - bobOffset,
+          );
+          ctx.stroke();
+
+          // Heart particle when rubbing
+          if (cat.state === "rubbing" && cat.rubbingTimer % 30 < 15) {
+            ctx.fillStyle = "#FF69B4";
+            ctx.font = "12px Arial";
+            ctx.fillText("❤", 15, -5 - bobOffset);
+          }
+
+          ctx.restore();
+        }
+
+        // Draw descending cat
+        if (cat.rescued && cat.state === "descending") {
+          ctx.save();
+          ctx.translate(cat.x, cat.y);
+
+          ctx.fillStyle = "#FF9800";
+          ctx.fillRect(0, 10, 25, 15);
+
+          ctx.beginPath();
+          ctx.arc(12, 8, 10, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(4, 2);
+          ctx.lineTo(8, -6);
+          ctx.lineTo(12, 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(12, 2);
+          ctx.lineTo(16, -6);
+          ctx.lineTo(20, 2);
+          ctx.fill();
+
+          ctx.fillStyle = "#333";
+          ctx.beginPath();
+          ctx.arc(8, 7, 2, 0, Math.PI * 2);
+          ctx.arc(16, 7, 2, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "#FF9800";
+          ctx.lineWidth = 4;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(25, 15);
+          ctx.lineTo(28, 8);
+          ctx.stroke();
+
+          ctx.restore();
+        }
       }
 
       function drawStreet() {
@@ -2045,11 +2908,68 @@ dengan kode yang tepat."`;
         ctx.fillStyle = "#FFCCBC";
         if (player.isWalking) {
           const armOffset = Math.sin((player.frame * Math.PI) / 2) * 4;
-          ctx.fillRect(3, 22 - bobOffset + armOffset, 5, 12);
-          ctx.fillRect(24, 22 - bobOffset - armOffset, 5, 12);
+          // If carrying cat, arms hold cat
+          if (player.carryingCat) {
+            ctx.fillRect(3, 22 - bobOffset, 5, 10);
+            ctx.fillRect(24, 22 - bobOffset, 5, 10);
+          } else {
+            ctx.fillRect(3, 22 - bobOffset + armOffset, 5, 12);
+            ctx.fillRect(24, 22 - bobOffset - armOffset, 5, 12);
+          }
         } else {
           ctx.fillRect(3, 24, 5, 10);
           ctx.fillRect(24, 24, 5, 10);
+        }
+
+        // Draw cat in player's arms
+        if (player.carryingCat) {
+          ctx.save();
+          ctx.translate(16, 26 - bobOffset);
+          ctx.scale(0.7, 0.7);
+
+          // Cat body
+          ctx.fillStyle = "#FF9800";
+          ctx.fillRect(-8, -4, 16, 10);
+
+          // Cat head
+          ctx.beginPath();
+          ctx.arc(0, -6, 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Ears
+          ctx.beginPath();
+          ctx.moveTo(-4, -10);
+          ctx.lineTo(-2, -13);
+          ctx.lineTo(0, -10);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(0, -10);
+          ctx.lineTo(2, -13);
+          ctx.lineTo(4, -10);
+          ctx.fill();
+
+          // Eyes (happy closed)
+          ctx.strokeStyle = "#333";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(-3, -6, 1, 0, Math.PI);
+          ctx.arc(3, -6, 1, 0, Math.PI);
+          ctx.stroke();
+
+          // Happy mouth
+          ctx.beginPath();
+          ctx.arc(0, -4.5, 2, 0, Math.PI);
+          ctx.stroke();
+
+          // Tail wrapped around
+          ctx.strokeStyle = "#FF9800";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(8, 0);
+          ctx.quadraticCurveTo(12, -2, 10, -6);
+          ctx.stroke();
+
+          ctx.restore();
         }
 
         ctx.fillStyle = "#FFCCBC";
