@@ -1617,11 +1617,26 @@
         const visibleGameWidth = screenW / coverScale;
         const halfVisible = visibleGameWidth / 2;
 
-        // Follow player horizontally
-        const playerCenterX = player.x + player.width / 2;
-        const clampedX = Math.max(halfVisible, Math.min(CONFIG.GAME_WIDTH - halfVisible, playerCenterX));
+        // Determine camera focus target:
+        // When cat is descending or walking to player, follow the cat so mobile users can see the rescue
+        let focusX;
+        const catState = objects.cat.state;
+        if (objects.cat.rescued && (catState === "descending" || catState === "walkingToPlayer" || catState === "rubbing")) {
+          const catCenterX = objects.cat.x + objects.cat.width / 2;
+          const playerCenterX = player.x + player.width / 2;
+          // During descending, focus on cat; during walkingToPlayer/rubbing, focus on midpoint
+          if (catState === "descending") {
+            focusX = catCenterX;
+          } else {
+            focusX = (catCenterX + playerCenterX) / 2;
+          }
+        } else {
+          focusX = player.x + player.width / 2;
+        }
 
-        // Translate so the player appears at the canvas center (which cover shows on screen)
+        const clampedX = Math.max(halfVisible, Math.min(CONFIG.GAME_WIDTH - halfVisible, focusX));
+
+        // Translate so the focus target appears at the canvas center (which cover shows on screen)
         mobileCamera.targetTranslateX = CONFIG.GAME_WIDTH / 2 - clampedX;
 
         // On first frame, snap immediately instead of smoothing
@@ -1629,7 +1644,11 @@
           mobileCamera.translateX = mobileCamera.targetTranslateX;
           mobileCamera.initialized = true;
         } else {
-          mobileCamera.translateX += (mobileCamera.targetTranslateX - mobileCamera.translateX) * mobileCamera.smoothSpeed;
+          // Use faster smoothing during rescue for a snappier camera pan
+          const speed = (objects.cat.rescued && (catState === "descending" || catState === "walkingToPlayer"))
+            ? 0.08
+            : mobileCamera.smoothSpeed;
+          mobileCamera.translateX += (mobileCamera.targetTranslateX - mobileCamera.translateX) * speed;
         }
       }
 
