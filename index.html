@@ -2754,6 +2754,23 @@ dengan kode yang tepat."`;
 
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
+        // Ambient light overlay based on time of day
+        ctx.save();
+        let ambient;
+        if (currentTime.name === 'MORNING') {
+          ambient = 'rgba(255,220,180,0.08)';
+        } else if (currentTime.name === 'NOON') {
+          ambient = 'rgba(255,255,255,0.04)';
+        } else if (currentTime.name === 'EVENING') {
+          ambient = 'rgba(180,200,255,0.10)';
+        } else if (currentTime.name === 'NIGHT') {
+          ambient = 'rgba(80,120,255,0.13)';
+        } else {
+          ambient = 'rgba(255,255,255,0.04)';
+        }
+        ctx.fillStyle = ambient;
+        ctx.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
+        ctx.restore();
       }
 
       function drawStars() {
@@ -3188,6 +3205,13 @@ dengan kode yang tepat."`;
 
       function drawStreet() {
         ctx.fillStyle = "#9E9E9E";
+        ctx.fillRect(0, CONFIG.GROUND_Y, CONFIG.GAME_WIDTH, 30);
+        // Soft shadow gradient under buildings and NPCs
+        const shadowGrad = ctx.createLinearGradient(0, CONFIG.GROUND_Y, 0, CONFIG.GROUND_Y + 30);
+        shadowGrad.addColorStop(0, 'rgba(60,60,80,0.18)');
+        shadowGrad.addColorStop(0.7, 'rgba(60,60,80,0.05)');
+        shadowGrad.addColorStop(1, 'rgba(60,60,80,0)');
+        ctx.fillStyle = shadowGrad;
         ctx.fillRect(0, CONFIG.GROUND_Y, CONFIG.GAME_WIDTH, 30);
 
         drawGrass();
@@ -4017,6 +4041,8 @@ dengan kode yang tepat."`;
           // Anchor at feet position (npc.y = ground level)
           const footX = npc.x;
           const footY = npc.y;
+
+          // (NPC shadow removed as requested)
 
           ctx.translate(footX + npc.width / 2, footY);
           ctx.scale(npc.direction, 1);
