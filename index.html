@@ -1472,6 +1472,51 @@
         });
       }
 
+      // ==================== PARTICLE SYSTEMS ====================
+      // Sakura petals (morning/noon)
+      const sakuraPetals = [];
+      for (let i = 0; i < 25; i++) {
+        sakuraPetals.push({
+          x: Math.random() * CONFIG.GAME_WIDTH,
+          y: Math.random() * CONFIG.GAME_HEIGHT,
+          size: Math.random() * 4 + 2,
+          speedX: Math.random() * 0.5 - 0.25,
+          speedY: Math.random() * 0.8 + 0.3,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.05,
+          sway: Math.random() * Math.PI * 2,
+          swaySpeed: Math.random() * 0.02 + 0.01,
+          opacity: Math.random() * 0.5 + 0.3,
+        });
+      }
+
+      // Fireflies (night)
+      const fireflies = [];
+      for (let i = 0; i < 15; i++) {
+        fireflies.push({
+          x: Math.random() * CONFIG.GAME_WIDTH,
+          y: 100 + Math.random() * (CONFIG.GROUND_Y - 150),
+          baseX: 0, baseY: 0,
+          angle: Math.random() * Math.PI * 2,
+          speed: Math.random() * 0.01 + 0.005,
+          radius: Math.random() * 30 + 15,
+          brightness: Math.random(),
+          pulseSpeed: Math.random() * 0.05 + 0.02,
+          size: Math.random() * 2 + 1.5,
+        });
+      }
+      fireflies.forEach(f => { f.baseX = f.x; f.baseY = f.y; });
+
+      // Shooting stars
+      const shootingStars = [];
+
+      // Heart particles
+      const heartParticles = [];
+
+      // Confetti
+      const confetti = [];
+      let confettiActive = false;
+
       // Time toggle button
       const timeToggle = document.getElementById("timeToggle");
       const timeIcon = document.getElementById("timeIcon");
@@ -1745,6 +1790,92 @@
           interactRange: 45,
         },
       };
+
+      // ==================== BACKGROUND NPCs ====================
+      const bgNPCs = [];
+      const NPC_TYPES = [
+        { type: 'walker', width: 16, height: 34, speed: [0.4, 0.8] },
+        { type: 'umbrella', width: 18, height: 38, speed: [0.3, 0.6] },
+        { type: 'dogwalker', width: 28, height: 34, speed: [0.5, 0.7] },
+        { type: 'couple', width: 28, height: 34, speed: [0.3, 0.5] },
+        { type: 'jogger', width: 16, height: 32, speed: [0.9, 1.4] },
+        { type: 'bagperson', width: 18, height: 36, speed: [0.35, 0.65] },
+      ];
+
+      function spawnNPC() {
+        const template = NPC_TYPES[Math.floor(Math.random() * NPC_TYPES.length)];
+        const dir = Math.random() > 0.5 ? 1 : -1;
+        const speed = template.speed[0] + Math.random() * (template.speed[1] - template.speed[0]);
+        // Depth layer: 0 = far back (smaller), 1 = mid, 2 = near-back
+        const layer = Math.floor(Math.random() * 3);
+        const scale = 1.1 + layer * 0.15;
+        const alpha = 0.7 + layer * 0.1;
+        // Y on the sidewalk: feet sit on GROUND_Y line, farther layers slightly higher
+        const yBase = CONFIG.GROUND_Y;
+
+        // On mobile, spawn NPCs just outside the visible viewport edges
+        let spawnX;
+        if (mobileCamera.enabled) {
+          const camOff = -mobileCamera.translateX; // left edge of visible area in game coords
+          const screenW = window.innerWidth;
+          const screenH = window.innerHeight;
+          const coverScale = Math.max(screenW / CONFIG.GAME_WIDTH, screenH / CONFIG.GAME_HEIGHT);
+          const visW = screenW / coverScale;
+          const visLeft = camOff + (CONFIG.GAME_WIDTH - visW) / 2;
+          spawnX = dir === 1 ? visLeft - 40 : visLeft + visW + 40;
+        } else {
+          spawnX = dir === 1 ? -40 : CONFIG.GAME_WIDTH + 40;
+        }
+
+        return {
+          type: template.type,
+          x: spawnX,
+          y: yBase,
+          width: template.width * scale,
+          height: template.height * scale,
+          speed: speed * scale,
+          direction: dir,
+          frame: 0,
+          frameTimer: 0,
+          alpha: alpha,
+          scale: scale,
+          layer: layer,
+          color: ['#2C2C3A', '#3A3344', '#2E3440', '#393145', '#342E3B', '#3D3548'][Math.floor(Math.random() * 6)],
+          hatColor: ['#4A4458', '#554E60', '#3E3850', '#5C5470'][Math.floor(Math.random() * 4)],
+          accColor: ['#6B5B7B', '#7B6B5B', '#5B6B7B', '#8B7B6B'][Math.floor(Math.random() * 4)],
+        };
+      }
+
+      // Initialize a few NPCs already on screen
+      for (let i = 0; i < 4; i++) {
+        const npc = spawnNPC();
+        npc.x = 80 + Math.random() * (CONFIG.GAME_WIDTH - 160);
+        bgNPCs.push(npc);
+      }
+
+      function updateBgNPCs() {
+        // Spawn new NPCs occasionally (higher rate on mobile for narrower viewport)
+        const spawnRate = mobileCamera.enabled ? 0.012 : 0.004;
+        const maxNPCs = mobileCamera.enabled ? 8 : 6;
+        if (bgNPCs.length < maxNPCs && Math.random() < spawnRate) {
+          bgNPCs.push(spawnNPC());
+        }
+
+        for (let i = bgNPCs.length - 1; i >= 0; i--) {
+          const npc = bgNPCs[i];
+          npc.x += npc.speed * npc.direction;
+          npc.frameTimer++;
+          if (npc.frameTimer > 12) {
+            npc.frame = (npc.frame + 1) % 4;
+            npc.frameTimer = 0;
+          }
+          // Remove if off screen (use wider bounds to account for camera movement)
+          if ((npc.direction === 1 && npc.x > CONFIG.GAME_WIDTH + 100) ||
+              (npc.direction === -1 && npc.x < -100)) {
+            bgNPCs.splice(i, 1);
+          }
+        }
+      }
 
       // ==================== BUILDINGS ====================
       const buildings = [
@@ -2099,6 +2230,22 @@ dengan kode yang tepat."`;
               playDing();
               closeDialog();
               triggerEnding();
+            } else if (['ILY', 'LOVE', 'SAYANG', 'CINTA', 'SUKA'].includes(code)) {
+              playDing();
+              input.value = '';
+              input.placeholder = '💕 aw, sweet~';
+              for (let i = 0; i < 10; i++) {
+                heartParticles.push({
+                  x: CONFIG.GAME_WIDTH / 2 + (Math.random() - 0.5) * 200,
+                  y: CONFIG.GAME_HEIGHT / 2 + Math.random() * 50,
+                  speedY: 0.5 + Math.random() * 1,
+                  sway: Math.random() * Math.PI * 2,
+                  life: 90, maxLife: 90, opacity: 1,
+                  size: 10 + Math.random() * 14,
+                  color: ['#FF69B4', '#FF1493', '#FF6B6B', '#FFD700'][Math.floor(Math.random() * 4)],
+                });
+              }
+              setTimeout(() => { input.placeholder = '_ _ _ _ _'; }, 3000);
             } else {
               playBuzz();
               input.value = "";
@@ -2117,6 +2264,8 @@ dengan kode yang tepat."`;
         objects.cat.rescued = true;
         objects.cat.state = "descending";
         playVictory();
+        confettiActive = true;
+        setTimeout(() => { confettiActive = false; }, 8000);
 
         const rescueInterval = setInterval(() => {
           objects.cat.y += 2;
@@ -2214,6 +2363,12 @@ dengan kode yang tepat."`;
 
         // Grass wave
         anim.grassWave = Math.sin(anim.time * 0.05);
+
+        // Update particle systems
+        updateParticles();
+
+        // Update background NPCs
+        updateBgNPCs();
       }
 
       // ==================== UPDATE ====================
@@ -2551,6 +2706,7 @@ dengan kode yang tepat."`;
         // Draw sky first without camera transformation (fills entire canvas)
         drawSky();
         if (currentTime.stars) drawStars();
+        drawShootingStars();
 
         // Apply camera transformation
         ctx.save();
@@ -2570,14 +2726,19 @@ dengan kode yang tepat."`;
 
         drawClouds();
         drawBuildings();
+        drawSakuraPetals();
         drawTree();
         drawCat();
         drawStreet();
+        drawBgNPCs();
         drawObjects();
         drawPlayer();
         drawArrows();
+        drawFireflies();
+        drawHeartParticles();
 
         ctx.restore(); // camera transform
+        drawConfetti();
         ctx.restore(); // DPR scale
       }
 
@@ -3653,6 +3814,357 @@ dengan kode yang tepat."`;
 
           ctx.restore();
         }
+      }
+
+      // ==================== PARTICLE UPDATE ====================
+      function updateParticles() {
+        const isMorningOrNoon = timeOrder[currentTimeIndex] === 'MORNING' || timeOrder[currentTimeIndex] === 'NOON';
+
+        // Sakura petals
+        if (isMorningOrNoon) {
+          sakuraPetals.forEach(p => {
+            p.sway += p.swaySpeed;
+            p.x += p.speedX + Math.sin(p.sway) * 0.5;
+            p.y += p.speedY;
+            p.rotation += p.rotSpeed;
+            if (p.y > CONFIG.GAME_HEIGHT + 10) { p.y = -10; p.x = Math.random() * CONFIG.GAME_WIDTH; }
+            if (p.x > CONFIG.GAME_WIDTH + 10) p.x = -10;
+            if (p.x < -10) p.x = CONFIG.GAME_WIDTH + 10;
+          });
+        }
+
+        // Fireflies
+        if (timeOrder[currentTimeIndex] === 'NIGHT') {
+          fireflies.forEach(f => {
+            f.angle += f.speed;
+            f.x = f.baseX + Math.cos(f.angle) * f.radius;
+            f.y = f.baseY + Math.sin(f.angle * 0.7) * f.radius * 0.6;
+            f.brightness = Math.sin(anim.time * f.pulseSpeed) * 0.5 + 0.5;
+          });
+        }
+
+        // Shooting stars
+        if (timeOrder[currentTimeIndex] === 'NIGHT' && Math.random() < 0.003) {
+          shootingStars.push({
+            x: Math.random() * CONFIG.GAME_WIDTH * 0.7,
+            y: Math.random() * 80,
+            speedX: 4 + Math.random() * 3,
+            speedY: 2 + Math.random() * 1.5,
+            life: 40 + Math.random() * 20,
+            maxLife: 60,
+            trail: [],
+          });
+        }
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+          const s = shootingStars[i];
+          s.trail.push({ x: s.x, y: s.y });
+          if (s.trail.length > 12) s.trail.shift();
+          s.x += s.speedX;
+          s.y += s.speedY;
+          s.life--;
+          if (s.life <= 0) shootingStars.splice(i, 1);
+        }
+
+        // Heart particles
+        for (let i = heartParticles.length - 1; i >= 0; i--) {
+          const h = heartParticles[i];
+          h.y -= h.speedY;
+          h.x += Math.sin(h.sway) * 0.3;
+          h.sway += 0.05;
+          h.life--;
+          h.opacity = h.life / h.maxLife;
+          if (h.life <= 0) heartParticles.splice(i, 1);
+        }
+
+        // Spawn hearts near cat when happy
+        if (objects.cat.rescued && (objects.cat.state === 'rubbing' || objects.cat.state === 'following') && Math.random() < 0.08) {
+          heartParticles.push({
+            x: objects.cat.x + Math.random() * 20,
+            y: objects.cat.y - 5,
+            speedY: 0.5 + Math.random() * 0.5,
+            sway: Math.random() * Math.PI * 2,
+            life: 60, maxLife: 60, opacity: 1,
+            size: 6 + Math.random() * 6,
+            color: Math.random() > 0.5 ? '#FF69B4' : '#FF1493',
+          });
+        }
+
+        // Confetti
+        if (confettiActive) {
+          if (confetti.length < 150 && anim.time % 2 === 0) {
+            for (let c = 0; c < 3; c++) {
+              confetti.push({
+                x: Math.random() * CONFIG.GAME_WIDTH,
+                y: -10,
+                speedX: (Math.random() - 0.5) * 3,
+                speedY: Math.random() * 2 + 1,
+                rotation: Math.random() * Math.PI * 2,
+                rotSpeed: (Math.random() - 0.5) * 0.1,
+                size: Math.random() * 6 + 3,
+                color: ['#FF69B4','#FFD700','#87CEEB','#FF6347','#98FB98','#DDA0DD','#FFA500'][Math.floor(Math.random() * 7)],
+                life: 200,
+              });
+            }
+          }
+          for (let i = confetti.length - 1; i >= 0; i--) {
+            const c = confetti[i];
+            c.x += c.speedX + Math.sin(c.rotation) * 0.5;
+            c.y += c.speedY;
+            c.rotation += c.rotSpeed;
+            c.life--;
+            if (c.y > CONFIG.GAME_HEIGHT + 20 || c.life <= 0) confetti.splice(i, 1);
+          }
+        }
+      }
+
+      // ==================== PARTICLE DRAW ====================
+      function drawSakuraPetals() {
+        const isMorningOrNoon = timeOrder[currentTimeIndex] === 'MORNING' || timeOrder[currentTimeIndex] === 'NOON';
+        if (!isMorningOrNoon) return;
+        sakuraPetals.forEach(p => {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation);
+          ctx.globalAlpha = p.opacity;
+          ctx.fillStyle = '#FFB7C5';
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#FFDDE1';
+          ctx.beginPath();
+          ctx.ellipse(0.5, 0, p.size * 0.6, p.size * 0.35, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        });
+      }
+
+      function drawFireflies() {
+        if (timeOrder[currentTimeIndex] !== 'NIGHT') return;
+        fireflies.forEach(f => {
+          const alpha = f.brightness * 0.8 + 0.2;
+          const gradient = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.size * 6);
+          gradient.addColorStop(0, `rgba(255, 255, 150, ${alpha * 0.4})`);
+          gradient.addColorStop(0.5, `rgba(255, 255, 100, ${alpha * 0.15})`);
+          gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(f.x, f.y, f.size * 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `rgba(255, 255, 200, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      function drawShootingStars() {
+        if (timeOrder[currentTimeIndex] !== 'NIGHT') return;
+        shootingStars.forEach(s => {
+          const alpha = s.life / s.maxLife;
+          for (let i = 0; i < s.trail.length; i++) {
+            const t = s.trail[i];
+            const trailAlpha = (i / s.trail.length) * alpha * 0.5;
+            ctx.fillStyle = `rgba(255, 255, 255, ${trailAlpha})`;
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 1.5 * (i / s.trail.length), 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `rgba(200, 220, 255, ${alpha * 0.3})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      function drawHeartParticles() {
+        heartParticles.forEach(h => {
+          ctx.save();
+          ctx.globalAlpha = h.opacity;
+          ctx.fillStyle = h.color;
+          ctx.font = `${h.size}px Arial`;
+          ctx.fillText('\u2764', h.x, h.y);
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive || confetti.length === 0) return;
+        confetti.forEach(c => {
+          ctx.save();
+          ctx.translate(c.x, c.y);
+          ctx.rotate(c.rotation);
+          ctx.fillStyle = c.color;
+          ctx.fillRect(-c.size / 2, -c.size / 4, c.size, c.size / 2);
+          ctx.restore();
+        });
+      }
+
+      // ==================== BACKGROUND NPCs DRAW ====================
+      function drawBgNPCs() {
+        // Sort by layer so farther NPCs draw first
+        const sorted = [...bgNPCs].sort((a, b) => a.layer - b.layer);
+
+        sorted.forEach(npc => {
+          ctx.save();
+          ctx.globalAlpha = npc.alpha;
+
+          // Anchor at feet position (npc.y = ground level)
+          const footX = npc.x;
+          const footY = npc.y;
+
+          ctx.translate(footX + npc.width / 2, footY);
+          ctx.scale(npc.direction, 1);
+          ctx.translate(-npc.width / 2, 0);
+
+          const s = npc.scale;
+          const bob = Math.sin(npc.frame * Math.PI / 2) * 1 * s;
+          const legSwing = Math.sin(npc.frame * Math.PI / 2) * 3 * s;
+          const w = npc.width;
+
+          if (npc.type === 'walker') {
+            // Feet/shoes
+            ctx.fillStyle = npc.color;
+            ctx.fillRect(3 * s + legSwing, -3 * s, 4 * s, 3 * s);
+            ctx.fillRect(9 * s - legSwing, -3 * s, 4 * s, 3 * s);
+            // Legs
+            ctx.fillRect(4 * s + legSwing, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(9 * s - legSwing, -12 * s - bob, 3 * s, 10 * s);
+            // Body
+            ctx.fillRect(2 * s, -24 * s - bob, 12 * s, 13 * s);
+            // Head (circle, no face)
+            ctx.fillStyle = npc.hatColor;
+            ctx.beginPath();
+            ctx.arc(8 * s, -28 * s - bob, 5 * s, 0, Math.PI * 2);
+            ctx.fill();
+            // Hat
+            ctx.fillStyle = npc.accColor;
+            ctx.fillRect(3 * s, -33 * s - bob, 10 * s, 3 * s);
+            ctx.fillRect(5 * s, -35 * s - bob, 6 * s, 3 * s);
+          }
+          else if (npc.type === 'umbrella') {
+            ctx.fillStyle = npc.color;
+            ctx.fillRect(5 * s + legSwing, -3 * s, 3 * s, 3 * s);
+            ctx.fillRect(10 * s - legSwing, -3 * s, 3 * s, 3 * s);
+            ctx.fillRect(5 * s + legSwing, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(10 * s - legSwing, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(3 * s, -24 * s - bob, 12 * s, 13 * s);
+            ctx.fillStyle = npc.hatColor;
+            ctx.beginPath();
+            ctx.arc(9 * s, -28 * s - bob, 4.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+            // Umbrella pole
+            ctx.strokeStyle = npc.accColor;
+            ctx.lineWidth = 1.5 * s;
+            ctx.beginPath();
+            ctx.moveTo(14 * s, -18 * s - bob);
+            ctx.lineTo(14 * s, -38 * s - bob);
+            ctx.stroke();
+            // Umbrella canopy
+            ctx.fillStyle = npc.accColor;
+            ctx.beginPath();
+            ctx.arc(14 * s, -38 * s - bob, 9 * s, Math.PI, 0);
+            ctx.fill();
+          }
+          else if (npc.type === 'dogwalker') {
+            ctx.fillStyle = npc.color;
+            ctx.fillRect(4 * s + legSwing, -3 * s, 3 * s, 3 * s);
+            ctx.fillRect(9 * s - legSwing, -3 * s, 3 * s, 3 * s);
+            ctx.fillRect(4 * s + legSwing, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(9 * s - legSwing, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(2 * s, -24 * s - bob, 12 * s, 13 * s);
+            ctx.fillStyle = npc.hatColor;
+            ctx.beginPath();
+            ctx.arc(8 * s, -28 * s - bob, 4.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+            // Leash
+            ctx.strokeStyle = npc.accColor;
+            ctx.lineWidth = 1 * s;
+            ctx.beginPath();
+            ctx.moveTo(13 * s, -16 * s - bob);
+            ctx.quadraticCurveTo(18 * s, -5 * s, 22 * s, -4 * s);
+            ctx.stroke();
+            // Dog body
+            ctx.fillStyle = npc.hatColor;
+            ctx.fillRect(20 * s, -6 * s, 8 * s, 4 * s);
+            ctx.beginPath();
+            ctx.arc(29 * s, -5 * s, 2.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+            // Dog legs
+            const dLeg = Math.sin(npc.frame * Math.PI / 2) * 2 * s;
+            ctx.fillRect(21 * s + dLeg, -2 * s, 2 * s, 3 * s);
+            ctx.fillRect(26 * s - dLeg, -2 * s, 2 * s, 3 * s);
+            // Dog tail
+            ctx.strokeStyle = npc.hatColor;
+            ctx.lineWidth = 1.5 * s;
+            ctx.beginPath();
+            ctx.moveTo(20 * s, -6 * s);
+            ctx.lineTo(18 * s, -9 * s + Math.sin(anim.time * 0.2) * 2 * s);
+            ctx.stroke();
+          }
+          else if (npc.type === 'couple') {
+            for (let p = 0; p < 2; p++) {
+              const px = p * 10 * s;
+              const col = p === 0 ? npc.color : npc.hatColor;
+              ctx.fillStyle = col;
+              ctx.fillRect(px + 3 * s + legSwing, -3 * s, 3 * s, 3 * s);
+              ctx.fillRect(px + 7 * s - legSwing, -3 * s, 3 * s, 3 * s);
+              ctx.fillRect(px + 3 * s + legSwing, -11 * s - bob, 3 * s, 9 * s);
+              ctx.fillRect(px + 7 * s - legSwing, -11 * s - bob, 3 * s, 9 * s);
+              ctx.fillRect(px + 1 * s, -22 * s - bob, 10 * s, 12 * s);
+              ctx.beginPath();
+              ctx.arc(px + 6 * s, -25 * s - bob, 3.5 * s, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.fillStyle = npc.accColor;
+            ctx.fillRect(9 * s, -14 * s - bob, 3 * s, 2 * s);
+          }
+          else if (npc.type === 'jogger') {
+            const jLeg = Math.sin(npc.frame * Math.PI / 2) * 5 * s;
+            ctx.fillStyle = npc.color;
+            ctx.fillRect(4 * s + jLeg, -3 * s, 3 * s, 3 * s);
+            ctx.fillRect(8 * s - jLeg, -3 * s, 3 * s, 3 * s);
+            ctx.fillRect(4 * s + jLeg, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(8 * s - jLeg, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(3 * s, -23 * s - bob, 10 * s, 12 * s);
+            ctx.fillStyle = npc.hatColor;
+            ctx.beginPath();
+            ctx.arc(8 * s, -27 * s - bob, 4 * s, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = npc.accColor;
+            ctx.fillRect(4 * s, -29 * s - bob, 8 * s, 2 * s);
+            const armSwing = Math.sin(npc.frame * Math.PI / 2) * 4 * s;
+            ctx.fillStyle = npc.color;
+            ctx.fillRect(1 * s, -20 * s - bob + armSwing, 3 * s, 7 * s);
+            ctx.fillRect(12 * s, -20 * s - bob - armSwing, 3 * s, 7 * s);
+          }
+          else if (npc.type === 'bagperson') {
+            ctx.fillStyle = npc.color;
+            ctx.fillRect(4 * s + legSwing, -3 * s, 3 * s, 3 * s);
+            ctx.fillRect(9 * s - legSwing, -3 * s, 3 * s, 3 * s);
+            ctx.fillRect(4 * s + legSwing, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(9 * s - legSwing, -12 * s - bob, 3 * s, 10 * s);
+            ctx.fillRect(2 * s, -25 * s - bob, 12 * s, 14 * s);
+            ctx.fillStyle = npc.hatColor;
+            ctx.beginPath();
+            ctx.arc(8 * s, -29 * s - bob, 4.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = npc.accColor;
+            ctx.fillRect(13 * s, -16 * s - bob, 5 * s, 8 * s);
+            ctx.strokeStyle = npc.accColor;
+            ctx.lineWidth = 1 * s;
+            ctx.beginPath();
+            ctx.arc(15.5 * s, -17 * s - bob, 2.5 * s, Math.PI, 0);
+            ctx.stroke();
+          }
+
+          ctx.restore();
+        });
       }
 
       // ==================== GAME LOOP ====================
