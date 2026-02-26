@@ -2,7 +2,10 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>🐱 Save The Cat — Episode 2: Home Sweet Home</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap"
@@ -889,6 +892,7 @@
         body {
           padding: 0;
           justify-content: flex-start;
+          background: #1a1a2e;
         }
         .game-wrapper {
           width: 100vw;
@@ -898,23 +902,43 @@
           border-radius: 0;
           box-shadow: none;
           overflow: hidden;
+          position: relative;
           display: flex;
-          align-items: center;
-          justify-content: center;
+          flex-direction: column;
+          background: #0f0c29;
         }
         #gameCanvas {
           width: 100%;
           height: auto;
-          object-fit: contain;
-          max-height: 100%;
+          flex-shrink: 0;
+        }
+        /* All overlay elements must be positioned relative to game-wrapper */
+        .top-bar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+        }
+        .hud {
+          position: absolute;
+          top: 50px;
+          left: 8px;
+          right: 8px;
+        }
+        .mobile-controls {
+          position: absolute;
+          bottom: 15px;
+          left: 0;
+          right: 0;
+        }
+        .room-indicator {
+          /* Position just above mobile controls */
+          bottom: 85px;
         }
         .icon-btn {
           width: 44px;
           height: 44px;
           font-size: 18px;
-        }
-        .hud {
-          top: 54px;
         }
         .hud-card {
           min-width: 100px;
@@ -974,9 +998,6 @@
         .start-button {
           font-size: 11px;
           padding: 12px 28px;
-        }
-        .room-indicator {
-          bottom: 95px;
         }
         .act-banner .act-title {
           font-size: 16px;
@@ -1459,23 +1480,6 @@
           { name: "Kamar Tidur", start: 1900, end: 2800, color: "#4E342E" },
         ],
       };
-      
-      // Update dimensions for mobile
-      function updateCFGForViewport() {
-        if (window.innerWidth <= 800) {
-          const aspect = 800 / 400; // Keep aspect ratio
-          CFG.W = Math.min(800, window.innerWidth);
-          CFG.H = CFG.W / aspect;
-          CFG.GROUND = CFG.H * 0.85; // Adjust ground proportionally
-          CFG.CEILING = CFG.H * 0.15;
-        } else {
-          CFG.W = 800;
-          CFG.H = 400;
-          CFG.GROUND = 340;
-          CFG.CEILING = 60;
-        }
-      }
-      updateCFGForViewport();
 
       // ==================== CANVAS ====================
       const canvas = document.getElementById("gameCanvas");
@@ -1507,14 +1511,18 @@
       }
 
       function setupCanvas() {
-        updateCFGForViewport(); // Update CFG dimensions first
         const rawDpr = window.devicePixelRatio || 1;
-        // Cap DPR to avoid excessive canvas size on high-DPI mobile
         dpr = Math.min(rawDpr, window.innerWidth <= 800 ? 1.5 : 2);
         canvas.width = CFG.W * dpr;
         canvas.height = CFG.H * dpr;
-        canvas.style.width = CFG.W + "px";
-        canvas.style.height = CFG.H + "px";
+        if (window.innerWidth <= 800) {
+          // Mobile: fill width, auto height to keep aspect ratio
+          canvas.style.width = '100%';
+          canvas.style.height = 'auto';
+        } else {
+          canvas.style.width = CFG.W + "px";
+          canvas.style.height = CFG.H + "px";
+        }
         ctx.imageSmoothingEnabled = false;
       }
       setupCanvas();
@@ -3120,12 +3128,9 @@
           const canvasRect = canvas.getBoundingClientRect();
           const sx = canvasRect.width / CFG.W;
           const sy = canvasRect.height / CFG.H;
-          const coverScale = Math.max(sx, sy);
-          const ox = (canvasRect.width - CFG.W * coverScale) / 2;
-          const oy = (canvasRect.height - CFG.H * coverScale) / 2;
 
-          prompt.style.left = gx * coverScale + ox - 35 + "px";
-          prompt.style.top = gy * coverScale + oy - 55 + "px";
+          prompt.style.left = gx * sx - 35 + "px";
+          prompt.style.top = gy * sy - 55 + "px";
           prompt.classList.add("visible");
         } else {
           prompt.classList.remove("visible");
