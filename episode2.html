@@ -902,28 +902,11 @@
           border-radius: 0;
           box-shadow: none;
           overflow: hidden;
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          background: #0f0c29;
         }
         #gameCanvas {
           width: 100%;
-          height: auto;
-          flex-shrink: 0;
-        }
-        /* All overlay elements must be positioned relative to game-wrapper */
-        .top-bar {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-        }
-        .hud {
-          position: absolute;
-          top: 50px;
-          left: 8px;
-          right: 8px;
+          height: 100%;
+          object-fit: cover;
         }
         .mobile-controls {
           position: absolute;
@@ -932,7 +915,6 @@
           right: 0;
         }
         .room-indicator {
-          /* Position just above mobile controls */
           bottom: 85px;
         }
         .icon-btn {
@@ -1510,15 +1492,18 @@
         };
       }
 
+      function detectMobile() {
+        return window.innerWidth <= 800;
+      }
+
       function setupCanvas() {
         const rawDpr = window.devicePixelRatio || 1;
-        dpr = Math.min(rawDpr, window.innerWidth <= 800 ? 1.5 : 2);
+        dpr = Math.min(rawDpr, 2);
         canvas.width = CFG.W * dpr;
         canvas.height = CFG.H * dpr;
-        if (window.innerWidth <= 800) {
-          // Mobile: fill width, auto height to keep aspect ratio
+        if (detectMobile()) {
           canvas.style.width = '100%';
-          canvas.style.height = 'auto';
+          canvas.style.height = '100%';
         } else {
           canvas.style.width = CFG.W + "px";
           canvas.style.height = CFG.H + "px";
@@ -1527,6 +1512,44 @@
       }
       setupCanvas();
       window.addEventListener("resize", setupCanvas);
+
+      // ==================== MOBILE CAMERA ====================
+      const mobileCamera = {
+        translateX: 0,
+        targetX: 0,
+        enabled: false,
+        smoothSpeed: 0.12,
+      };
+
+      function updateMobileCamera() {
+        mobileCamera.enabled = detectMobile();
+        if (!mobileCamera.enabled) {
+          mobileCamera.translateX = 0;
+          return;
+        }
+
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+
+        // CSS object-fit:cover crops the canvas in portrait.
+        // Calculate how many game-pixels are visible after the crop.
+        const coverScale = Math.max(screenW / CFG.W, screenH / CFG.H);
+        const visibleGameWidth = screenW / coverScale;
+        const halfVisible = visibleGameWidth / 2;
+
+        // Focus on the player (already camera-relative)
+        const playerScreenX = player.x - camera.x + player.w / 2;
+
+        // Clamp so we don't go past game edges
+        let targetX = playerScreenX - halfVisible;
+        targetX = Math.max(0, Math.min(CFG.W - visibleGameWidth, targetX));
+
+        // Convert to pixel offset for CSS transform
+        mobileCamera.targetX = -targetX * coverScale;
+        mobileCamera.translateX += (mobileCamera.targetX - mobileCamera.translateX) * mobileCamera.smoothSpeed;
+
+        canvas.style.objectPosition = (targetX / (CFG.W - visibleGameWidth) * 100) + '% center';
+      }
 
       // ==================== CAMERA ====================
       const camera = { x: 0, targetX: 0, y: 0, targetY: 0 };
@@ -3046,6 +3069,7 @@
         }
 
         updateCamera();
+        updateMobileCamera();
         updateRoomIndicator();
         updateInteractPrompt();
       }
@@ -3128,9 +3152,12 @@
           const canvasRect = canvas.getBoundingClientRect();
           const sx = canvasRect.width / CFG.W;
           const sy = canvasRect.height / CFG.H;
+          const coverScale = Math.max(sx, sy);
+          const ox = (canvasRect.width - CFG.W * coverScale) / 2;
+          const oy = (canvasRect.height - CFG.H * coverScale) / 2;
 
-          prompt.style.left = gx * sx - 35 + "px";
-          prompt.style.top = gy * sy - 55 + "px";
+          prompt.style.left = gx * coverScale + ox - 35 + "px";
+          prompt.style.top = gy * coverScale + oy - 55 + "px";
           prompt.classList.add("visible");
         } else {
           prompt.classList.remove("visible");
