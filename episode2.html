@@ -1455,6 +1455,23 @@
           { name: "Kamar Tidur", start: 1900, end: 2800, color: "#4E342E" },
         ],
       };
+      
+      // Update dimensions for mobile
+      function updateCFGForViewport() {
+        if (window.innerWidth <= 800) {
+          const aspect = 800 / 400; // Keep aspect ratio
+          CFG.W = Math.min(800, window.innerWidth);
+          CFG.H = CFG.W / aspect;
+          CFG.GROUND = CFG.H * 0.85; // Adjust ground proportionally
+          CFG.CEILING = CFG.H * 0.15;
+        } else {
+          CFG.W = 800;
+          CFG.H = 400;
+          CFG.GROUND = 340;
+          CFG.CEILING = 60;
+        }
+      }
+      updateCFGForViewport();
 
       // ==================== CANVAS ====================
       const canvas = document.getElementById("gameCanvas");
@@ -1486,18 +1503,14 @@
       }
 
       function setupCanvas() {
+        updateCFGForViewport(); // Update CFG dimensions first
         const rawDpr = window.devicePixelRatio || 1;
         // Cap DPR to avoid excessive canvas size on high-DPI mobile
         dpr = Math.min(rawDpr, window.innerWidth <= 800 ? 1.5 : 2);
         canvas.width = CFG.W * dpr;
         canvas.height = CFG.H * dpr;
-        if (window.innerWidth <= 800) {
-          canvas.style.width = "100%";
-          canvas.style.height = "100%";
-        } else {
-          canvas.style.width = CFG.W + "px";
-          canvas.style.height = CFG.H + "px";
-        }
+        canvas.style.width = CFG.W + "px";
+        canvas.style.height = CFG.H + "px";
         ctx.imageSmoothingEnabled = false;
       }
       setupCanvas();
