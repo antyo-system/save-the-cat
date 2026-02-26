@@ -1,0 +1,5217 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🐱 Save The Cat — Episode 2: Home Sweet Home</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        image-rendering: pixelated;
+      }
+
+      body {
+        background: #0f0c29;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "VT323", monospace;
+        overflow: hidden;
+      }
+
+      .game-wrapper {
+        position: relative;
+        border: 4px solid #3d3d5c;
+        border-radius: 8px;
+        box-shadow:
+          0 0 60px rgba(100, 100, 200, 0.4),
+          inset 0 0 30px rgba(0, 0, 0, 0.3);
+      }
+
+      /* ===== TOP BAR BUTTONS ===== */
+      .top-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 10px 12px;
+        z-index: 100;
+        pointer-events: none;
+      }
+      .top-bar > * {
+        pointer-events: auto;
+      }
+
+      .top-left {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .top-right {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(90, 90, 138, 0.8);
+        border-radius: 10px;
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        backdrop-filter: blur(4px);
+        -webkit-tap-highlight-color: transparent;
+      }
+      .icon-btn:hover {
+        background: rgba(0, 0, 0, 0.8);
+        transform: scale(1.08);
+        border-color: #8a8aba;
+      }
+      .icon-btn:active {
+        transform: scale(0.95);
+      }
+      .icon-btn.muted {
+        opacity: 0.5;
+      }
+
+      /* ===== HUD ===== */
+      .hud {
+        position: absolute;
+        top: 56px;
+        left: 12px;
+        right: 12px;
+        display: flex;
+        gap: 12px;
+        z-index: 90;
+        pointer-events: none;
+      }
+
+      .hud-card {
+        background: rgba(0, 0, 0, 0.55);
+        border: 2px solid rgba(90, 90, 138, 0.6);
+        border-radius: 10px;
+        padding: 8px 12px;
+        backdrop-filter: blur(4px);
+        min-width: 140px;
+      }
+
+      .hud-label {
+        font-family: "Press Start 2P", cursive;
+        font-size: 7px;
+        color: #aaa;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .hud-bar {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .hud-bar-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition:
+          width 0.5s ease,
+          background 0.5s ease;
+        position: relative;
+      }
+
+      .hud-bar-fill::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px 5px 0 0;
+      }
+
+      .hud-bar-fill.clean {
+        background: linear-gradient(90deg, #4caf50, #8bc34a);
+      }
+      .hud-bar-fill.mood {
+        background: linear-gradient(90deg, #ff9800, #ffc107);
+      }
+      .hud-bar-fill.mood.happy {
+        background: linear-gradient(90deg, #e91e63, #ff69b4);
+      }
+      .hud-bar-fill.mood.scared {
+        background: linear-gradient(90deg, #9c27b0, #ce93d8);
+      }
+
+      .hud-percent {
+        font-family: "Press Start 2P", cursive;
+        font-size: 7px;
+        color: #fff;
+        text-align: right;
+        margin-top: 3px;
+      }
+
+      /* ===== ACT BANNER ===== */
+      .act-banner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 150;
+        text-align: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.8s ease;
+      }
+      .act-banner.visible {
+        opacity: 1;
+      }
+
+      .act-banner .act-num {
+        font-family: "Press Start 2P", cursive;
+        font-size: 10px;
+        color: #ffd700;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+      }
+      .act-banner .act-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 20px;
+        color: #fff;
+        text-shadow:
+          0 0 30px rgba(136, 204, 255, 0.8),
+          0 2px 10px rgba(0, 0, 0, 0.8);
+      }
+      .act-banner .act-subtitle {
+        font-family: "VT323", monospace;
+        font-size: 20px;
+        color: #ccc;
+        margin-top: 10px;
+      }
+
+      /* ===== TASK PANEL ===== */
+      .task-panel {
+        position: absolute;
+        top: 56px;
+        right: 12px;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(90, 90, 138, 0.6);
+        border-radius: 10px;
+        padding: 10px 14px;
+        z-index: 90;
+        backdrop-filter: blur(4px);
+        max-width: 180px;
+        display: none;
+      }
+      .task-panel.visible {
+        display: block;
+      }
+
+      .task-panel-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 7px;
+        color: #ffd700;
+        margin-bottom: 8px;
+      }
+
+      .task-item {
+        font-family: "VT323", monospace;
+        font-size: 15px;
+        color: #ccc;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s;
+      }
+      .task-item.done {
+        color: #4caf50;
+        text-decoration: line-through;
+        opacity: 0.6;
+      }
+      .task-item .task-check {
+        font-size: 12px;
+      }
+
+      /* ===== ROOM INDICATOR ===== */
+      .room-indicator {
+        position: absolute;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 90;
+        display: flex;
+        gap: 6px;
+        pointer-events: none;
+      }
+
+      .room-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        transition: all 0.3s;
+      }
+      .room-dot.active {
+        background: #ffd700;
+        border-color: #ffd700;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        transform: scale(1.3);
+      }
+
+      .room-name {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "Press Start 2P", cursive;
+        font-size: 7px;
+        color: rgba(255, 255, 255, 0.7);
+        white-space: nowrap;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+      }
+
+      /* ===== CANVAS ===== */
+      #gameCanvas {
+        display: block;
+        position: relative;
+        z-index: 1;
+        touch-action: none;
+      }
+
+      /* ===== DIALOG ===== */
+      .dialog-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 260;
+        padding: 10px;
+      }
+      .dialog-overlay.active {
+        display: flex;
+      }
+
+      .dialog-box {
+        background: linear-gradient(145deg, #2a2a4a, #1e1e38);
+        border: 3px solid #5a5a8a;
+        border-radius: 12px;
+        padding: 22px 26px;
+        max-width: 400px;
+        width: 100%;
+        color: #fff;
+        font-family: "VT323", monospace;
+        box-shadow:
+          0 12px 40px rgba(0, 0, 0, 0.6),
+          0 0 20px rgba(90, 90, 138, 0.2);
+        animation: dialogPop 0.25s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      @keyframes dialogPop {
+        from {
+          transform: scale(0.85) translateY(10px);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .dialog-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 11px;
+        color: #ffd700;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .dialog-title .icon {
+        font-size: 20px;
+      }
+
+      .dialog-content {
+        font-size: 19px;
+        line-height: 1.7;
+        color: #ddd;
+        margin-bottom: 20px;
+        white-space: pre-line;
+      }
+
+      .dialog-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .dialog-btn {
+        font-family: "Press Start 2P", cursive;
+        font-size: 10px;
+        padding: 11px 22px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        min-width: 90px;
+      }
+      .dialog-btn.primary {
+        background: linear-gradient(135deg, #4a7c59, #3a6c49);
+        color: white;
+        box-shadow: 0 3px 10px rgba(74, 124, 89, 0.4);
+      }
+      .dialog-btn.primary:hover {
+        background: linear-gradient(135deg, #5a9c69, #4a8c59);
+        transform: translateY(-2px);
+      }
+      .dialog-btn.primary:active {
+        transform: translateY(0);
+      }
+      .dialog-btn.secondary {
+        background: linear-gradient(135deg, #4a4a6a, #3a3a5a);
+        color: #ccc;
+      }
+      .dialog-btn.secondary:hover {
+        background: linear-gradient(135deg, #5a5a7a, #4a4a6a);
+      }
+
+      /* ===== INTRO OVERLAY ===== */
+      .intro-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #0f0c29, #1a1040, #24243e);
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex-direction: column;
+        z-index: 300;
+        opacity: 1;
+        transition: opacity 0.8s ease;
+        padding: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(136, 204, 255, 0.3) transparent;
+      }
+      .intro-overlay::-webkit-scrollbar {
+        width: 5px;
+      }
+      .intro-overlay::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .intro-overlay::-webkit-scrollbar-thumb {
+        background: rgba(136, 204, 255, 0.3);
+        border-radius: 4px;
+      }
+      .intro-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .intro-content {
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        color: #fff;
+        margin: auto;
+        padding: 16px 20px;
+      }
+
+      .intro-ep-label {
+        font-family: "Press Start 2P", cursive;
+        font-size: 9px;
+        color: #ffd700;
+        letter-spacing: 4px;
+        margin-bottom: 6px;
+        opacity: 0;
+        animation: fadeIn 0.8s ease-out 0.3s forwards;
+      }
+
+      .intro-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 18px;
+        color: #88ccff;
+        margin-bottom: 12px;
+        text-shadow: 0 0 20px rgba(136, 204, 255, 0.8);
+        animation: glow 2s ease-in-out infinite;
+        opacity: 0;
+        animation:
+          fadeIn 0.8s ease-out 0.8s forwards,
+          glow 2s ease-in-out 1.5s infinite;
+      }
+
+      @keyframes glow {
+        0%,
+        100% {
+          text-shadow: 0 0 20px rgba(136, 204, 255, 0.8);
+        }
+        50% {
+          text-shadow:
+            0 0 30px rgba(136, 204, 255, 1),
+            0 0 40px rgba(136, 204, 255, 0.6);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .narrative-text {
+        font-family: "VT323", monospace;
+        font-size: 19px;
+        line-height: 1.5;
+        color: #ddd;
+        margin-bottom: 12px;
+        min-height: 60px;
+        padding: 12px 16px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        border: 1px solid rgba(136, 204, 255, 0.2);
+      }
+
+      .typing-cursor {
+        display: inline-block;
+        width: 8px;
+        height: 20px;
+        background: #88ccff;
+        margin-left: 4px;
+        animation: blink 0.8s infinite;
+      }
+      @keyframes blink {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .recap-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 152, 0, 0.1);
+        border: 1px solid rgba(255, 152, 0, 0.3);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        opacity: 0;
+        animation: fadeIn 0.8s ease-out 3.5s forwards;
+      }
+      .recap-box .recap-cat {
+        font-size: 30px;
+        flex-shrink: 0;
+      }
+      .recap-box .recap-text {
+        font-family: "VT323", monospace;
+        font-size: 15px;
+        color: #ffd700;
+        text-align: left;
+        line-height: 1.3;
+      }
+
+      .tutorials {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 14px;
+        opacity: 0;
+        animation: fadeIn 0.8s ease-out 4.5s forwards;
+      }
+      .tutorial-item {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 8px 6px;
+        border-radius: 8px;
+        border: 1px solid rgba(136, 204, 255, 0.2);
+        font-family: "VT323", monospace;
+        font-size: 13px;
+        color: #ccc;
+        transition: border-color 0.3s;
+      }
+      .tutorial-item:hover {
+        border-color: rgba(136, 204, 255, 0.5);
+      }
+      .tutorial-icon {
+        font-size: 18px;
+        margin-bottom: 2px;
+      }
+
+      .start-button {
+        font-family: "Press Start 2P", cursive;
+        font-size: 12px;
+        padding: 12px 32px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+        transition: all 0.3s ease;
+        opacity: 0;
+        animation:
+          fadeIn 0.8s ease-out 5s forwards,
+          pulse 2s ease-in-out 5.5s infinite;
+      }
+      .start-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.7);
+      }
+      .start-button:active {
+        transform: translateY(-1px);
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      /* ===== ENDING OVERLAY ===== */
+      .ending-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        z-index: 300;
+        opacity: 0;
+        transition: opacity 1.5s ease;
+      }
+      .ending-overlay.active {
+        display: flex;
+      }
+      .ending-overlay.visible {
+        opacity: 1;
+      }
+
+      .ending-scene {
+        text-align: center;
+        max-width: 600px;
+        padding: 30px;
+      }
+
+      .ending-emoji {
+        font-size: 50px;
+        margin-bottom: 15px;
+        animation: bounceIn 1s ease-out;
+      }
+      @keyframes bounceIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        70% {
+          transform: scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .ending-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 18px;
+        color: #88ccff;
+        margin-bottom: 15px;
+        text-shadow: 0 0 20px rgba(136, 204, 255, 0.5);
+        animation: fadeIn 1s ease-out 0.3s backwards;
+      }
+
+      .ending-text {
+        font-family: "VT323", monospace;
+        font-size: 20px;
+        line-height: 1.6;
+        color: #ccc;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        border: 1px solid rgba(136, 204, 255, 0.2);
+        animation: fadeIn 1s ease-out 0.6s backwards;
+      }
+
+      .ending-stats {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 20px;
+        animation: fadeIn 1s ease-out 1s backwards;
+      }
+      .stat-box {
+        background: rgba(0, 0, 0, 0.4);
+        border: 2px solid rgba(255, 215, 0, 0.3);
+        border-radius: 10px;
+        padding: 12px 20px;
+        text-align: center;
+      }
+      .stat-num {
+        font-family: "Press Start 2P", cursive;
+        font-size: 16px;
+        color: #ffd700;
+      }
+      .stat-label {
+        font-family: "VT323", monospace;
+        font-size: 14px;
+        color: #aaa;
+        margin-top: 4px;
+      }
+
+      .ending-btn {
+        margin-top: 25px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-family: "Press Start 2P", cursive;
+        font-size: 10px;
+        cursor: pointer;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        animation:
+          fadeIn 1s ease-out 1.5s backwards,
+          pulse 2s ease-in-out 2s infinite;
+        transition: all 0.3s;
+      }
+      .ending-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      }
+
+      /* ===== INTERACT PROMPT ===== */
+      .interact-prompt {
+        position: absolute;
+        display: none;
+        pointer-events: none;
+        z-index: 50;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .interact-prompt.visible {
+        display: flex;
+        animation: promptBounce 0.5s ease-in-out infinite;
+      }
+
+      .prompt-icon {
+        background: linear-gradient(135deg, #ffd700, #ffa000);
+        color: #000;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        box-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+      }
+      .prompt-text {
+        background: rgba(0, 0, 0, 0.85);
+        color: #ffd700;
+        font-family: "Press Start 2P", cursive;
+        font-size: 8px;
+        padding: 5px 10px;
+        border-radius: 6px;
+        white-space: nowrap;
+        border: 2px solid #ffd700;
+      }
+      @keyframes promptBounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      /* ===== MOBILE CONTROLS ===== */
+      .mobile-controls {
+        display: none;
+        gap: 8px;
+        padding: 10px;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        bottom: 15px;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        pointer-events: none;
+      }
+
+      .mobile-btn {
+        width: 56px;
+        height: 56px;
+        background: rgba(61, 61, 92, 0.85);
+        border: 3px solid rgba(90, 90, 138, 0.9);
+        border-radius: 14px;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        transition: all 0.1s;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        pointer-events: auto;
+      }
+      .mobile-btn:active {
+        background: #5a5a8a;
+        transform: scale(0.92);
+      }
+      .mobile-btn.action {
+        background: rgba(74, 124, 89, 0.85);
+        font-size: 18px;
+      }
+      .mobile-btn.action:active {
+        background: #5a9c69;
+      }
+      .mobile-btn.jump {
+        background: rgba(56, 96, 176, 0.85);
+        border-color: rgba(90, 130, 200, 0.9);
+      }
+      .mobile-btn.jump:active {
+        background: #5a82c8;
+      }
+      .mobile-btn.special {
+        background: rgba(183, 100, 28, 0.85);
+        border-color: rgba(220, 140, 60, 0.9);
+      }
+      .mobile-btn.special:active {
+        background: #c68828;
+      }
+      .mobile-btn::before {
+        content: attr(data-label);
+        font-size: 22px;
+      }
+
+      .controls-hint {
+        color: #666;
+        font-size: 14px;
+        margin-top: 15px;
+        text-align: center;
+        font-family: "VT323", monospace;
+      }
+      .controls-hint span {
+        color: #ffd700;
+        background: #333;
+        padding: 2px 8px;
+        border-radius: 3px;
+        margin: 0 3px;
+      }
+
+      /* ===== TRANSITION OVERLAY ===== */
+      .transition-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        z-index: 250;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.6s ease;
+      }
+      .transition-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 800px) {
+        .mobile-controls {
+          display: flex;
+        }
+        .controls-hint {
+          display: none;
+        }
+        body {
+          padding: 0;
+          justify-content: flex-start;
+        }
+        .game-wrapper {
+          width: 100vw;
+          height: 100vh;
+          height: 100dvh;
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
+          overflow: hidden;
+        }
+        #gameCanvas {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .icon-btn {
+          width: 44px;
+          height: 44px;
+          font-size: 18px;
+        }
+        .hud {
+          top: 54px;
+        }
+        .hud-card {
+          min-width: 100px;
+          padding: 6px 10px;
+        }
+        .hud-label {
+          font-size: 6px;
+        }
+        .hud-bar {
+          height: 8px;
+        }
+        .hud-percent {
+          font-size: 6px;
+        }
+        .task-panel {
+          top: 54px;
+          max-width: 150px;
+          padding: 8px 10px;
+        }
+        .task-item {
+          font-size: 13px;
+        }
+        .dialog-box {
+          padding: 18px;
+          margin: 10px;
+          max-height: 70vh;
+        }
+        .dialog-title {
+          font-size: 10px;
+        }
+        .dialog-content {
+          font-size: 17px;
+        }
+        .dialog-btn {
+          font-size: 9px;
+          padding: 10px 18px;
+        }
+        .intro-title {
+          font-size: 14px;
+        }
+        .narrative-text {
+          font-size: 16px;
+          min-height: 50px;
+          padding: 10px;
+        }
+        .tutorials {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 6px;
+        }
+        .tutorial-item {
+          padding: 6px;
+          font-size: 12px;
+        }
+        .tutorial-icon {
+          font-size: 18px;
+        }
+        .start-button {
+          font-size: 11px;
+          padding: 12px 28px;
+        }
+        .room-indicator {
+          bottom: 95px;
+        }
+        .act-banner .act-title {
+          font-size: 16px;
+        }
+      }
+
+      @media (max-width: 500px) {
+        .mobile-btn {
+          width: 50px;
+          height: 50px;
+        }
+        .mobile-controls {
+          gap: 6px;
+          padding: 0 8px;
+        }
+        .hud {
+          flex-direction: column;
+          gap: 6px;
+        }
+        .hud-card {
+          min-width: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-wrapper">
+      <audio id="bgMusic" loop preload="auto">
+        <source
+          src="https://cdn.pixabay.com/audio/2022/11/16/audio_0959a8e2d2.mp3"
+          type="audio/mpeg"
+        />
+      </audio>
+
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="top-left">
+          <button
+            class="icon-btn"
+            id="backToMenu"
+            title="Menu"
+            onclick="
+              if (confirm('Kembali ke menu utama?'))
+                window.location.href = 'menu.html';
+            "
+          >
+            🏠
+          </button>
+          <button class="icon-btn" id="musicToggle" title="Toggle Music">
+            🎵
+          </button>
+        </div>
+        <div class="top-right">
+          <button class="icon-btn" id="taskToggle" title="Tasks">📋</button>
+        </div>
+      </div>
+
+      <!-- HUD -->
+      <div class="hud" id="hud" style="display: none">
+        <div class="hud-card">
+          <div class="hud-label">🧹 KEBERSIHAN</div>
+          <div class="hud-bar">
+            <div
+              class="hud-bar-fill clean"
+              id="cleanBar"
+              style="width: 0%"
+            ></div>
+          </div>
+          <div class="hud-percent" id="cleanPercent">0%</div>
+        </div>
+        <div class="hud-card">
+          <div class="hud-label">🐱 MOOD KUCING</div>
+          <div class="hud-bar">
+            <div
+              class="hud-bar-fill mood"
+              id="moodBar"
+              style="width: 60%"
+            ></div>
+          </div>
+          <div class="hud-percent" id="moodPercent">Gugup</div>
+        </div>
+      </div>
+
+      <!-- Task Panel -->
+      <div class="task-panel" id="taskPanel">
+        <div class="task-panel-title">📋 TUGAS</div>
+        <div id="taskList"></div>
+      </div>
+
+      <!-- Canvas -->
+      <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+      <!-- Intro Overlay -->
+      <div class="intro-overlay" id="introOverlay">
+        <div class="intro-content">
+          <div class="intro-ep-label">— EPISODE 2 —</div>
+          <div class="intro-title">🏠 Home Sweet Home</div>
+          <div class="narrative-text" id="narrativeText">
+            <span id="typedText"></span
+            ><span class="typing-cursor" id="cursor"></span>
+          </div>
+          <div class="recap-box">
+            <div class="recap-cat">🐱</div>
+            <div class="recap-text">
+              Sebelumnya, kamu menyelamatkan kucing dari pohon.<br />
+              Sekarang saatnya memberinya tempat tinggal mewah yang nyaman...
+            </div>
+          </div>
+          <div class="tutorials" id="tutorials">
+            <div class="tutorial-item">
+              <div class="tutorial-icon">⬅️➡️</div>
+              <div>Gerak: Arrow Keys</div>
+            </div>
+            <div class="tutorial-item">
+              <div class="tutorial-icon">❗</div>
+              <div>Interaksi: Tekan E</div>
+            </div>
+            <div class="tutorial-item">
+              <div class="tutorial-icon">⬆️</div>
+              <div>Lompat: Space</div>
+            </div>
+            <div class="tutorial-item">
+              <div class="tutorial-icon">🧹</div>
+              <div>Sapu: F / Injak: Space</div>
+            </div>
+          </div>
+          <button class="start-button" id="startButton">Masuk Apartemen</button>
+        </div>
+      </div>
+
+      <!-- Act Banner -->
+      <div class="act-banner" id="actBanner">
+        <div class="act-num" id="actNum"></div>
+        <div class="act-title" id="actTitle"></div>
+        <div class="act-subtitle" id="actSubtitle"></div>
+      </div>
+
+      <!-- Room Indicator -->
+      <div class="room-indicator" id="roomIndicator" style="display: none">
+        <div class="room-dot" data-room="0"></div>
+        <div class="room-dot" data-room="1"></div>
+        <div class="room-dot" data-room="2"></div>
+        <div class="room-dot" data-room="3"></div>
+        <div class="room-name" id="roomName">Lorong</div>
+      </div>
+
+      <!-- Interact Prompt -->
+      <div class="interact-prompt" id="interactPrompt">
+        <div class="prompt-icon">!</div>
+        <div class="prompt-text">Tekan E</div>
+      </div>
+
+      <!-- Dialog Overlay -->
+      <div class="dialog-overlay" id="dialogOverlay">
+        <div class="dialog-box">
+          <div class="dialog-title">
+            <span class="icon" id="dialogIcon">📕</span>
+            <span id="dialogTitle">Judul</span>
+          </div>
+          <div class="dialog-content" id="dialogContent">Konten</div>
+          <div class="dialog-buttons" id="dialogButtons">
+            <button class="dialog-btn secondary" id="btnSecondary">
+              Tutup
+            </button>
+            <button class="dialog-btn primary" id="btnPrimary">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transition Overlay -->
+      <div class="transition-overlay" id="transitionOverlay"></div>
+
+      <!-- Ending Overlay -->
+      <div class="ending-overlay" id="endingOverlay">
+        <div class="ending-scene">
+          <div class="ending-emoji">🏠🐱✨</div>
+          <div class="ending-title">Home Sweet Home</div>
+          <div class="ending-text" id="endingText">
+            Apartemen yang tadinya berantakan,<br />
+            kini menjadi rumah yang hangat...<br /><br />
+            Kucing kecilmu meringkuk di kasurnya,<br />
+            mendengkur pelan... dia akhirnya punya rumah. 💛
+          </div>
+          <div class="ending-stats">
+            <div class="stat-box">
+              <div class="stat-num" id="statClean">100%</div>
+              <div class="stat-label">Kebersihan</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" id="statTasks">0/0</div>
+              <div class="stat-label">Tugas</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" id="statTime">0:00</div>
+              <div class="stat-label">Waktu</div>
+            </div>
+          </div>
+          <button class="ending-btn" id="endingBtn">
+            <span style="font-size: 14px">💬</span> Lanjutkan ke Episode 3...
+          </button>
+          <button
+            class="ending-btn"
+            onclick="window.location.href = 'menu.html'"
+            style="
+              background: linear-gradient(135deg, #4a4a6a, #5a5a8a);
+              box-shadow: 0 6px 20px rgba(90, 90, 138, 0.3);
+              margin-top: 10px;
+              animation-delay: 2s;
+            "
+          >
+            <span style="font-size: 14px">🏠</span> Kembali ke Menu
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Controls -->
+      <div class="mobile-controls">
+        <button
+          class="mobile-btn"
+          id="btnLeft"
+          data-label="◀"
+          aria-label="Kiri"
+        ></button>
+        <button
+          class="mobile-btn jump"
+          id="btnJump"
+          data-label="⬆"
+          aria-label="Lompat"
+        ></button>
+        <button
+          class="mobile-btn action"
+          id="btnAction"
+          data-label="E"
+          aria-label="Interaksi"
+        ></button>
+        <button
+          class="mobile-btn special"
+          id="btnSpecial"
+          data-label="🧹"
+          aria-label="Bersihkan"
+        ></button>
+        <button
+          class="mobile-btn"
+          id="btnRight"
+          data-label="▶"
+          aria-label="Kanan"
+        ></button>
+      </div>
+    </div>
+
+    <p class="controls-hint">
+      <span>←</span> <span>→</span> Jalan &nbsp;&nbsp; <span>E</span> Interaksi
+      &nbsp;&nbsp; <span>Space</span> Lompat &nbsp;&nbsp;
+      <span>F</span> Bersihkan
+    </p>
+
+    <script>
+      // ==================== AUDIO ====================
+      const bgMusic = document.getElementById("bgMusic");
+      const musicToggle = document.getElementById("musicToggle");
+      let musicStarted = false;
+      bgMusic.volume = 0.25;
+
+      function startMusic() {
+        if (!musicStarted) {
+          bgMusic.play().catch(() => {});
+          musicStarted = true;
+        }
+      }
+      musicToggle.addEventListener("click", () => {
+        if (bgMusic.paused) {
+          bgMusic.play();
+          musicToggle.textContent = "🎵";
+          musicToggle.classList.remove("muted");
+        } else {
+          bgMusic.pause();
+          musicToggle.textContent = "🔇";
+          musicToggle.classList.add("muted");
+        }
+        musicStarted = true;
+      });
+      document.addEventListener("keydown", startMusic, { once: true });
+      document.addEventListener("click", startMusic, { once: true });
+      document.addEventListener("touchstart", startMusic, { once: true });
+
+      // ==================== SOUND EFFECTS ====================
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioCtx();
+      let sfxEnabled = true;
+
+      function playSfx(type) {
+        if (!sfxEnabled) return;
+        audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const t = audioCtx.currentTime;
+
+        switch (type) {
+          case "step":
+            osc.frequency.value = 100 + Math.random() * 30;
+            osc.type = "sine";
+            gain.gain.setValueAtTime(0.08, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+            osc.start(t);
+            osc.stop(t + 0.05);
+            break;
+          case "clean":
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(600, t);
+            osc.frequency.linearRampToValueAtTime(1200, t + 0.15);
+            gain.gain.setValueAtTime(0.15, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+            osc.start(t);
+            osc.stop(t + 0.2);
+            break;
+          case "ding":
+            osc.frequency.value = 880;
+            osc.type = "sine";
+            gain.gain.setValueAtTime(0.25, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+            osc.start(t);
+            osc.stop(t + 0.3);
+            break;
+          case "buzz":
+            osc.frequency.value = 150;
+            osc.type = "sawtooth";
+            gain.gain.setValueAtTime(0.15, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+            osc.start(t);
+            osc.stop(t + 0.2);
+            break;
+          case "meow":
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(400, t);
+            osc.frequency.linearRampToValueAtTime(600, t + 0.1);
+            osc.frequency.linearRampToValueAtTime(300, t + 0.3);
+            gain.gain.setValueAtTime(0.15, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+            osc.start(t);
+            osc.stop(t + 0.4);
+            break;
+          case "purr":
+            const lfo = audioCtx.createOscillator();
+            const lfoGain = audioCtx.createGain();
+            lfo.frequency.value = 25;
+            lfoGain.gain.value = 10;
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            osc.frequency.value = 100;
+            osc.type = "sine";
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+            osc.start(t);
+            lfo.start(t);
+            osc.stop(t + 1.5);
+            lfo.stop(t + 1.5);
+            break;
+          case "victory": {
+            const notes = [523.25, 587.33, 659.25, 783.99, 1046.5];
+            notes.forEach((freq, i) => {
+              const o = audioCtx.createOscillator();
+              const g = audioCtx.createGain();
+              o.connect(g);
+              g.connect(audioCtx.destination);
+              o.frequency.value = freq;
+              o.type = "sine";
+              const st = t + i * 0.12;
+              g.gain.setValueAtTime(0.2, st);
+              g.gain.exponentialRampToValueAtTime(0.001, st + 0.25);
+              o.start(st);
+              o.stop(st + 0.25);
+            });
+            return;
+          }
+          case "splash":
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(200, t);
+            osc.frequency.linearRampToValueAtTime(80, t + 0.3);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+            osc.start(t);
+            osc.stop(t + 0.3);
+            break;
+          case "rat":
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(2000, t);
+            osc.frequency.linearRampToValueAtTime(3000, t + 0.05);
+            osc.frequency.linearRampToValueAtTime(1500, t + 0.1);
+            gain.gain.setValueAtTime(0.1, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+            osc.start(t);
+            osc.stop(t + 0.15);
+            break;
+          case "fix":
+            osc.type = "square";
+            osc.frequency.setValueAtTime(300, t);
+            osc.frequency.linearRampToValueAtTime(500, t + 0.1);
+            gain.gain.setValueAtTime(0.1, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+            osc.start(t);
+            osc.stop(t + 0.15);
+            break;
+          case "squish":
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(120, t);
+            osc.frequency.linearRampToValueAtTime(40, t + 0.12);
+            gain.gain.setValueAtTime(0.2, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+            osc.start(t);
+            osc.stop(t + 0.15);
+            break;
+        }
+      }
+
+      // ==================== INTRO ====================
+      const introOverlay = document.getElementById("introOverlay");
+      const typedText = document.getElementById("typedText");
+      const cursor = document.getElementById("cursor");
+      const startButton = document.getElementById("startButton");
+
+      const storyText =
+        "Lantai 42, Skyline Residences...\nKamu membuka pintu sambil menggendong kucing kecilmu.\nApartemen mewah ini... berantakan sekali!\nSaatnya mengubahnya jadi rumah yang nyaman.";
+      let charIndex = 0;
+
+      function typeWriter() {
+        if (charIndex < storyText.length) {
+          typedText.textContent += storyText.charAt(charIndex);
+          charIndex++;
+        } else {
+          clearInterval(typingInterval);
+          cursor.style.display = "none";
+        }
+      }
+      let typingInterval;
+      setTimeout(() => {
+        typingInterval = setInterval(typeWriter, 45);
+      }, 600);
+
+      startButton.addEventListener("click", () => {
+        game.introPassed = true;
+        introOverlay.classList.add("hidden");
+        setTimeout(() => {
+          introOverlay.style.display = "none";
+        }, 800);
+        startMusic();
+        document.getElementById("hud").style.display = "flex";
+        document.getElementById("roomIndicator").style.display = "flex";
+        showActBanner(1);
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (!game.introPassed && e.key === "Enter") startButton.click();
+      });
+
+      // ==================== CONFIG ====================
+      const CFG = {
+        W: 800,
+        H: 400,
+        GROUND: 340,
+        CEILING: 60,
+        WORLD_W: 2800,
+        SPEED: 3,
+        ROOMS: [
+          { name: "Lorong", start: 0, end: 400, color: "#3E2723" },
+          { name: "Ruang Tamu", start: 400, end: 1200, color: "#4E342E" },
+          { name: "Dapur", start: 1200, end: 1900, color: "#3E2723" },
+          { name: "Kamar Tidur", start: 1900, end: 2800, color: "#4E342E" },
+        ],
+      };
+
+      // ==================== CANVAS ====================
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      let dpr = 1;
+
+      if (!ctx.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function (
+          x,
+          y,
+          w,
+          h,
+          r,
+        ) {
+          if (typeof r === "number") r = [r, r, r, r];
+          const [tl, tr, br, bl] = r;
+          this.moveTo(x + tl, y);
+          this.lineTo(x + w - tr, y);
+          this.quadraticCurveTo(x + w, y, x + w, y + tr);
+          this.lineTo(x + w, y + h - br);
+          this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+          this.lineTo(x + bl, y + h);
+          this.quadraticCurveTo(x, y + h, x, y + h - bl);
+          this.lineTo(x, y + tl);
+          this.quadraticCurveTo(x, y, x + tl, y);
+          this.closePath();
+          return this;
+        };
+      }
+
+      function setupCanvas() {
+        const rawDpr = window.devicePixelRatio || 1;
+        // Cap DPR to avoid excessive canvas size on high-DPI mobile
+        dpr = Math.min(rawDpr, window.innerWidth <= 800 ? 1.5 : 2);
+        canvas.width = CFG.W * dpr;
+        canvas.height = CFG.H * dpr;
+        if (window.innerWidth <= 800) {
+          canvas.style.width = "100%";
+          canvas.style.height = "100%";
+        } else {
+          canvas.style.width = CFG.W + "px";
+          canvas.style.height = CFG.H + "px";
+        }
+        ctx.imageSmoothingEnabled = false;
+      }
+      setupCanvas();
+      window.addEventListener("resize", setupCanvas);
+
+      // ==================== CAMERA ====================
+      const camera = { x: 0, targetX: 0, y: 0, targetY: 0 };
+
+      function updateCamera() {
+        const halfW = CFG.W / 2;
+        camera.targetX = Math.max(
+          0,
+          Math.min(CFG.WORLD_W - CFG.W, player.x - halfW + player.w / 2),
+        );
+        camera.x += (camera.targetX - camera.x) * 0.12;
+
+        // Slight vertical camera follow when jumping
+        if (player.jumping) {
+          camera.targetY = Math.max(0, (CFG.GROUND - player.y) * 0.15);
+        } else {
+          camera.targetY = 0;
+        }
+        camera.y += (camera.targetY - camera.y) * 0.08;
+      }
+
+      // ==================== GAME STATE ====================
+      const game = {
+        introPassed: false,
+        act: 0, // 0=pre, 1, 2, 3
+        cleanPercent: 0,
+        catMood: 60, // 0-100
+        currentDialog: null,
+        gameComplete: false,
+        startTime: 0,
+        frame: 0,
+        actTransition: false,
+        rats: [],
+        ratsClearedCount: 0,
+        ratsRequired: 5,
+        roaches: [],
+        roachesClearedCount: 0,
+        roachesRequired: 6,
+        pipeFixed: false,
+        pipeBurst: false,
+        waterLevel: 0,
+        sparkles: [],
+        dustClouds: [],
+        confetti: [],
+        confettiActive: false,
+        collectibles: [],
+        collectiblesGrabbed: 0,
+        hearts: [],
+        ambientParticles: [],
+      };
+
+      // ==================== TASKS ====================
+      const tasks = [
+        { id: "trash1", label: "Buang sampah lorong", done: false, act: 1 },
+        { id: "trash2", label: "Buang sampah ruang tamu", done: false, act: 1 },
+        { id: "clothes1", label: "Rapikan baju di sofa", done: false, act: 1 },
+        { id: "dishes", label: "Cuci piring kotor", done: false, act: 1 },
+        { id: "trash3", label: "Buang sampah dapur", done: false, act: 1 },
+        { id: "bed", label: "Rapikan tempat tidur", done: false, act: 1 },
+        { id: "clothes2", label: "Rapikan baju di kamar", done: false, act: 1 },
+        { id: "rats", label: "Usir semua tikus!", done: false, act: 2 },
+        {
+          id: "roaches",
+          label: "Basmi kecoa dengan sandal! (0/6)",
+          done: false,
+          act: 2,
+        },
+        { id: "pipe", label: "Perbaiki pipa bocor", done: false, act: 2 },
+        { id: "calmcat", label: "Tenangkan kucing", done: false, act: 2 },
+        { id: "shelf", label: "Perbaiki rak buku", done: false, act: 3 },
+        { id: "plant", label: "Taruh tanaman hias", done: false, act: 3 },
+        {
+          id: "catbed",
+          label: "Pasang tempat tidur kucing",
+          done: false,
+          act: 3,
+        },
+      ];
+
+      function completeTask(id) {
+        const task = tasks.find((t) => t.id === id);
+        if (task && !task.done) {
+          task.done = true;
+          playSfx("ding");
+          updateTaskUI();
+          updateCleanPercent();
+
+          // Show encouraging floating text
+          const encouragements = [
+            "Bagus sekali! ✨",
+            "Kerja bagus! 🌟",
+            "Hebat! 💪",
+            "Keren! 🎉",
+            "Mantap! ⭐",
+            "Luar biasa! 💖",
+            "Terus semangat! 🔥",
+            "Amazing! 🌈",
+            "Sip! 👏",
+          ];
+          const msg =
+            encouragements[Math.floor(Math.random() * encouragements.length)];
+          showFloatingText(msg, player.x + player.w / 2, player.y - 30);
+
+          // Spawn extra hearts for delight
+          spawnHeart(player.x + player.w / 2, player.y - 20);
+
+          // Defer act check so the interaction dialog can be handled first
+          setTimeout(() => checkActProgress(), 100);
+        }
+      }
+
+      // Floating encouraging text
+      let floatingTexts = [];
+      function showFloatingText(text, x, y) {
+        floatingTexts.push({ text, x, y, life: 90, maxLife: 90 });
+      }
+
+      function updateTaskUI() {
+        const list = document.getElementById("taskList");
+        const currentTasks = tasks.filter((t) => t.act <= game.act);
+        list.innerHTML = currentTasks
+          .map(
+            (t) =>
+              `<div class="task-item ${t.done ? "done" : ""}">
+          <span class="task-check">${t.done ? "✅" : "⬜"}</span>
+          ${t.label}
+        </div>`,
+          )
+          .join("");
+      }
+
+      function updateCleanPercent() {
+        const total = tasks.length;
+        const done = tasks.filter((t) => t.done).length;
+        game.cleanPercent = Math.round((done / total) * 100);
+        document.getElementById("cleanBar").style.width =
+          game.cleanPercent + "%";
+        document.getElementById("cleanPercent").textContent =
+          game.cleanPercent + "%";
+      }
+
+      function checkActProgress() {
+        if (game.act === 1) {
+          const act1Tasks = tasks.filter((t) => t.act === 1);
+          if (act1Tasks.every((t) => t.done)) {
+            startAct2();
+          }
+        } else if (game.act === 2) {
+          const act2Tasks = tasks.filter((t) => t.act === 2);
+          if (act2Tasks.every((t) => t.done)) {
+            startAct3();
+          }
+        } else if (game.act === 3) {
+          const act3Tasks = tasks.filter((t) => t.act === 3);
+          if (act3Tasks.every((t) => t.done)) {
+            triggerEnding();
+          }
+        }
+      }
+
+      // ==================== TASK PANEL TOGGLE ====================
+      const taskToggle = document.getElementById("taskToggle");
+      const taskPanel = document.getElementById("taskPanel");
+      let taskPanelVisible = false;
+      taskToggle.addEventListener("click", () => {
+        taskPanelVisible = !taskPanelVisible;
+        taskPanel.classList.toggle("visible", taskPanelVisible);
+      });
+
+      // ==================== ACT SYSTEM ====================
+      function showActBanner(act) {
+        const banner = document.getElementById("actBanner");
+        const numEl = document.getElementById("actNum");
+        const titleEl = document.getElementById("actTitle");
+        const subEl = document.getElementById("actSubtitle");
+
+        const actData = {
+          1: {
+            num: "ACT 1",
+            title: "🏚️ Kekacauan",
+            sub: "Bersihkan apartemen yang berantakan",
+          },
+          2: {
+            num: "ACT 2",
+            title: "🐀 Serangan Tikus!",
+            sub: "Hadapi masalah yang tak terduga",
+          },
+          3: {
+            num: "ACT 3",
+            title: "🏠 Rumah Kita",
+            sub: "Sentuhan akhir untuk rumah baru",
+          },
+        };
+        const d = actData[act];
+        numEl.textContent = d.num;
+        titleEl.textContent = d.title;
+        subEl.textContent = d.sub;
+
+        game.act = act;
+        game.startTime = game.startTime || Date.now();
+        updateTaskUI();
+
+        banner.classList.add("visible");
+        setTimeout(() => banner.classList.remove("visible"), 3000);
+      }
+
+      function startAct2() {
+        game.actTransition = true;
+        // Close any open task dialog first
+        if (game.currentDialog) closeDialog();
+        const overlay = document.getElementById("transitionOverlay");
+        overlay.classList.add("active");
+
+        setTimeout(() => {
+          // Spawn rats
+          spawnRats();
+          // Spawn cockroaches
+          spawnRoaches();
+          // Burst pipe
+          game.pipeBurst = true;
+          game.waterLevel = 0;
+          // Cat gets scared
+          game.catMood = 20;
+          updateCatMoodUI();
+
+          showDialog(
+            "🐀",
+            "Masalah!",
+            '"CICIT!"\n\nSekumpulan tikus dan kecoa muncul dari balik furnitur!\nPipa air di dapur juga tiba-tiba bocor!\n\nGunakan sapu (F) untuk tikus\ndan LOMPAT (Space) di atas kecoa untuk menginjaknya!',
+            "Hadapi!",
+            null,
+            () => {
+              closeDialog();
+              overlay.classList.remove("active");
+              game.actTransition = false;
+              showActBanner(2);
+            },
+          );
+        }, 800);
+      }
+
+      function startAct3() {
+        game.actTransition = true;
+        // Close any open task dialog first
+        if (game.currentDialog) closeDialog();
+        const overlay = document.getElementById("transitionOverlay");
+        overlay.classList.add("active");
+
+        setTimeout(() => {
+          game.catMood = 70;
+          updateCatMoodUI();
+
+          showDialog(
+            "✨",
+            "Hampir Selesai!",
+            "Semua masalah sudah ditangani!\nKucingmu mulai keluar dari persembunyian...\n\nSekarang tinggal sentuhan akhir:\nperbaiki rak, taruh tanaman, dan\nsiapkan tempat tidur untuk kucing.",
+            "Lanjut!",
+            null,
+            () => {
+              closeDialog();
+              overlay.classList.remove("active");
+              game.actTransition = false;
+              showActBanner(3);
+            },
+          );
+        }, 800);
+      }
+
+      function triggerEnding() {
+        // Close any open dialog first
+        if (game.currentDialog) closeDialog();
+        game.gameComplete = true;
+        game.catMood = 100;
+        updateCatMoodUI();
+        playSfx("victory");
+        game.confettiActive = true;
+
+        setTimeout(() => {
+          const elapsed = Math.round((Date.now() - game.startTime) / 1000);
+          const mins = Math.floor(elapsed / 60);
+          const secs = elapsed % 60;
+          document.getElementById("statClean").textContent =
+            game.cleanPercent + "%";
+          document.getElementById("statTasks").textContent =
+            tasks.filter((t) => t.done).length + "/" + tasks.length;
+          document.getElementById("statTime").textContent =
+            mins + ":" + (secs < 10 ? "0" : "") + secs;
+
+          const ending = document.getElementById("endingOverlay");
+          ending.classList.add("active");
+          setTimeout(() => ending.classList.add("visible"), 100);
+        }, 2000);
+
+        setTimeout(() => {
+          game.confettiActive = false;
+        }, 8000);
+      }
+
+      // ==================== PLAYER ====================
+      const player = {
+        x: 100,
+        y: CFG.GROUND,
+        w: 32,
+        h: 48,
+        speed: CFG.SPEED,
+        dir: 1,
+        frame: 0,
+        frameTimer: 0,
+        walking: false,
+        vy: 0,
+        jumping: false,
+        jumpPow: -8,
+        gravity: 0.45,
+        sweeping: false,
+        sweepTimer: 0,
+        sweepCooldown: 0,
+      };
+
+      // ==================== CAT COMPANION ====================
+      const cat = {
+        x: 150,
+        y: CFG.GROUND - 2,
+        w: 24,
+        h: 20,
+        dir: 1,
+        frame: 0,
+        frameTimer: 0,
+        state: "following", // following, scared, sitting, happy
+        targetX: 0,
+        idleTimer: 0,
+        hideX: 520, // sofa position for hiding
+      };
+
+      // ==================== INTERACTABLE OBJECTS ====================
+      const objects = [
+        // Hallway
+        {
+          id: "door",
+          type: "decor",
+          x: 30,
+          y: CFG.GROUND - 90,
+          w: 50,
+          h: 90,
+          room: 0,
+          sprite: "door",
+        },
+        {
+          id: "shoes",
+          type: "decor",
+          x: 120,
+          y: CFG.GROUND - 12,
+          w: 40,
+          h: 12,
+          room: 0,
+          sprite: "shoes",
+        },
+        {
+          id: "trash1",
+          type: "trash",
+          x: 250,
+          y: CFG.GROUND - 25,
+          w: 30,
+          h: 25,
+          room: 0,
+          cleaned: false,
+          interact: 40,
+        },
+
+        // Living Room
+        {
+          id: "sofa",
+          type: "decor",
+          x: 480,
+          y: CFG.GROUND - 55,
+          w: 120,
+          h: 55,
+          room: 1,
+          sprite: "sofa",
+        },
+        {
+          id: "tv_stand",
+          type: "decor",
+          x: 700,
+          y: CFG.GROUND - 60,
+          w: 70,
+          h: 60,
+          room: 1,
+          sprite: "tv",
+        },
+        {
+          id: "coffee_table",
+          type: "decor",
+          x: 620,
+          y: CFG.GROUND - 30,
+          w: 60,
+          h: 30,
+          room: 1,
+          sprite: "table",
+        },
+        {
+          id: "trash2",
+          type: "trash",
+          x: 640,
+          y: CFG.GROUND - 20,
+          w: 25,
+          h: 20,
+          room: 1,
+          cleaned: false,
+          interact: 40,
+        },
+        {
+          id: "clothes1",
+          type: "clothes",
+          x: 510,
+          y: CFG.GROUND - 70,
+          w: 35,
+          h: 18,
+          room: 1,
+          cleaned: false,
+          interact: 45,
+        },
+        {
+          id: "window1",
+          type: "decor",
+          x: 550,
+          y: CFG.CEILING + 3,
+          w: 420,
+          h: CFG.GROUND - CFG.CEILING - 6,
+          room: 1,
+          sprite: "window",
+          skylight: true,
+        },
+        {
+          id: "bookshelf_broken",
+          type: "shelf",
+          x: 950,
+          y: CFG.GROUND - 100,
+          w: 50,
+          h: 100,
+          room: 1,
+          fixed: false,
+          interact: 45,
+        },
+
+        // Kitchen
+        {
+          id: "counter",
+          type: "decor",
+          x: 1250,
+          y: CFG.GROUND - 50,
+          w: 200,
+          h: 50,
+          room: 2,
+          sprite: "counter",
+        },
+        {
+          id: "stove",
+          type: "decor",
+          x: 1480,
+          y: CFG.GROUND - 50,
+          w: 60,
+          h: 50,
+          room: 2,
+          sprite: "stove",
+        },
+        {
+          id: "sink",
+          type: "decor",
+          x: 1340,
+          y: CFG.GROUND - 65,
+          w: 50,
+          h: 15,
+          room: 2,
+          sprite: "sink",
+        },
+        {
+          id: "dishes",
+          type: "dishes",
+          x: 1300,
+          y: CFG.GROUND - 68,
+          w: 35,
+          h: 18,
+          room: 2,
+          cleaned: false,
+          interact: 45,
+        },
+        {
+          id: "trash3",
+          type: "trash",
+          x: 1560,
+          y: CFG.GROUND - 25,
+          w: 28,
+          h: 25,
+          room: 2,
+          cleaned: false,
+          interact: 40,
+        },
+        {
+          id: "pipe",
+          type: "pipe",
+          x: 1370,
+          y: CFG.GROUND - 50,
+          w: 20,
+          h: 50,
+          room: 2,
+          fixed: false,
+          interact: 40,
+        },
+        {
+          id: "fridge",
+          type: "decor",
+          x: 1600,
+          y: CFG.GROUND - 100,
+          w: 55,
+          h: 100,
+          room: 2,
+          sprite: "fridge",
+        },
+        {
+          id: "window2",
+          type: "decor",
+          x: 1700,
+          y: CFG.CEILING + 5,
+          w: 120,
+          h: CFG.GROUND - CFG.CEILING - 10,
+          room: 2,
+          sprite: "window",
+        },
+
+        // Bedroom
+        {
+          id: "bed_frame",
+          type: "decor",
+          x: 2000,
+          y: CFG.GROUND - 50,
+          w: 140,
+          h: 50,
+          room: 3,
+          sprite: "bed",
+        },
+        {
+          id: "bed",
+          type: "bed",
+          x: 2010,
+          y: CFG.GROUND - 60,
+          w: 120,
+          h: 15,
+          room: 3,
+          cleaned: false,
+          interact: 50,
+        },
+        {
+          id: "clothes2",
+          type: "clothes",
+          x: 2200,
+          y: CFG.GROUND - 15,
+          w: 40,
+          h: 15,
+          room: 3,
+          cleaned: false,
+          interact: 40,
+        },
+        {
+          id: "desk",
+          type: "decor",
+          x: 2350,
+          y: CFG.GROUND - 55,
+          w: 80,
+          h: 55,
+          room: 3,
+          sprite: "desk",
+        },
+        {
+          id: "plant_spot",
+          type: "plant",
+          x: 2450,
+          y: CFG.GROUND - 40,
+          w: 30,
+          h: 40,
+          room: 3,
+          placed: false,
+          interact: 40,
+        },
+        {
+          id: "catbed_spot",
+          type: "catbed",
+          x: 2550,
+          y: CFG.GROUND - 20,
+          w: 45,
+          h: 20,
+          room: 3,
+          placed: false,
+          interact: 45,
+        },
+        {
+          id: "window3",
+          type: "decor",
+          x: 2600,
+          y: CFG.CEILING + 5,
+          w: 120,
+          h: CFG.GROUND - CFG.CEILING - 10,
+          room: 3,
+          sprite: "window",
+        },
+        {
+          id: "wardrobe",
+          type: "decor",
+          x: 2160,
+          y: CFG.GROUND - 110,
+          w: 70,
+          h: 110,
+          room: 3,
+          sprite: "wardrobe",
+        },
+      ];
+
+      // ==================== RATS ====================
+      function spawnRats() {
+        game.rats = [];
+        const positions = [500, 700, 900, 1300, 1500];
+        for (let i = 0; i < game.ratsRequired; i++) {
+          game.rats.push({
+            x: positions[i] + Math.random() * 60,
+            y: CFG.GROUND - 10,
+            w: 18,
+            h: 12,
+            dir: Math.random() > 0.5 ? 1 : -1,
+            speed: 1.5 + Math.random() * 1.5,
+            frame: 0,
+            frameTimer: 0,
+            alive: true,
+            pauseTimer: 0,
+            fleeing: false,
+          });
+        }
+      }
+
+      // ==================== COCKROACHES ====================
+      function spawnRoaches() {
+        game.roaches = [];
+        const positions = [450, 650, 850, 1250, 1450, 1650];
+        for (let i = 0; i < game.roachesRequired; i++) {
+          game.roaches.push({
+            x: positions[i] + Math.random() * 80,
+            y: CFG.GROUND - 6,
+            w: 12,
+            h: 6,
+            dir: Math.random() > 0.5 ? 1 : -1,
+            speed: 2 + Math.random() * 2,
+            frame: 0,
+            frameTimer: 0,
+            alive: true,
+            squished: false,
+            squishTimer: 0,
+            pauseTimer: Math.floor(Math.random() * 60),
+            scurrying: true,
+          });
+        }
+      }
+
+      function updateRoaches() {
+        for (const roach of game.roaches) {
+          if (!roach.alive) continue;
+          if (roach.squished) {
+            roach.squishTimer--;
+            if (roach.squishTimer <= 0) roach.alive = false;
+            continue;
+          }
+
+          roach.pauseTimer--;
+          if (roach.pauseTimer <= 0) {
+            roach.scurrying = true;
+            roach.x += roach.dir * roach.speed;
+            // Random direction change
+            if (Math.random() < 0.02) {
+              roach.dir *= -1;
+              roach.pauseTimer = 20 + Math.random() * 40;
+              roach.scurrying = false;
+            }
+            // Random pause
+            if (Math.random() < 0.008) {
+              roach.pauseTimer = 30 + Math.random() * 80;
+              roach.scurrying = false;
+            }
+            // Bounce off walls
+            if (roach.x < 50 || roach.x > CFG.WORLD_W - 50) {
+              roach.dir *= -1;
+            }
+            // Flee from player if close
+            const dist = player.x + player.w / 2 - (roach.x + roach.w / 2);
+            if (Math.abs(dist) < 80 && Math.abs(dist) > 20) {
+              roach.dir = dist > 0 ? -1 : 1;
+              roach.speed = 3.5;
+              roach.scurrying = true;
+            } else {
+              roach.speed = 2 + Math.random() * 2;
+            }
+          }
+
+          roach.frameTimer++;
+          if (roach.frameTimer > 3) {
+            roach.frame = (roach.frame + 1) % 4;
+            roach.frameTimer = 0;
+          }
+        }
+      }
+
+      function checkRoachStomp() {
+        // Player must be landing from a jump (going down)
+        if (!player.jumping || player.vy < 0) return;
+        const px = player.x + player.w / 2;
+        const py = player.y; // player origin is near ground level
+        for (const roach of game.roaches) {
+          if (!roach.alive || roach.squished) continue;
+          const rx = roach.x + roach.w / 2;
+          const ry = roach.y;
+          if (Math.abs(px - rx) < 25 && Math.abs(py - ry) < 20) {
+            // SQUISH!
+            roach.squished = true;
+            roach.squishTimer = 60;
+            playSfx("squish");
+            game.roachesClearedCount++;
+            // Update task label
+            const roachTask = tasks.find((t) => t.id === "roaches");
+            if (roachTask) {
+              roachTask.label = `Basmi kecoa dengan sandal! (${game.roachesClearedCount}/${game.roachesRequired})`;
+              updateTaskUI();
+            }
+            spawnSparkles(roach.x + roach.w / 2, roach.y);
+            // Small bounce after stomp
+            player.vy = -5;
+            if (game.roachesClearedCount >= game.roachesRequired) {
+              completeTask("roaches");
+            }
+          }
+        }
+      }
+
+      // ==================== COLLECTIBLES (jump utility) ====================
+      function spawnCollectibles() {
+        game.collectibles = [];
+        // Floating stars/treats in each room at varying heights - only reachable by jumping
+        const positions = [
+          { x: 200, y: CFG.GROUND - 80, type: "star" },
+          { x: 520, y: CFG.GROUND - 90, type: "treat" },
+          { x: 680, y: CFG.GROUND - 85, type: "star" },
+          { x: 820, y: CFG.GROUND - 95, type: "heart" },
+          { x: 1050, y: CFG.GROUND - 80, type: "star" },
+          { x: 1350, y: CFG.GROUND - 90, type: "treat" },
+          { x: 1550, y: CFG.GROUND - 85, type: "star" },
+          { x: 1750, y: CFG.GROUND - 95, type: "heart" },
+          { x: 2050, y: CFG.GROUND - 80, type: "treat" },
+          { x: 2250, y: CFG.GROUND - 90, type: "star" },
+          { x: 2450, y: CFG.GROUND - 85, type: "heart" },
+          { x: 2650, y: CFG.GROUND - 80, type: "star" },
+        ];
+        for (const p of positions) {
+          game.collectibles.push({
+            x: p.x,
+            y: p.y,
+            type: p.type,
+            collected: false,
+            bobOffset: Math.random() * Math.PI * 2,
+            sparkle: 0,
+            size: 8,
+          });
+        }
+      }
+      // Spawn collectibles when game starts
+      spawnCollectibles();
+
+      function updateCollectibles() {
+        if (!game.introPassed) return;
+        const px = player.x + player.w / 2;
+        const py = player.y - player.h / 2;
+        for (const c of game.collectibles) {
+          if (c.collected) continue;
+          c.sparkle = (c.sparkle + 0.05) % (Math.PI * 2);
+          // Check collision - player must jump to reach
+          const cx = c.x;
+          const cy = c.y + Math.sin(game.frame * 0.04 + c.bobOffset) * 5;
+          if (Math.abs(px - cx) < 20 && Math.abs(py - cy) < 20) {
+            c.collected = true;
+            game.collectiblesGrabbed++;
+            playSfx("ding");
+            spawnSparkles(cx, cy);
+            // Bonus effects
+            if (c.type === "heart") {
+              game.catMood = Math.min(100, game.catMood + 5);
+              updateCatMoodUI();
+              spawnHeart(cx, cy);
+            } else if (c.type === "treat") {
+              game.cleanPercent = Math.min(100, game.cleanPercent + 2);
+              updateCleanPercent();
+            } else {
+              // star - both small boosts
+              game.catMood = Math.min(100, game.catMood + 2);
+              game.cleanPercent = Math.min(100, game.cleanPercent + 1);
+              updateCatMoodUI();
+              updateCleanPercent();
+            }
+          }
+        }
+      }
+
+      function spawnHeart(x, y) {
+        for (let i = 0; i < 3; i++) {
+          game.hearts.push({
+            x: x + (Math.random() - 0.5) * 20,
+            y: y,
+            vy: -1 - Math.random() * 1.5,
+            life: 60 + Math.random() * 30,
+            maxLife: 90,
+            size: 4 + Math.random() * 4,
+          });
+        }
+      }
+
+      // ==================== INPUT ====================
+      const keys = {
+        left: false,
+        right: false,
+        interact: false,
+        jump: false,
+        sweep: false,
+      };
+
+      document.addEventListener("keydown", (e) => {
+        if (game.currentDialog || game.gameComplete || !game.introPassed)
+          return;
+        if (e.key === "ArrowLeft" || e.key === "a") keys.left = true;
+        if (e.key === "ArrowRight" || e.key === "d") keys.right = true;
+        if (e.key === "ArrowUp" || e.key === "e" || e.key === "E") {
+          if (!keys.interact) {
+            keys.interact = true;
+            handleInteraction();
+          }
+        }
+        if (e.key === " " || e.key === "w" || e.key === "W") {
+          e.preventDefault();
+          if (!keys.jump) {
+            keys.jump = true;
+            playerJump();
+          }
+        }
+        if (e.key === "f" || e.key === "F") {
+          if (!keys.sweep) {
+            keys.sweep = true;
+            playerSweep();
+          }
+        }
+      });
+
+      document.addEventListener("keyup", (e) => {
+        if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
+        if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
+        if (e.key === "ArrowUp" || e.key === "e" || e.key === "E")
+          keys.interact = false;
+        if (e.key === " " || e.key === "w" || e.key === "W") keys.jump = false;
+        if (e.key === "f" || e.key === "F") keys.sweep = false;
+      });
+
+      // Mobile controls
+      const btnLeft = document.getElementById("btnLeft");
+      const btnRight = document.getElementById("btnRight");
+      const btnAction = document.getElementById("btnAction");
+      const btnJump = document.getElementById("btnJump");
+      const btnSpecial = document.getElementById("btnSpecial");
+
+      // Prevent default on game wrapper to avoid scrolling on mobile
+      document
+        .querySelector(".game-wrapper")
+        .addEventListener("touchmove", (e) => e.preventDefault(), {
+          passive: false,
+        });
+
+      // Helper to register both touch and mouse events for mobile compatibility
+      function addMobileBtn(btn, onDown, onUp) {
+        btn.addEventListener(
+          "touchstart",
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDown();
+          },
+          { passive: false },
+        );
+        if (onUp) {
+          btn.addEventListener(
+            "touchend",
+            (e) => {
+              e.preventDefault();
+              onUp();
+            },
+            { passive: false },
+          );
+          btn.addEventListener(
+            "touchcancel",
+            (e) => {
+              e.preventDefault();
+              onUp();
+            },
+            { passive: false },
+          );
+        }
+        // Mouse fallback for some mobile browsers
+        btn.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          onDown();
+        });
+        if (onUp) {
+          btn.addEventListener("mouseup", (e) => {
+            e.preventDefault();
+            onUp();
+          });
+          btn.addEventListener("mouseleave", (e) => {
+            onUp();
+          });
+        }
+      }
+
+      addMobileBtn(
+        btnLeft,
+        () => {
+          keys.left = true;
+        },
+        () => {
+          keys.left = false;
+        },
+      );
+      addMobileBtn(
+        btnRight,
+        () => {
+          keys.right = true;
+        },
+        () => {
+          keys.right = false;
+        },
+      );
+      addMobileBtn(btnAction, () => {
+        handleInteraction();
+      });
+      addMobileBtn(btnJump, () => {
+        playerJump();
+      });
+      addMobileBtn(btnSpecial, () => {
+        playerSweep();
+      });
+
+      function playerJump() {
+        if (!player.jumping && game.introPassed && !game.actTransition) {
+          player.jumping = true;
+          player.vy = player.jumpPow;
+          playSfx("step");
+        }
+      }
+
+      function playerSweep() {
+        if (player.sweepCooldown > 0 || !game.introPassed || game.actTransition)
+          return;
+        player.sweeping = true;
+        player.sweepTimer = 45;
+        player.sweepCooldown = 55;
+
+        // Dust cloud effect
+        game.dustClouds.push({
+          x: player.x + (player.dir > 0 ? player.w + 5 : -15),
+          y: player.y + 20,
+          life: 30,
+          maxLife: 30,
+          size: 15 + Math.random() * 10,
+        });
+
+        // Check if sweeping near a rat
+        for (const rat of game.rats) {
+          if (!rat.alive) continue;
+          const dist = Math.abs(player.x + player.w / 2 - (rat.x + rat.w / 2));
+          if (dist < 60) {
+            rat.fleeing = true;
+            rat.dir = rat.x < player.x ? -1 : 1;
+            rat.speed = 4;
+            playSfx("rat");
+
+            // After fleeing, remove
+            setTimeout(() => {
+              rat.alive = false;
+              game.ratsClearedCount++;
+              if (game.ratsClearedCount >= game.ratsRequired) {
+                completeTask("rats");
+              }
+            }, 1500);
+          }
+        }
+      }
+
+      // ==================== INTERACTION ====================
+      function getNearbyObject() {
+        const px = player.x + player.w / 2;
+        for (const obj of objects) {
+          if (obj.type === "decor") continue;
+
+          // Check if already done
+          if (
+            (obj.type === "trash" ||
+              obj.type === "clothes" ||
+              obj.type === "dishes" ||
+              obj.type === "bed") &&
+            obj.cleaned
+          )
+            continue;
+          if (obj.type === "shelf" && obj.fixed) continue;
+          if (obj.type === "pipe" && obj.fixed) continue;
+          if (obj.type === "plant" && obj.placed) continue;
+          if (obj.type === "catbed" && obj.placed) continue;
+
+          // Check act requirement
+          const task = tasks.find((t) => t.id === obj.id);
+          if (task && task.act > game.act) continue;
+
+          const ox = obj.x + obj.w / 2;
+          if (Math.abs(px - ox) < (obj.interact || 40)) {
+            return obj;
+          }
+        }
+
+        // Check cat interaction (for calming)
+        if (game.act === 2 && cat.state === "scared") {
+          const catCenter = cat.x + cat.w / 2;
+          if (Math.abs(px - catCenter) < 50) {
+            return {
+              id: "calmcat",
+              type: "cat",
+              x: cat.x,
+              y: cat.y,
+              w: cat.w,
+              h: cat.h,
+              interact: 50,
+            };
+          }
+        }
+
+        return null;
+      }
+
+      function handleInteraction() {
+        if (game.currentDialog || game.gameComplete || game.actTransition)
+          return;
+        const obj = getNearbyObject();
+        if (!obj) return;
+
+        switch (obj.type) {
+          case "trash":
+            playSfx("clean");
+            obj.cleaned = true;
+            spawnSparkles(obj.x + obj.w / 2, obj.y);
+            completeTask(obj.id);
+            showDialog(
+              "🗑️",
+              "Sampah Dibersihkan!",
+              "Kamu membuang sampah ke kantong.\nApartemen mulai terlihat lebih rapi!",
+              "OK",
+            );
+            break;
+
+          case "clothes":
+            playSfx("clean");
+            obj.cleaned = true;
+            spawnSparkles(obj.x + obj.w / 2, obj.y);
+            completeTask(obj.id);
+            showDialog(
+              "👕",
+              "Baju Dirapikan!",
+              "Baju-baju dilipat rapi dan\ndimasukkan ke lemari.",
+              "OK",
+            );
+            break;
+
+          case "dishes":
+            playSfx("splash");
+            obj.cleaned = true;
+            spawnSparkles(obj.x + obj.w / 2, obj.y);
+            completeTask(obj.id);
+            showDialog(
+              "🍽️",
+              "Piring Dicuci!",
+              "Piring-piring kotor sudah bersih!\nDapur mulai lebih segar.",
+              "OK",
+            );
+            break;
+
+          case "bed":
+            playSfx("clean");
+            obj.cleaned = true;
+            spawnSparkles(obj.x + obj.w / 2, obj.y);
+            completeTask(obj.id);
+            showDialog(
+              "🛏️",
+              "Tempat Tidur Rapi!",
+              "Seprai diganti, bantal ditata.\nTidur malam ini pasti nyenyak.",
+              "OK",
+            );
+            break;
+
+          case "pipe":
+            if (game.act < 2 || !game.pipeBurst) {
+              playSfx("buzz");
+              showDialog(
+                "🔧",
+                "Pipa Air",
+                "Pipa ini terlihat agak tua,\ntapi masih baik-baik saja.",
+                "OK",
+              );
+            } else if (!obj.fixed) {
+              playSfx("fix");
+              obj.fixed = true;
+              game.pipeFixed = true;
+              spawnSparkles(obj.x + obj.w / 2, obj.y);
+              completeTask("pipe");
+              showDialog(
+                "🔧",
+                "Pipa Diperbaiki!",
+                "Kamu berhasil memperbaiki pipa!\nAir berhenti mengalir.",
+                "OK",
+              );
+            }
+            break;
+
+          case "shelf":
+            if (game.act < 3) {
+              playSfx("buzz");
+              showDialog(
+                "📚",
+                "Rak Buku",
+                "Rak ini miring dan hampir jatuh.\nPerlu diperbaiki nanti.",
+                "OK",
+              );
+            } else {
+              playSfx("fix");
+              obj.fixed = true;
+              spawnSparkles(obj.x + obj.w / 2, obj.y);
+              completeTask("shelf");
+              showDialog(
+                "📚",
+                "Rak Diperbaiki!",
+                "Rak buku sekarang kokoh!\nBuku-buku ditata rapi di atasnya.",
+                "OK",
+              );
+            }
+            break;
+
+          case "plant":
+            if (game.act < 3) {
+              playSfx("buzz");
+              showDialog(
+                "🌿",
+                "Spot Tanaman",
+                "Tempat yang bagus untuk tanaman.\nNanti saja dulu.",
+                "OK",
+              );
+            } else {
+              playSfx("ding");
+              obj.placed = true;
+              spawnSparkles(obj.x + obj.w / 2, obj.y);
+              completeTask("plant");
+              showDialog(
+                "🌿",
+                "Tanaman Ditaruh!",
+                "Tanaman hijau menambah kesegaran\ndi kamar tidur.",
+                "OK",
+              );
+            }
+            break;
+
+          case "catbed":
+            if (game.act < 3) {
+              playSfx("buzz");
+              showDialog(
+                "🛏️",
+                "Tempat Kucing",
+                "Sepertinya di sini tempat yang\npas untuk kucing tidur.",
+                "OK",
+              );
+            } else {
+              playSfx("purr");
+              obj.placed = true;
+              spawnSparkles(obj.x + obj.w / 2, obj.y);
+              completeTask("catbed");
+              showDialog(
+                "🐱",
+                "Tempat Tidur Kucing!",
+                "Kasur empuk untuk kucing kecilmu.\nDia langsung menghampiri dan\nmendengkur bahagia! 💛",
+                "OK",
+              );
+            }
+            break;
+
+          case "cat":
+            playSfx("meow");
+            playSfx("purr");
+            cat.state = "following";
+            game.catMood = 60;
+            updateCatMoodUI();
+            completeTask("calmcat");
+            showDialog(
+              "🐱",
+              "Kucing Tenang",
+              '"Meooww~"\n\nKamu mengelus kucing kecilmu.\nDia mulai tenang dan keluar\ndari persembunyian.',
+              "OK",
+            );
+            break;
+        }
+      }
+
+      // ==================== DIALOG ====================
+      let _dialogPrimaryAction = null;
+
+      function showDialog(
+        icon,
+        title,
+        content,
+        primaryBtn,
+        secondaryBtn,
+        primaryAction,
+      ) {
+        game.currentDialog = title;
+        _dialogPrimaryAction = primaryAction || null;
+        document.getElementById("dialogIcon").textContent = icon;
+        document.getElementById("dialogTitle").textContent = title;
+        document.getElementById("dialogContent").textContent = content;
+
+        const btnP = document.getElementById("btnPrimary");
+        const btnS = document.getElementById("btnSecondary");
+
+        if (primaryBtn) {
+          btnP.style.display = "block";
+          btnP.textContent = primaryBtn;
+          btnP.onclick = () => {
+            if (_dialogPrimaryAction) {
+              const cb = _dialogPrimaryAction;
+              _dialogPrimaryAction = null;
+              cb();
+            } else {
+              closeDialog();
+            }
+          };
+        } else {
+          btnP.style.display = "none";
+        }
+
+        btnS.style.display = secondaryBtn ? "block" : "none";
+        if (secondaryBtn) {
+          btnS.textContent = secondaryBtn;
+          btnS.onclick = () => closeDialog();
+        }
+
+        document.getElementById("dialogOverlay").classList.add("active");
+      }
+
+      function closeDialog() {
+        document.getElementById("dialogOverlay").classList.remove("active");
+        game.currentDialog = null;
+        _dialogPrimaryAction = null;
+        // Safety: if transition overlay is stuck, remove it
+        const tOverlay = document.getElementById("transitionOverlay");
+        if (tOverlay.classList.contains("active") && !game.actTransition) {
+          tOverlay.classList.remove("active");
+        }
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (game.currentDialog && (e.key === "Escape" || e.key === "Enter")) {
+          // Use the primary action callback if it exists (e.g. act transitions)
+          if (_dialogPrimaryAction) {
+            const cb = _dialogPrimaryAction;
+            _dialogPrimaryAction = null;
+            cb();
+          } else {
+            closeDialog();
+          }
+        }
+      });
+
+      // ==================== CAT MOOD UI ====================
+      function updateCatMoodUI() {
+        const bar = document.getElementById("moodBar");
+        const label = document.getElementById("moodPercent");
+        bar.style.width = game.catMood + "%";
+
+        bar.classList.remove("happy", "scared");
+        if (game.catMood >= 80) {
+          label.textContent = "Bahagia 💛";
+          bar.classList.add("happy");
+        } else if (game.catMood >= 50) {
+          label.textContent = "Tenang";
+        } else if (game.catMood >= 30) {
+          label.textContent = "Gugup";
+        } else {
+          label.textContent = "Ketakutan! 😱";
+          bar.classList.add("scared");
+        }
+      }
+
+      // ==================== SPARKLE EFFECTS ====================
+      function spawnSparkles(x, y) {
+        for (let i = 0; i < 8; i++) {
+          game.sparkles.push({
+            x: x + (Math.random() - 0.5) * 40,
+            y: y + (Math.random() - 0.5) * 30,
+            vy: -1 - Math.random() * 2,
+            life: 40 + Math.random() * 20,
+            maxLife: 60,
+            size: 3 + Math.random() * 4,
+            color: ["#FFD700", "#FFF", "#87CEEB", "#FF69B4"][
+              Math.floor(Math.random() * 4)
+            ],
+          });
+        }
+      }
+
+      // ==================== ROOM DETECTION ====================
+      function getCurrentRoom() {
+        const px = player.x + player.w / 2;
+        for (let i = 0; i < CFG.ROOMS.length; i++) {
+          if (px >= CFG.ROOMS[i].start && px < CFG.ROOMS[i].end) return i;
+        }
+        return 0;
+      }
+
+      function updateRoomIndicator() {
+        const roomIdx = getCurrentRoom();
+        const dots = document.querySelectorAll(".room-dot");
+        dots.forEach((d, i) => d.classList.toggle("active", i === roomIdx));
+        document.getElementById("roomName").textContent =
+          CFG.ROOMS[roomIdx].name;
+      }
+
+      // ==================== UPDATE ====================
+      let footstepTimer = 0;
+
+      function update() {
+        if (!game.introPassed || game.gameComplete) return;
+        game.frame++;
+
+        // Player movement
+        if (!game.currentDialog && !game.actTransition) {
+          player.walking = false;
+          if (keys.left) {
+            player.x -= player.speed;
+            player.dir = -1;
+            player.walking = true;
+          }
+          if (keys.right) {
+            player.x += player.speed;
+            player.dir = 1;
+            player.walking = true;
+          }
+          player.x = Math.max(
+            10,
+            Math.min(CFG.WORLD_W - player.w - 10, player.x),
+          );
+
+          // Jump
+          if (player.jumping) {
+            player.vy += player.gravity;
+            player.y += player.vy;
+            if (player.y >= CFG.GROUND) {
+              player.y = CFG.GROUND;
+              player.vy = 0;
+              player.jumping = false;
+            }
+          }
+
+          // Sweep cooldown
+          if (player.sweepCooldown > 0) player.sweepCooldown--;
+          if (player.sweepTimer > 0) {
+            player.sweepTimer--;
+            if (player.sweepTimer === 0) player.sweeping = false;
+          }
+        }
+
+        // Walking animation
+        if (player.walking) {
+          player.frameTimer++;
+          if (player.frameTimer > 8) {
+            player.frame = (player.frame + 1) % 4;
+            player.frameTimer = 0;
+            if (player.frame === 0 || player.frame === 2) {
+              footstepTimer++;
+              if (footstepTimer % 2 === 0) playSfx("step");
+            }
+          }
+        } else {
+          player.frame = 0;
+        }
+
+        // Cat companion behavior
+        updateCat();
+
+        // Rats
+        updateRats();
+
+        // Cockroaches
+        updateRoaches();
+        checkRoachStomp();
+
+        // Water from pipe
+        if (game.pipeBurst && !game.pipeFixed) {
+          game.waterLevel = Math.min(game.waterLevel + 0.02, 15);
+        } else if (game.pipeFixed) {
+          game.waterLevel = Math.max(game.waterLevel - 0.1, 0);
+        }
+
+        // Cat mood gradual increase when cleaning
+        if (game.act >= 1 && game.catMood < 100 && game.frame % 180 === 0) {
+          if (cat.state !== "scared") {
+            game.catMood = Math.min(100, game.catMood + 1);
+            updateCatMoodUI();
+          }
+        }
+
+        // Collectibles
+        updateCollectibles();
+
+        // Hearts
+        for (let i = game.hearts.length - 1; i >= 0; i--) {
+          const h = game.hearts[i];
+          h.y += h.vy;
+          h.x += Math.sin(game.frame * 0.1 + i) * 0.3;
+          h.life--;
+          if (h.life <= 0) game.hearts.splice(i, 1);
+        }
+
+        // Cat proximity hearts (delight feature)
+        if (cat.state === "following" || cat.state === "happy") {
+          const catDist = Math.abs(player.x - cat.x);
+          if (catDist < 60 && game.frame % 90 === 0) {
+            spawnHeart(cat.x + cat.w / 2, cat.y - 10);
+          }
+        }
+
+        // Ambient dust motes (reduced count)
+        if (game.frame % 30 === 0 && game.ambientParticles.length < 12) {
+          game.ambientParticles.push({
+            x: camera.x + Math.random() * CFG.W,
+            y: CFG.CEILING + Math.random() * (CFG.GROUND - CFG.CEILING),
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: -0.1 - Math.random() * 0.2,
+            life: 120 + Math.random() * 120,
+            maxLife: 240,
+            size: 1 + Math.random() * 1.5,
+          });
+        }
+        for (let i = game.ambientParticles.length - 1; i >= 0; i--) {
+          const p = game.ambientParticles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life--;
+          if (p.life <= 0) game.ambientParticles.splice(i, 1);
+        }
+
+        // Sparkles
+        for (let i = game.sparkles.length - 1; i >= 0; i--) {
+          const s = game.sparkles[i];
+          s.y += s.vy;
+          s.life--;
+          if (s.life <= 0) game.sparkles.splice(i, 1);
+        }
+
+        // Dust clouds
+        for (let i = game.dustClouds.length - 1; i >= 0; i--) {
+          const d = game.dustClouds[i];
+          d.life--;
+          d.size += 0.5;
+          if (d.life <= 0) game.dustClouds.splice(i, 1);
+        }
+
+        // Confetti
+        if (game.confettiActive) {
+          if (game.confetti.length < 80 && game.frame % 3 === 0) {
+            for (let c = 0; c < 2; c++) {
+              game.confetti.push({
+                x: camera.x + Math.random() * CFG.W,
+                y: -10,
+                vx: (Math.random() - 0.5) * 3,
+                vy: 1 + Math.random() * 2,
+                rot: Math.random() * Math.PI * 2,
+                rotS: (Math.random() - 0.5) * 0.1,
+                size: 3 + Math.random() * 5,
+                color: [
+                  "#FF69B4",
+                  "#FFD700",
+                  "#87CEEB",
+                  "#FF6347",
+                  "#98FB98",
+                  "#DDA0DD",
+                ][Math.floor(Math.random() * 6)],
+                life: 200,
+              });
+            }
+          }
+          for (let i = game.confetti.length - 1; i >= 0; i--) {
+            const c = game.confetti[i];
+            c.x += c.vx;
+            c.y += c.vy;
+            c.rot += c.rotS;
+            c.life--;
+            if (c.y > CFG.H + 20 || c.life <= 0) game.confetti.splice(i, 1);
+          }
+        }
+
+        // Floating texts
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+          const ft = floatingTexts[i];
+          ft.y -= 0.5;
+          ft.life--;
+          if (ft.life <= 0) floatingTexts.splice(i, 1);
+        }
+
+        updateCamera();
+        updateRoomIndicator();
+        updateInteractPrompt();
+      }
+
+      function updateCat() {
+        if (
+          game.act === 2 &&
+          !tasks.find((t) => t.id === "calmcat").done &&
+          cat.state !== "scared"
+        ) {
+          cat.state = "scared";
+          cat.x = cat.hideX;
+        }
+
+        if (cat.state === "following") {
+          const dist = player.x - cat.x;
+          const follow = 50;
+          if (Math.abs(dist) > follow + 10) {
+            cat.dir = dist > 0 ? 1 : -1;
+            cat.x += cat.dir * 2;
+            cat.frameTimer++;
+            if (cat.frameTimer > 6) {
+              cat.frame = (cat.frame + 1) % 4;
+              cat.frameTimer = 0;
+            }
+          } else {
+            cat.frame = 0;
+            cat.idleTimer++;
+          }
+          cat.y = CFG.GROUND - 2;
+        } else if (cat.state === "scared") {
+          // Cat hides near sofa
+          cat.x = cat.hideX;
+          cat.y = CFG.GROUND - 2;
+          cat.frame = 0;
+          // Shiver animation handled in draw
+        } else if (cat.state === "happy") {
+          // Cat sits contentedly
+          cat.frame = 0;
+        }
+      }
+
+      function updateRats() {
+        for (const rat of game.rats) {
+          if (!rat.alive) continue;
+
+          if (rat.fleeing) {
+            rat.x += rat.dir * rat.speed;
+            if (rat.x < -50 || rat.x > CFG.WORLD_W + 50) rat.alive = false;
+          } else {
+            rat.pauseTimer--;
+            if (rat.pauseTimer <= 0) {
+              rat.x += rat.dir * rat.speed;
+              // Random direction change
+              if (Math.random() < 0.01) {
+                rat.dir *= -1;
+                rat.pauseTimer = 30 + Math.random() * 60;
+              }
+              // Bounce off walls
+              if (rat.x < 50 || rat.x > CFG.WORLD_W - 50) rat.dir *= -1;
+            }
+          }
+
+          rat.frameTimer++;
+          if (rat.frameTimer > 5) {
+            rat.frame = (rat.frame + 1) % 4;
+            rat.frameTimer = 0;
+          }
+        }
+      }
+
+      function updateInteractPrompt() {
+        const nearby = getNearbyObject();
+        const prompt = document.getElementById("interactPrompt");
+
+        if (nearby && !game.currentDialog) {
+          let gx = nearby.x + nearby.w / 2 - camera.x;
+          let gy = nearby.y;
+
+          const canvasRect = canvas.getBoundingClientRect();
+          const sx = canvasRect.width / CFG.W;
+          const sy = canvasRect.height / CFG.H;
+          const coverScale = Math.max(sx, sy);
+          const ox = (canvasRect.width - CFG.W * coverScale) / 2;
+          const oy = (canvasRect.height - CFG.H * coverScale) / 2;
+
+          prompt.style.left = gx * coverScale + ox - 35 + "px";
+          prompt.style.top = gy * coverScale + oy - 55 + "px";
+          prompt.classList.add("visible");
+        } else {
+          prompt.classList.remove("visible");
+        }
+      }
+
+      // ==================== RENDER ====================
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        // Camera transform
+        ctx.save();
+        ctx.translate(-camera.x, camera.y);
+
+        drawApartment();
+        drawFurniture();
+        drawCleanableItems();
+        drawCollectibles();
+        drawWater();
+        drawRats();
+        drawRoaches();
+        drawCat();
+        drawPlayer();
+        drawSparkles();
+        drawHearts();
+        drawAmbientParticles();
+        drawDustClouds();
+        drawFloatingTexts();
+
+        ctx.restore(); // camera
+
+        drawConfetti();
+        ctx.restore(); // dpr
+      }
+
+      // Persistent skyline buildings (generated once)
+      const skylineBuildings = [];
+      (function generateSkyline() {
+        let bx = 0;
+        while (bx < 500) {
+          const bw = 12 + Math.floor(Math.random() * 25);
+          const bh = 30 + Math.floor(Math.random() * 120);
+          const lit = Math.random() > 0.3;
+          const hue = Math.floor(Math.random() * 40) + 200; // blue-purple
+          skylineBuildings.push({ bx, bw, bh, lit, hue, windows: [] });
+          // Pre-generate window pattern
+          for (let wy = 5; wy < bh - 5; wy += 8) {
+            for (let wx = 3; wx < bw - 3; wx += 6) {
+              if (Math.random() > 0.35) {
+                const warm = Math.random() > 0.5;
+                skylineBuildings[skylineBuildings.length - 1].windows.push({
+                  wx,
+                  wy,
+                  on: true,
+                  color: warm ? "#FFE082" : "#FFF9C4",
+                  flicker: Math.random() > 0.85,
+                });
+              }
+            }
+          }
+          bx += bw + 2 + Math.floor(Math.random() * 5);
+        }
+      })();
+
+      // ===== CACHED SKYLINE (offscreen canvas, updated every 20 frames) =====
+      const _skyCache = document.createElement("canvas");
+      const _skyCCtx = _skyCache.getContext("2d");
+      _skyCache.width = 500;
+      _skyCache.height = 200;
+      let _skyCFrame = -999;
+
+      function _renderSkylineCache() {
+        const c = _skyCCtx,
+          w = 500,
+          h = 200;
+        const skyGrad = c.createLinearGradient(0, 0, 0, h);
+        skyGrad.addColorStop(0, "#0a0a1a");
+        skyGrad.addColorStop(0.3, "#0d1028");
+        skyGrad.addColorStop(0.6, "#1a1a3e");
+        skyGrad.addColorStop(1, "#1e2a4a");
+        c.fillStyle = skyGrad;
+        c.fillRect(0, 0, w, h);
+        // Moon
+        c.fillStyle = "#FFF8E1";
+        c.globalAlpha = 0.9;
+        c.beginPath();
+        c.arc(w * 0.8, 18, 10, 0, Math.PI * 2);
+        c.fill();
+        c.globalAlpha = 0.08;
+        c.beginPath();
+        c.arc(w * 0.8, 18, 25, 0, Math.PI * 2);
+        c.fill();
+        c.globalAlpha = 1;
+        // Stars
+        c.fillStyle = "#fff";
+        for (let i = 0; i < 12; i++) {
+          const sx = (i * 37 + 13) % w,
+            sy = (i * 23 + 7) % (h * 0.4);
+          const tw = (Math.sin(game.frame * 0.05 + i * 1.7) + 1) * 0.5;
+          c.globalAlpha = 0.3 + tw * 0.7;
+          c.beginPath();
+          c.arc(sx, sy, 0.8 + tw * 0.5, 0, Math.PI * 2);
+          c.fill();
+        }
+        c.globalAlpha = 1;
+        // City glow
+        const glowGrad = c.createLinearGradient(0, h - 30, 0, h);
+        glowGrad.addColorStop(0, "rgba(255,180,100,0)");
+        glowGrad.addColorStop(1, "rgba(255,160,80,0.08)");
+        c.fillStyle = glowGrad;
+        c.fillRect(0, h - 30, w, 30);
+        // Buildings (flat colors instead of per-building gradients)
+        for (const b of skylineBuildings) {
+          c.fillStyle = `hsl(${b.hue},30%,10%)`;
+          c.fillRect(b.bx, h - b.bh, b.bw, b.bh);
+          c.fillStyle = `hsl(${b.hue},20%,18%)`;
+          c.fillRect(b.bx, h - b.bh, b.bw, 2);
+          for (const win of b.windows) {
+            const flick = win.flicker
+              ? Math.sin(game.frame * 0.02 + b.bx) > 0
+                ? 1
+                : 0.3
+              : 1;
+            c.globalAlpha = 0.7 * flick;
+            c.fillStyle = win.color;
+            c.fillRect(b.bx + win.wx, h - b.bh + win.wy, 3, 4);
+          }
+          c.globalAlpha = 1;
+        }
+        // Antenna
+        c.strokeStyle = "#444";
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(60, h - 150);
+        c.lineTo(60, h - 170);
+        c.stroke();
+        c.fillStyle = game.frame % 60 < 30 ? "#F44336" : "#880000";
+        c.beginPath();
+        c.arc(60, h - 170, 1.5, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = "rgba(100,180,255,0.03)";
+        c.fillRect(0, 0, w, h);
+      }
+      _renderSkylineCache();
+
+      function drawCitySkyline(x, y, w, h) {
+        // Only re-render skyline cache every 20 frames
+        if (game.frame - _skyCFrame >= 20) {
+          _renderSkylineCache();
+          _skyCFrame = game.frame;
+        }
+        ctx.drawImage(_skyCache, 0, 0, 500, 200, x, y, w, h);
+      }
+
+      function drawApartment() {
+        // Cache gradients (avoid per-frame createLinearGradient)
+        if (!drawApartment._g) {
+          const g = {};
+          g.ceil = ctx.createLinearGradient(0, 0, 0, CFG.CEILING);
+          g.ceil.addColorStop(0, "#3E2F23");
+          g.ceil.addColorStop(1, "#4A3B2E");
+          g.floor = ctx.createLinearGradient(0, CFG.GROUND, 0, CFG.H);
+          g.floor.addColorStop(0, "#4a3828");
+          g.floor.addColorStop(0.2, "#3e3020");
+          g.floor.addColorStop(0.8, "#352818");
+          g.floor.addColorStop(1, "#2a2015");
+          g.walls = {};
+          for (const room of CFG.ROOMS) {
+            const wg = ctx.createLinearGradient(0, CFG.CEILING, 0, CFG.GROUND);
+            if (room.name === "Lorong" || room.name === "Dapur") {
+              wg.addColorStop(0, "#8D7B68");
+              wg.addColorStop(1, "#7A6B5A");
+            } else {
+              wg.addColorStop(0, "#A0937D");
+              wg.addColorStop(1, "#8D8068");
+            }
+            g.walls[room.name] = wg;
+          }
+          drawApartment._g = g;
+        }
+        const _g = drawApartment._g;
+        const camL = camera.x - 60,
+          camR = camera.x + CFG.W + 60;
+
+        // Ceiling - dark modern
+        ctx.fillStyle = _g.ceil;
+        ctx.fillRect(0, 0, CFG.WORLD_W, CFG.CEILING);
+
+        // Ceiling trim - warm gold accent
+        ctx.fillStyle = "#5C4A3A";
+        ctx.fillRect(0, CFG.CEILING - 4, CFG.WORLD_W, 6);
+        ctx.fillStyle = "rgba(255,215,0,0.2)";
+        ctx.fillRect(0, CFG.CEILING - 1, CFG.WORLD_W, 1);
+
+        // Walls per room with luxury colors
+        for (const room of CFG.ROOMS) {
+          ctx.fillStyle = _g.walls[room.name];
+          ctx.fillRect(
+            room.start,
+            CFG.CEILING,
+            room.end - room.start,
+            CFG.GROUND - CFG.CEILING,
+          );
+
+          // Room dividers - warm arch openings
+          if (room.start > 0) {
+            ctx.fillStyle = "#5C4A3A";
+            ctx.fillRect(
+              room.start - 20,
+              CFG.CEILING,
+              40,
+              CFG.GROUND - CFG.CEILING,
+            );
+            // Arch top
+            ctx.fillStyle = "#6B5A4A";
+            ctx.fillRect(room.start - 22, CFG.CEILING, 44, 5);
+            // Warm accent strip
+            ctx.fillStyle = "rgba(255,200,100,0.18)";
+            ctx.fillRect(room.start - 18, CFG.CEILING + 5, 36, 2);
+          }
+        }
+
+        // Floor - premium dark hardwood
+        ctx.fillStyle = _g.floor;
+        ctx.fillRect(0, CFG.GROUND, CFG.WORLD_W, CFG.H - CFG.GROUND);
+
+        // Floor planks - wide luxury planks
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        ctx.lineWidth = 1;
+        const plkS = Math.max(0, Math.floor(camL / 80) * 80);
+        const plkE = Math.min(CFG.WORLD_W, camR + 80);
+        for (let px = plkS; px < plkE; px += 80) {
+          ctx.beginPath();
+          ctx.moveTo(px, CFG.GROUND);
+          ctx.lineTo(px, CFG.H);
+          ctx.stroke();
+        }
+        // Plank highlights
+        ctx.fillStyle = "rgba(255,200,120,0.03)";
+        for (
+          let px = Math.max(0, Math.floor(camL / 160) * 160);
+          px < plkE;
+          px += 160
+        ) {
+          ctx.fillRect(px, CFG.GROUND, 80, CFG.H - CFG.GROUND);
+        }
+
+        // Floor baseboard - dark wood trim
+        ctx.fillStyle = "#1a1515";
+        ctx.fillRect(0, CFG.GROUND - 2, CFG.WORLD_W, 4);
+        ctx.fillStyle = "rgba(255,215,0,0.06)";
+        ctx.fillRect(0, CFG.GROUND - 2, CFG.WORLD_W, 1);
+
+        // Floor reflection (ambient light from windows)
+        for (const obj of objects) {
+          if (obj.sprite === "window") {
+            if (obj.x + obj.w + 60 < camL || obj.x - 30 > camR) continue;
+            const reflGrad = ctx.createLinearGradient(
+              obj.x,
+              CFG.GROUND,
+              obj.x,
+              CFG.H,
+            );
+            reflGrad.addColorStop(0, "rgba(100,150,200,0.06)");
+            reflGrad.addColorStop(1, "rgba(100,150,200,0)");
+            ctx.fillStyle = reflGrad;
+            ctx.fillRect(
+              obj.x - 30,
+              CFG.GROUND,
+              obj.w + 60,
+              CFG.H - CFG.GROUND,
+            );
+          }
+        }
+
+        // Draw panoramic windows with city view
+        for (const obj of objects) {
+          if (obj.sprite === "window") {
+            if (obj.x + obj.w < camL || obj.x > camR) continue;
+            drawWindow(obj.x, obj.y, obj.w, obj.h, obj.skylight);
+          }
+        }
+
+        // ===== WALL DECORATIONS (fills vertical space) =====
+        const wallY = CFG.CEILING + 12;
+
+        // -- Hallway: Mirror + coat hooks --
+        if (camR > 100 && camL < 380) {
+          // Mirror
+          ctx.fillStyle = "#4A3B2E";
+          ctx.fillRect(120, wallY + 15, 52, 72);
+          ctx.fillStyle = "rgba(180,210,230,0.3)";
+          ctx.fillRect(123, wallY + 18, 46, 66);
+          // Mirror reflection shine
+          ctx.fillStyle = "rgba(255,255,255,0.12)";
+          ctx.fillRect(125, wallY + 20, 15, 60);
+          // Coat hooks
+          for (let i = 0; i < 3; i++) {
+            ctx.fillStyle = "#C4A265";
+            ctx.fillRect(280 + i * 25, wallY + 30, 3, 10);
+            ctx.beginPath();
+            ctx.arc(281.5 + i * 25, wallY + 28, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } // end hallway
+
+        // -- Living Room: Art prints above sofa + floating shelf --
+        if (camR > 420 && camL < 1150) {
+          // Large framed art (abstract sunset)
+          ctx.fillStyle = "#3A2E22";
+          ctx.fillRect(435, wallY + 8, 65, 50);
+          ctx.fillStyle = "#FF8C42";
+          ctx.fillRect(439, wallY + 12, 57, 42);
+          // Sunset gradient inside frame
+          const sunGrad = ctx.createLinearGradient(
+            439,
+            wallY + 12,
+            439,
+            wallY + 54,
+          );
+          sunGrad.addColorStop(0, "#FF6B35");
+          sunGrad.addColorStop(0.4, "#FF8C42");
+          sunGrad.addColorStop(0.7, "#F7C59F");
+          sunGrad.addColorStop(1, "#2C1810");
+          ctx.fillStyle = sunGrad;
+          ctx.fillRect(439, wallY + 12, 57, 42);
+          // Sun circle
+          ctx.fillStyle = "#FFD700";
+          ctx.beginPath();
+          ctx.arc(467, wallY + 30, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Small photo frame next to sofa
+          ctx.fillStyle = "#C4A265";
+          ctx.fillRect(1040, wallY + 20, 35, 28);
+          ctx.fillStyle = "#5D8AA8";
+          ctx.fillRect(1043, wallY + 23, 29, 22);
+          // Tiny mountain
+          ctx.fillStyle = "#2C3E50";
+          ctx.beginPath();
+          ctx.moveTo(1043, wallY + 45);
+          ctx.lineTo(1057, wallY + 30);
+          ctx.lineTo(1072, wallY + 45);
+          ctx.closePath();
+          ctx.fill();
+
+          // Floating shelf in living room with books
+          ctx.fillStyle = "#5C4A3A";
+          ctx.fillRect(1050, wallY + 65, 80, 5);
+          // Books on shelf
+          const bookColors = [
+            "#E74C3C",
+            "#3498DB",
+            "#2ECC71",
+            "#9B59B6",
+            "#F39C12",
+          ];
+          for (let i = 0; i < 5; i++) {
+            const bh = 15 + ((i * 7 + 3) % 9);
+            ctx.fillStyle = bookColors[i];
+            ctx.fillRect(1053 + i * 14, wallY + 65 - bh, 10, bh);
+          }
+        } // end living room
+
+        // -- Kitchen: Spice rack + clock + recipe note --
+        if (camR > 1410 && camL < 1720) {
+          // Wall clock
+          ctx.fillStyle = "#3A2E22";
+          ctx.beginPath();
+          ctx.arc(1450, wallY + 35, 20, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#F5F0E6";
+          ctx.beginPath();
+          ctx.arc(1450, wallY + 35, 17, 0, Math.PI * 2);
+          ctx.fill();
+          // Clock numbers (12, 3, 6, 9)
+          ctx.fillStyle = "#333";
+          ctx.font = "6px 'VT323', monospace";
+          ctx.textAlign = "center";
+          ctx.fillText("12", 1450, wallY + 23);
+          ctx.fillText("3", 1463, wallY + 37);
+          ctx.fillText("6", 1450, wallY + 51);
+          ctx.fillText("9", 1437, wallY + 37);
+          // Clock hands
+          const clockAngle = (game.frame * 0.01) % (Math.PI * 2);
+          ctx.strokeStyle = "#333";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(1450, wallY + 35);
+          ctx.lineTo(
+            1450 + Math.cos(clockAngle - Math.PI / 2) * 10,
+            wallY + 35 + Math.sin(clockAngle - Math.PI / 2) * 10,
+          );
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(1450, wallY + 35);
+          ctx.lineTo(
+            1450 + Math.cos(clockAngle * 12 - Math.PI / 2) * 14,
+            wallY + 35 + Math.sin(clockAngle * 12 - Math.PI / 2) * 14,
+          );
+          ctx.stroke();
+          ctx.textAlign = "left";
+
+          // Spice rack
+          ctx.fillStyle = "#5C4A3A";
+          ctx.fillRect(1580, wallY + 20, 50, 5);
+          ctx.fillRect(1580, wallY + 50, 50, 5);
+          // Spice jars
+          const spiceColors = ["#E8A87C", "#D4A373", "#CB997E", "#A5A58D"];
+          for (let i = 0; i < 4; i++) {
+            ctx.fillStyle = spiceColors[i];
+            ctx.fillRect(1583 + i * 12, wallY + 8, 8, 12);
+            ctx.fillStyle = "#C4A265";
+            ctx.fillRect(1583 + i * 12, wallY + 6, 8, 3);
+          }
+          for (let i = 0; i < 3; i++) {
+            ctx.fillStyle = spiceColors[i + 1];
+            ctx.fillRect(1586 + i * 14, wallY + 38, 8, 12);
+            ctx.fillStyle = "#C4A265";
+            ctx.fillRect(1586 + i * 14, wallY + 36, 8, 3);
+          }
+
+          // Recipe note / memo board in kitchen
+          ctx.fillStyle = "#F5E6CC";
+          ctx.fillRect(1660, wallY + 25, 28, 35);
+          ctx.fillStyle = "#D4A373";
+          ctx.fillRect(1660, wallY + 25, 28, 5);
+          // Text lines
+          ctx.fillStyle = "rgba(0,0,0,0.15)";
+          for (let i = 0; i < 4; i++) {
+            ctx.fillRect(1664, wallY + 35 + i * 6, 20, 1);
+          }
+          // Pin
+          ctx.fillStyle = "#E74C3C";
+          ctx.beginPath();
+          ctx.arc(1674, wallY + 25, 3, 0, Math.PI * 2);
+          ctx.fill();
+        } // end kitchen
+
+        // -- Bedroom: Photo wall + hanging plant + dream catcher --
+        if (camR > 2060 && camL < 2550) {
+          // Photo wall (3 small frames)
+          const frameColors = ["#C4A265", "#8B7355", "#6B5A4A"];
+          for (let i = 0; i < 3; i++) {
+            const fx = 2280 + i * 50;
+            const fy = wallY + 10 + (i % 2) * 15;
+            ctx.fillStyle = frameColors[i];
+            ctx.fillRect(fx, fy, 36, 30);
+            // Photo inside - different scenes
+            if (i === 0) {
+              ctx.fillStyle = "#87CEEB";
+              ctx.fillRect(fx + 3, fy + 3, 30, 24);
+              ctx.fillStyle = "#228B22";
+              ctx.fillRect(fx + 3, fy + 18, 30, 9);
+            } else if (i === 1) {
+              ctx.fillStyle = "#FFB6C1";
+              ctx.fillRect(fx + 3, fy + 3, 30, 24);
+              ctx.fillStyle = "#FF69B4";
+              ctx.beginPath();
+              ctx.arc(fx + 18, fy + 15, 6, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              ctx.fillStyle = "#2C3E50";
+              ctx.fillRect(fx + 3, fy + 3, 30, 24);
+              ctx.fillStyle = "#F1C40F";
+              ctx.beginPath();
+              ctx.arc(fx + 25, fy + 10, 5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // Hanging plant (macramé)
+          const hpX = 2500,
+            hpY = wallY + 5;
+          // String
+          ctx.strokeStyle = "#D4A373";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(hpX + 10, CFG.CEILING);
+          ctx.lineTo(hpX + 10, hpY);
+          ctx.stroke();
+          // Pot
+          ctx.fillStyle = "#A0522D";
+          ctx.fillRect(hpX, hpY + 5, 20, 18);
+          ctx.fillStyle = "#8B4513";
+          ctx.fillRect(hpX - 2, hpY + 2, 24, 5);
+          // Leaves drooping
+          ctx.fillStyle = "#4CAF50";
+          for (let l = 0; l < 5; l++) {
+            const angle = (l / 4) * Math.PI - Math.PI * 0.1;
+            const lx = hpX + 10 + Math.cos(angle) * 14;
+            const ly =
+              hpY +
+              15 +
+              Math.sin(angle) * 10 +
+              Math.sin(game.frame * 0.02 + l) * 1.5;
+            ctx.beginPath();
+            ctx.ellipse(lx, ly, 6, 3, angle * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Dream catcher near bed
+          const dcX = 2100,
+            dcY = wallY + 15;
+          ctx.strokeStyle = "#D4A373";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(dcX, CFG.CEILING);
+          ctx.lineTo(dcX, dcY);
+          ctx.stroke();
+          // Circle
+          ctx.strokeStyle = "#C4A265";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(dcX, dcY + 15, 12, 0, Math.PI * 2);
+          ctx.stroke();
+          // Web pattern
+          ctx.lineWidth = 0.5;
+          ctx.strokeStyle = "rgba(196,162,101,0.5)";
+          for (let i = 0; i < 6; i++) {
+            const a = (i * Math.PI * 2) / 6;
+            ctx.beginPath();
+            ctx.moveTo(dcX, dcY + 15);
+            ctx.lineTo(dcX + Math.cos(a) * 10, dcY + 15 + Math.sin(a) * 10);
+            ctx.stroke();
+          }
+          // Feathers
+          ctx.fillStyle = "#E8D5B7";
+          for (let i = 0; i < 3; i++) {
+            const fx = dcX - 8 + i * 8;
+            const fy = dcY + 28 + Math.sin(game.frame * 0.03 + i) * 1.5;
+            ctx.beginPath();
+            ctx.ellipse(fx, fy, 2, 6, 0.2 * (i - 1), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } // end bedroom
+
+        // Wainscoting / dado rail on all walls (fills lower wall space)
+        ctx.fillStyle = "rgba(0,0,0,0.06)";
+        ctx.fillRect(0, CFG.GROUND - 120, CFG.WORLD_W, 1);
+        ctx.fillStyle = "rgba(255,255,255,0.04)";
+        ctx.fillRect(0, CFG.GROUND - 119, CFG.WORLD_W, 1);
+        // Lower wall panel pattern (camera-culled)
+        for (
+          let px = Math.max(0, Math.floor(camL / 60) * 60);
+          px < Math.min(CFG.WORLD_W, camR + 60);
+          px += 60
+        ) {
+          ctx.fillStyle = "rgba(0,0,0,0.02)";
+          ctx.fillRect(px + 2, CFG.GROUND - 118, 56, 116);
+        }
+
+        // Modern pendant lights (only draw visible ones)
+        for (let lx = 200; lx < CFG.WORLD_W; lx += 400) {
+          if (lx + 70 < camera.x || lx - 70 > camera.x + CFG.W) continue;
+          // Cord
+          ctx.strokeStyle = "#333";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(lx, CFG.CEILING);
+          ctx.lineTo(lx, CFG.CEILING + 18);
+          ctx.stroke();
+          // Warm pendant shade
+          ctx.fillStyle = "#3A2E25";
+          ctx.beginPath();
+          ctx.moveTo(lx - 12, CFG.CEILING + 18);
+          ctx.lineTo(lx - 8, CFG.CEILING + 28);
+          ctx.lineTo(lx + 8, CFG.CEILING + 28);
+          ctx.lineTo(lx + 12, CFG.CEILING + 18);
+          ctx.closePath();
+          ctx.fill();
+          // Warm light bulb
+          ctx.fillStyle = "#FFE0A0";
+          ctx.globalAlpha = 0.9;
+          ctx.beginPath();
+          ctx.arc(lx, CFG.CEILING + 28, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          // Combined warm light cone
+          ctx.fillStyle = "rgba(255,220,150,0.04)";
+          ctx.beginPath();
+          ctx.moveTo(lx - 6, CFG.CEILING + 28);
+          ctx.lineTo(lx - 70, CFG.GROUND);
+          ctx.lineTo(lx + 70, CFG.GROUND);
+          ctx.lineTo(lx + 6, CFG.CEILING + 28);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Apartment label - modern gold
+        ctx.fillStyle = "#C4A265";
+        ctx.font = "bold 14px 'Press Start 2P', cursive";
+        ctx.fillText("42F", 60, CFG.CEILING + 35);
+        ctx.fillStyle = "rgba(255,255,255,0.35)";
+        ctx.font = "11px 'VT323', monospace";
+        ctx.fillText("Skyline Residences ✦", 45, CFG.CEILING + 50);
+      }
+
+      function drawWindow(x, y, w, h, isSkylight) {
+        if (isSkylight) {
+          // Big skylight - clean modern frame
+          ctx.fillStyle = "#1a1a22";
+          ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
+          ctx.fillStyle = "#2a2a32";
+          ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+
+          // City skyline view
+          drawCitySkyline(x, y, w, h);
+
+          // Clean thin dividers - 4 vertical panels
+          ctx.fillStyle = "#1a1a22";
+          for (let i = 1; i < 4; i++) {
+            ctx.fillRect(x + (w * i) / 4 - 1, y, 2, h);
+          }
+          // One horizontal divider at 40%
+          ctx.fillRect(x, y + h * 0.4 - 1, w, 2);
+
+          // Subtle inner glow (ambient light coming through)
+          const glowGrad = ctx.createLinearGradient(x, y + h - 40, x, y + h);
+          glowGrad.addColorStop(0, "rgba(150,200,255,0)");
+          glowGrad.addColorStop(1, "rgba(150,200,255,0.04)");
+          ctx.fillStyle = glowGrad;
+          ctx.fillRect(x, y + h - 40, w, 40);
+
+          // Light reflection on floor from skylight
+          ctx.fillStyle = "rgba(100,160,220,0.03)";
+          ctx.fillRect(x - 50, CFG.GROUND, w + 100, CFG.H - CFG.GROUND);
+        } else {
+          // Regular window - slim dark metal frame
+          ctx.fillStyle = "#1a1a22";
+          ctx.fillRect(x - 3, y - 3, w + 6, h + 6);
+          ctx.fillStyle = "#2a2a35";
+          ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
+
+          // City skyline view
+          drawCitySkyline(x, y, w, h);
+
+          // Two vertical dividers
+          ctx.fillStyle = "#1a1a22";
+          ctx.fillRect(x + w / 3 - 1, y, 2, h);
+          ctx.fillRect(x + (w * 2) / 3 - 1, y, 2, h);
+
+          // Sheer curtains
+          ctx.fillStyle = "rgba(200,200,220,0.06)";
+          ctx.fillRect(x, y, 8, h);
+          ctx.fillRect(x + w - 8, y, 8, h);
+          for (let cy = y; cy < y + h; cy += 12) {
+            ctx.fillStyle = "rgba(200,200,220,0.03)";
+            ctx.fillRect(x, cy, 8, 6);
+            ctx.fillRect(x + w - 8, cy, 8, 6);
+          }
+        }
+      }
+
+      function drawFurniture() {
+        const camL = camera.x - 100,
+          camR = camera.x + CFG.W + 100;
+        for (const obj of objects) {
+          if (obj.type !== "decor") continue;
+          if (obj.x + obj.w < camL || obj.x > camR) continue;
+          switch (obj.sprite) {
+            case "door":
+              ctx.fillStyle = "#5D4037";
+              ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+              ctx.fillStyle = "#795548";
+              ctx.fillRect(obj.x + 3, obj.y + 3, obj.w - 6, obj.h - 3);
+              // Handle
+              ctx.fillStyle = "#FFD700";
+              ctx.beginPath();
+              ctx.arc(obj.x + obj.w - 12, obj.y + obj.h / 2, 4, 0, Math.PI * 2);
+              ctx.fill();
+              // Peephole
+              ctx.fillStyle = "#333";
+              ctx.beginPath();
+              ctx.arc(obj.x + obj.w / 2, obj.y + 25, 3, 0, Math.PI * 2);
+              ctx.fill();
+              break;
+
+            case "shoes":
+              ctx.fillStyle = "#5D4037";
+              ctx.fillRect(obj.x, obj.y + 4, 15, 8);
+              ctx.fillStyle = "#3E2723";
+              ctx.fillRect(obj.x + 18, obj.y + 3, 14, 9);
+              ctx.fillStyle = "#FF5722";
+              ctx.fillRect(obj.x + 8, obj.y + 5, 12, 7);
+              break;
+
+            case "sofa":
+              // Modern luxury dark sofa
+              ctx.fillStyle = "#2a2a2a";
+              ctx.fillRect(obj.x, obj.y + 12, obj.w, obj.h - 12);
+              // Seat cushions
+              ctx.fillStyle = "#333";
+              ctx.fillRect(obj.x + 8, obj.y + 12, (obj.w - 16) / 2 - 2, 22);
+              ctx.fillRect(
+                obj.x + obj.w / 2 + 2,
+                obj.y + 12,
+                (obj.w - 16) / 2 - 2,
+                22,
+              );
+              // Back cushions
+              ctx.fillStyle = "#2a2a2a";
+              ctx.fillRect(obj.x + 5, obj.y - 2, obj.w - 10, 18);
+              ctx.fillStyle = "#303030";
+              ctx.fillRect(obj.x + 8, obj.y, (obj.w - 16) / 2 - 2, 14);
+              ctx.fillRect(
+                obj.x + obj.w / 2 + 2,
+                obj.y,
+                (obj.w - 16) / 2 - 2,
+                14,
+              );
+              // Low armrests
+              ctx.fillStyle = "#252525";
+              ctx.fillRect(obj.x, obj.y + 5, 10, obj.h - 10);
+              ctx.fillRect(obj.x + obj.w - 10, obj.y + 5, 10, obj.h - 10);
+              // Small metal legs
+              ctx.fillStyle = "#C4A265";
+              ctx.fillRect(obj.x + 5, obj.y + obj.h - 3, 5, 5);
+              ctx.fillRect(obj.x + obj.w - 10, obj.y + obj.h - 3, 5, 5);
+              // Accent pillows
+              ctx.fillStyle = "#C4A265";
+              ctx.fillRect(obj.x + 15, obj.y + 5, 18, 13);
+              ctx.fillStyle = "#8B7355";
+              ctx.fillRect(obj.x + obj.w - 33, obj.y + 5, 18, 13);
+              break;
+
+            case "tv":
+              // TV Stand
+              ctx.fillStyle = "#4E342E";
+              ctx.fillRect(obj.x, obj.y + 30, obj.w, 30);
+              ctx.fillStyle = "#5D4037";
+              ctx.fillRect(obj.x + 3, obj.y + 33, obj.w - 6, 24);
+              // TV Screen
+              ctx.fillStyle = "#1a1a2e";
+              ctx.fillRect(obj.x + 5, obj.y, obj.w - 10, 30);
+              ctx.fillStyle = "#333";
+              ctx.fillRect(obj.x + 8, obj.y + 3, obj.w - 16, 24);
+              // Screen glow
+              ctx.fillStyle = "rgba(100,149,237,0.1)";
+              ctx.fillRect(obj.x + 8, obj.y + 3, obj.w - 16, 24);
+              // Stand base
+              ctx.fillStyle = "#333";
+              ctx.fillRect(obj.x + obj.w / 2 - 8, obj.y + 26, 16, 6);
+              break;
+
+            case "table":
+              ctx.fillStyle = "#795548";
+              ctx.fillRect(obj.x, obj.y, obj.w, 6);
+              ctx.fillStyle = "#5D4037";
+              ctx.fillRect(obj.x + 5, obj.y + 6, 5, obj.h - 6);
+              ctx.fillRect(obj.x + obj.w - 10, obj.y + 6, 5, obj.h - 6);
+              break;
+
+            case "counter":
+              ctx.fillStyle = "#78909C";
+              ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+              ctx.fillStyle = "#90A4AE";
+              ctx.fillRect(obj.x, obj.y, obj.w, 8);
+              // Cabinet doors
+              ctx.fillStyle = "#607D8B";
+              for (let cx = obj.x + 10; cx < obj.x + obj.w - 10; cx += 50) {
+                ctx.fillRect(cx, obj.y + 15, 40, 30);
+                ctx.fillStyle = "#FFD700";
+                ctx.beginPath();
+                ctx.arc(cx + 20, obj.y + 30, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#607D8B";
+              }
+              break;
+
+            case "stove":
+              ctx.fillStyle = "#424242";
+              ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+              ctx.fillStyle = "#616161";
+              ctx.fillRect(obj.x, obj.y, obj.w, 6);
+              // Burners
+              ctx.fillStyle = "#333";
+              ctx.beginPath();
+              ctx.arc(obj.x + 15, obj.y + 3, 8, 0, Math.PI * 2);
+              ctx.arc(obj.x + 45, obj.y + 3, 8, 0, Math.PI * 2);
+              ctx.fill();
+              break;
+
+            case "sink":
+              ctx.fillStyle = "#B0BEC5";
+              ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+              ctx.fillStyle = "#90A4AE";
+              ctx.fillRect(obj.x + 5, obj.y + 3, obj.w - 10, obj.h - 6);
+              // Faucet
+              ctx.fillStyle = "#9E9E9E";
+              ctx.fillRect(obj.x + obj.w / 2 - 3, obj.y - 15, 6, 15);
+              ctx.fillRect(obj.x + obj.w / 2 - 8, obj.y - 18, 16, 5);
+              break;
+
+            case "fridge":
+              ctx.fillStyle = "#E0E0E0";
+              ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+              ctx.fillStyle = "#BDBDBD";
+              ctx.fillRect(obj.x + 2, obj.y + 2, obj.w - 4, obj.h * 0.4);
+              ctx.fillRect(
+                obj.x + 2,
+                obj.y + obj.h * 0.42,
+                obj.w - 4,
+                obj.h * 0.56,
+              );
+              // Handle
+              ctx.fillStyle = "#9E9E9E";
+              ctx.fillRect(obj.x + obj.w - 8, obj.y + 15, 3, 20);
+              ctx.fillRect(obj.x + obj.w - 8, obj.y + obj.h * 0.5, 3, 20);
+              break;
+
+            case "bed":
+              // Bed frame
+              ctx.fillStyle = "#5D4037";
+              ctx.fillRect(obj.x, obj.y + 10, obj.w, obj.h - 10);
+              // Mattress
+              ctx.fillStyle = "#E8E8E8";
+              ctx.fillRect(obj.x + 5, obj.y + 5, obj.w - 10, 15);
+              // Headboard
+              ctx.fillStyle = "#4E342E";
+              ctx.fillRect(obj.x, obj.y - 30, 10, 80);
+              // Pillow
+              ctx.fillStyle = "#FFF";
+              ctx.fillRect(obj.x + 15, obj.y + 3, 30, 12);
+              // Legs
+              ctx.fillStyle = "#3E2723";
+              ctx.fillRect(obj.x + 5, obj.y + obj.h - 5, 8, 8);
+              ctx.fillRect(obj.x + obj.w - 13, obj.y + obj.h - 5, 8, 8);
+              break;
+
+            case "desk":
+              ctx.fillStyle = "#795548";
+              ctx.fillRect(obj.x, obj.y, obj.w, 6);
+              ctx.fillStyle = "#5D4037";
+              ctx.fillRect(obj.x + 5, obj.y + 6, 8, obj.h - 6);
+              ctx.fillRect(obj.x + obj.w - 13, obj.y + 6, 8, obj.h - 6);
+              // Laptop
+              ctx.fillStyle = "#37474F";
+              ctx.fillRect(obj.x + 20, obj.y - 15, 35, 15);
+              ctx.fillStyle = "#455A64";
+              ctx.fillRect(obj.x + 22, obj.y - 13, 31, 11);
+              ctx.fillStyle = "#546E7A";
+              ctx.fillRect(obj.x + 15, obj.y, 45, 3);
+              break;
+
+            case "wardrobe":
+              ctx.fillStyle = "#6D4C41";
+              ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+              ctx.fillStyle = "#795548";
+              ctx.fillRect(obj.x + 3, obj.y + 3, obj.w / 2 - 5, obj.h - 6);
+              ctx.fillRect(
+                obj.x + obj.w / 2 + 2,
+                obj.y + 3,
+                obj.w / 2 - 5,
+                obj.h - 6,
+              );
+              // Handles
+              ctx.fillStyle = "#FFD700";
+              ctx.beginPath();
+              ctx.arc(
+                obj.x + obj.w / 2 - 5,
+                obj.y + obj.h / 2,
+                3,
+                0,
+                Math.PI * 2,
+              );
+              ctx.arc(
+                obj.x + obj.w / 2 + 5,
+                obj.y + obj.h / 2,
+                3,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+              break;
+          }
+        }
+      }
+
+      function drawCleanableItems() {
+        const camL = camera.x - 50,
+          camR = camera.x + CFG.W + 50;
+        for (const obj of objects) {
+          if (obj.type === "decor") continue;
+          if (obj.x + obj.w < camL || obj.x > camR) continue;
+
+          switch (obj.type) {
+            case "trash":
+              if (!obj.cleaned) {
+                // Trash bag
+                ctx.fillStyle = "#333";
+                ctx.beginPath();
+                ctx.ellipse(
+                  obj.x + obj.w / 2,
+                  obj.y + obj.h / 2,
+                  obj.w / 2,
+                  obj.h / 2,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+                ctx.fillStyle = "#444";
+                ctx.beginPath();
+                ctx.ellipse(
+                  obj.x + obj.w / 2,
+                  obj.y + 3,
+                  obj.w / 3,
+                  5,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+                // Stink lines
+                ctx.strokeStyle = "rgba(150,200,50,0.4)";
+                ctx.lineWidth = 1;
+                const wave = Math.sin(game.frame * 0.08) * 3;
+                ctx.beginPath();
+                ctx.moveTo(obj.x + obj.w / 2 - 5, obj.y - 5);
+                ctx.quadraticCurveTo(
+                  obj.x + obj.w / 2 - 5 + wave,
+                  obj.y - 15,
+                  obj.x + obj.w / 2 - 8,
+                  obj.y - 25,
+                );
+                ctx.moveTo(obj.x + obj.w / 2 + 5, obj.y - 5);
+                ctx.quadraticCurveTo(
+                  obj.x + obj.w / 2 + 5 - wave,
+                  obj.y - 15,
+                  obj.x + obj.w / 2 + 8,
+                  obj.y - 25,
+                );
+                ctx.stroke();
+              }
+              break;
+
+            case "clothes":
+              if (!obj.cleaned) {
+                ctx.fillStyle = "#E91E63";
+                ctx.fillRect(obj.x, obj.y, obj.w * 0.4, obj.h);
+                ctx.fillStyle = "#2196F3";
+                ctx.fillRect(
+                  obj.x + obj.w * 0.3,
+                  obj.y + 3,
+                  obj.w * 0.4,
+                  obj.h - 3,
+                );
+                ctx.fillStyle = "#4CAF50";
+                ctx.fillRect(
+                  obj.x + obj.w * 0.6,
+                  obj.y + 2,
+                  obj.w * 0.4,
+                  obj.h - 2,
+                );
+              }
+              break;
+
+            case "dishes":
+              if (!obj.cleaned) {
+                // Dirty plates stacked
+                ctx.fillStyle = "#E0E0E0";
+                ctx.beginPath();
+                ctx.ellipse(obj.x + 10, obj.y + 12, 12, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#BDBDBD";
+                ctx.beginPath();
+                ctx.ellipse(obj.x + 15, obj.y + 8, 12, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#CFD8DC";
+                ctx.beginPath();
+                ctx.ellipse(obj.x + 20, obj.y + 4, 12, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Dirty spots
+                ctx.fillStyle = "rgba(121,85,72,0.5)";
+                ctx.beginPath();
+                ctx.arc(obj.x + 18, obj.y + 3, 3, 0, Math.PI * 2);
+                ctx.arc(obj.x + 22, obj.y + 6, 2, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              break;
+
+            case "bed":
+              if (!obj.cleaned) {
+                // Messy blanket
+                ctx.fillStyle = "#7986CB";
+                ctx.fillRect(obj.x + 20, obj.y, obj.w - 40, obj.h);
+                ctx.fillStyle = "#5C6BC0";
+                ctx.fillRect(obj.x + 30, obj.y + 3, 40, obj.h - 3);
+                ctx.fillStyle = "#9FA8DA";
+                ctx.fillRect(obj.x + 60, obj.y - 5, 30, obj.h + 5);
+              } else {
+                // Clean blanket
+                ctx.fillStyle = "#7986CB";
+                ctx.fillRect(obj.x + 10, obj.y, obj.w - 20, obj.h);
+                ctx.fillStyle = "#9FA8DA";
+                ctx.fillRect(obj.x + 10, obj.y, obj.w - 20, 4);
+              }
+              break;
+
+            case "shelf":
+              if (!obj.fixed) {
+                // Broken tilted shelf
+                ctx.save();
+                ctx.translate(obj.x + obj.w / 2, obj.y + obj.h);
+                ctx.rotate(-0.15);
+                ctx.fillStyle = "#795548";
+                ctx.fillRect(-obj.w / 2, -obj.h, obj.w, obj.h);
+                ctx.fillStyle = "#5D4037";
+                ctx.fillRect(-obj.w / 2 + 5, -obj.h + 10, obj.w - 10, 5);
+                ctx.fillRect(-obj.w / 2 + 5, -obj.h + 40, obj.w - 10, 5);
+                ctx.fillRect(-obj.w / 2 + 5, -obj.h + 70, obj.w - 10, 5);
+                ctx.restore();
+              } else {
+                // Fixed shelf with books
+                ctx.fillStyle = "#795548";
+                ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.fillStyle = "#5D4037";
+                ctx.fillRect(obj.x + 5, obj.y + 10, obj.w - 10, 5);
+                ctx.fillRect(obj.x + 5, obj.y + 40, obj.w - 10, 5);
+                ctx.fillRect(obj.x + 5, obj.y + 70, obj.w - 10, 5);
+                // Books
+                const bookColors = [
+                  "#C62828",
+                  "#1565C0",
+                  "#2E7D32",
+                  "#F9A825",
+                  "#6A1B9A",
+                ];
+                bookColors.forEach((c, i) => {
+                  ctx.fillStyle = c;
+                  ctx.fillRect(obj.x + 8 + i * 8, obj.y + 15, 6, 22);
+                });
+                bookColors.slice(0, 3).forEach((c, i) => {
+                  ctx.fillStyle = c;
+                  ctx.fillRect(obj.x + 8 + i * 12, obj.y + 45, 10, 22);
+                });
+              }
+              break;
+
+            case "pipe":
+              // Pipe always visible
+              ctx.fillStyle = "#78909C";
+              ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+              ctx.fillStyle = "#90A4AE";
+              ctx.fillRect(obj.x + 2, obj.y, obj.w - 4, obj.h);
+
+              if (game.pipeBurst && !game.pipeFixed) {
+                // Leak
+                ctx.fillStyle = "#4FC3F7";
+                const spray = Math.sin(game.frame * 0.3) * 5;
+                ctx.beginPath();
+                ctx.ellipse(
+                  obj.x + obj.w / 2,
+                  obj.y + 20,
+                  8 + spray,
+                  4,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+                // Water drops
+                for (let d = 0; d < 3; d++) {
+                  const dy = (game.frame * 2 + d * 15) % 30;
+                  ctx.fillStyle = "rgba(79,195,247,0.6)";
+                  ctx.beginPath();
+                  ctx.arc(
+                    obj.x + obj.w / 2 + Math.sin(d + game.frame * 0.1) * 8,
+                    obj.y + 20 + dy,
+                    2,
+                    0,
+                    Math.PI * 2,
+                  );
+                  ctx.fill();
+                }
+                // Wrench icon hint
+                ctx.fillStyle = "#FFD700";
+                ctx.font = "12px Arial";
+                ctx.fillText("🔧", obj.x - 5, obj.y - 5);
+              } else if (game.pipeFixed) {
+                // Fixed indicator
+                ctx.fillStyle = "#4CAF50";
+                ctx.font = "10px Arial";
+                ctx.fillText("✓", obj.x + 5, obj.y + 25);
+              }
+              break;
+
+            case "plant":
+              if (obj.placed) {
+                // Pot
+                ctx.fillStyle = "#8D6E63";
+                ctx.fillRect(obj.x + 5, obj.y + 20, obj.w - 10, 20);
+                ctx.fillStyle = "#795548";
+                ctx.fillRect(obj.x + 3, obj.y + 18, obj.w - 6, 5);
+                // Plant
+                ctx.fillStyle = "#4CAF50";
+                ctx.beginPath();
+                ctx.arc(obj.x + obj.w / 2, obj.y + 10, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#66BB6A";
+                ctx.beginPath();
+                ctx.arc(obj.x + obj.w / 2 - 5, obj.y + 5, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(obj.x + obj.w / 2 + 5, obj.y + 8, 7, 0, Math.PI * 2);
+                ctx.fill();
+              } else {
+                // Empty spot marker
+                ctx.strokeStyle = "rgba(255,255,255,0.2)";
+                ctx.setLineDash([4, 4]);
+                ctx.strokeRect(obj.x + 2, obj.y + 15, obj.w - 4, 25);
+                ctx.setLineDash([]);
+                ctx.fillStyle = "rgba(255,255,255,0.15)";
+                ctx.font = "14px Arial";
+                ctx.fillText("🌿", obj.x + 7, obj.y + 32);
+              }
+              break;
+
+            case "catbed":
+              if (obj.placed) {
+                // Cat bed
+                ctx.fillStyle = "#FF8A65";
+                ctx.beginPath();
+                ctx.ellipse(
+                  obj.x + obj.w / 2,
+                  obj.y + obj.h / 2,
+                  obj.w / 2,
+                  obj.h / 2 + 3,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+                ctx.fillStyle = "#FFAB91";
+                ctx.beginPath();
+                ctx.ellipse(
+                  obj.x + obj.w / 2,
+                  obj.y + obj.h / 2,
+                  obj.w / 2 - 5,
+                  obj.h / 2 - 2,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+                // Paw prints
+                ctx.fillStyle = "rgba(0,0,0,0.1)";
+                ctx.beginPath();
+                ctx.arc(obj.x + 15, obj.y + 8, 3, 0, Math.PI * 2);
+                ctx.arc(obj.x + 28, obj.y + 10, 3, 0, Math.PI * 2);
+                ctx.fill();
+              } else {
+                ctx.strokeStyle = "rgba(255,255,255,0.2)";
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.ellipse(
+                  obj.x + obj.w / 2,
+                  obj.y + obj.h / 2,
+                  obj.w / 2,
+                  obj.h / 2,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = "rgba(255,255,255,0.15)";
+                ctx.font = "14px Arial";
+                ctx.fillText("🐱", obj.x + 12, obj.y + 15);
+              }
+              break;
+          }
+        }
+      }
+
+      function drawWater() {
+        if (game.waterLevel <= 0) return;
+        // Water on kitchen floor
+        const kitchen = CFG.ROOMS[2];
+        ctx.fillStyle = "rgba(79,195,247,0.25)";
+        ctx.fillRect(
+          kitchen.start,
+          CFG.GROUND - game.waterLevel,
+          kitchen.end - kitchen.start,
+          game.waterLevel + (CFG.H - CFG.GROUND),
+        );
+
+        // Water ripples
+        ctx.strokeStyle = "rgba(79,195,247,0.3)";
+        ctx.lineWidth = 1;
+        for (let rx = kitchen.start + 10; rx < kitchen.end; rx += 30) {
+          const ry =
+            CFG.GROUND -
+            game.waterLevel +
+            Math.sin(game.frame * 0.05 + rx * 0.1) * 2;
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          ctx.quadraticCurveTo(rx + 15, ry - 2, rx + 30, ry);
+          ctx.stroke();
+        }
+      }
+
+      function drawRats() {
+        const camL = camera.x - 30,
+          camR = camera.x + CFG.W + 30;
+        for (const rat of game.rats) {
+          if (!rat.alive) continue;
+          if (rat.x + rat.w < camL || rat.x > camR) continue;
+
+          ctx.save();
+          ctx.translate(rat.x + rat.w / 2, rat.y + rat.h / 2);
+          ctx.scale(rat.dir, 1);
+          ctx.translate(-rat.w / 2, -rat.h / 2);
+
+          const bob = Math.sin((rat.frame * Math.PI) / 2) * 1;
+          const fleeBob = rat.fleeing ? Math.sin(game.frame * 0.8) * 2 : 0;
+
+          // Shadow
+          ctx.fillStyle = "rgba(0,0,0,0.2)";
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w / 2,
+            rat.h + 2,
+            rat.w / 2 - 2,
+            2,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+
+          // Tail - long curvy tail
+          ctx.strokeStyle = "#8B7070";
+          ctx.lineWidth = 1.5;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(1, rat.h / 2 - bob);
+          const tailWave = Math.sin(game.frame * 0.15 + rat.x) * 4;
+          ctx.bezierCurveTo(
+            -4,
+            rat.h / 2 - 6 - bob + tailWave,
+            -10,
+            rat.h / 2 - 10 - bob - tailWave,
+            -14,
+            rat.h / 2 - 5 - bob + tailWave * 0.5,
+          );
+          ctx.stroke();
+
+          // Back legs
+          ctx.fillStyle = "#5a4a4a";
+          const legAnim = Math.sin((rat.frame * Math.PI) / 2) * 3;
+          ctx.fillRect(3 + legAnim, rat.h - 2, 3, 4);
+          ctx.fillRect(7 - legAnim, rat.h - 2, 3, 4);
+
+          // Body - plump oval
+          ctx.fillStyle = "#5a4a4a";
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w / 2,
+            rat.h / 2 - bob + fleeBob,
+            rat.w / 2 + 1,
+            rat.h / 3 + 1,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+
+          // Belly (lighter underside)
+          ctx.fillStyle = "#8a7a7a";
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w / 2,
+            rat.h / 2 + 1 - bob + fleeBob,
+            rat.w / 3,
+            rat.h / 4 - 1,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+
+          // Front legs
+          ctx.fillStyle = "#5a4a4a";
+          ctx.fillRect(rat.w - 6 - legAnim, rat.h - 2, 3, 4);
+          ctx.fillRect(rat.w - 3 + legAnim, rat.h - 2, 3, 4);
+
+          // Head - pointy snout
+          ctx.fillStyle = "#6a5a5a";
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w - 1,
+            rat.h / 2 - 1 - bob + fleeBob,
+            6,
+            5,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+
+          // Snout (pointy)
+          ctx.fillStyle = "#7a6a6a";
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w + 4,
+            rat.h / 2 - bob + fleeBob,
+            3,
+            2.5,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+
+          // Nose - pink tip
+          ctx.fillStyle = "#dd8888";
+          ctx.beginPath();
+          ctx.arc(rat.w + 6, rat.h / 2 - bob + fleeBob, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Ears - round pink ears
+          ctx.fillStyle = "#6a5a5a";
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w - 3,
+            rat.h / 2 - 6 - bob + fleeBob,
+            4,
+            4,
+            -0.3,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w + 1,
+            rat.h / 2 - 5 - bob + fleeBob,
+            4,
+            4,
+            0.3,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+          // Inner ear pink
+          ctx.fillStyle = "#cc9999";
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w - 3,
+            rat.h / 2 - 6 - bob + fleeBob,
+            2.5,
+            2.5,
+            -0.3,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+          ctx.beginPath();
+          ctx.ellipse(
+            rat.w + 1,
+            rat.h / 2 - 5 - bob + fleeBob,
+            2.5,
+            2.5,
+            0.3,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+
+          // Eyes - beady and menacing
+          ctx.fillStyle = rat.fleeing ? "#ff4444" : "#111";
+          ctx.beginPath();
+          ctx.arc(
+            rat.w + 1,
+            rat.h / 2 - 2 - bob + fleeBob,
+            1.8,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+          // Eye shine
+          ctx.fillStyle = rat.fleeing ? "#ff8888" : "#fff";
+          ctx.beginPath();
+          ctx.arc(
+            rat.w + 1.5,
+            rat.h / 2 - 2.5 - bob + fleeBob,
+            0.6,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+
+          // Whiskers
+          ctx.strokeStyle = "#999";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(rat.w + 4, rat.h / 2 - 1 - bob + fleeBob);
+          ctx.lineTo(rat.w + 10, rat.h / 2 - 3 - bob + fleeBob);
+          ctx.moveTo(rat.w + 4, rat.h / 2 + 1 - bob + fleeBob);
+          ctx.lineTo(rat.w + 10, rat.h / 2 + 1 - bob + fleeBob);
+          ctx.moveTo(rat.w + 4, rat.h / 2 - bob + fleeBob);
+          ctx.lineTo(rat.w + 9, rat.h / 2 - 4 - bob + fleeBob);
+          ctx.stroke();
+
+          // Scared indicator when fleeing
+          if (rat.fleeing) {
+            ctx.fillStyle = "#FF5722";
+            ctx.font = "8px Arial";
+            ctx.fillText("!", rat.w / 2, -4);
+          }
+
+          ctx.restore();
+        }
+      }
+
+      function drawRoaches() {
+        const camL = camera.x - 20,
+          camR = camera.x + CFG.W + 20;
+        for (const roach of game.roaches) {
+          if (!roach.alive) continue;
+          if (roach.x + roach.w < camL || roach.x > camR) continue;
+
+          ctx.save();
+          ctx.translate(roach.x + roach.w / 2, roach.y + roach.h / 2);
+
+          if (roach.squished) {
+            // Squished roach - flat splat
+            ctx.scale(1.3, 0.3);
+            ctx.fillStyle = "#3a2a1a";
+            ctx.beginPath();
+            ctx.ellipse(
+              0,
+              0,
+              roach.w / 2 + 2,
+              roach.h / 2 + 2,
+              0,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+            // Splat marks
+            ctx.fillStyle = "#2a1a0a";
+            ctx.beginPath();
+            ctx.arc(-3, -2, 2, 0, Math.PI * 2);
+            ctx.arc(3, 1, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            // Sandal print indicator
+            ctx.restore();
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.font = "10px Arial";
+            ctx.fillText("👡", roach.x - 2, roach.y - 6);
+            continue;
+          }
+
+          ctx.scale(roach.dir, 1);
+
+          const legAnim = roach.scurrying
+            ? Math.sin((roach.frame * Math.PI) / 2) * 2
+            : 0;
+
+          // Shadow
+          ctx.fillStyle = "rgba(0,0,0,0.15)";
+          ctx.beginPath();
+          ctx.ellipse(0, roach.h / 2 + 1, roach.w / 2, 1.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Legs (3 pairs) - fast scurrying legs
+          ctx.strokeStyle = "#4a3520";
+          ctx.lineWidth = 0.8;
+          // Left legs
+          ctx.beginPath();
+          ctx.moveTo(-2, -1);
+          ctx.lineTo(-5 - legAnim, -3);
+          ctx.moveTo(-1, 0);
+          ctx.lineTo(-6, 0 - legAnim * 0.5);
+          ctx.moveTo(0, 1);
+          ctx.lineTo(-5 + legAnim, 3);
+          ctx.stroke();
+          // Right legs
+          ctx.beginPath();
+          ctx.moveTo(2, -1);
+          ctx.lineTo(5 + legAnim, -3);
+          ctx.moveTo(1, 0);
+          ctx.lineTo(6, 0 + legAnim * 0.5);
+          ctx.moveTo(0, 1);
+          ctx.lineTo(5 - legAnim, 3);
+          ctx.stroke();
+
+          // Body - dark brown oval
+          ctx.fillStyle = "#4a2a15";
+          ctx.beginPath();
+          ctx.ellipse(0, 0, roach.w / 2, roach.h / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Wing line (center)
+          ctx.strokeStyle = "#2a1a08";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(0, -roach.h / 2 + 1);
+          ctx.lineTo(0, roach.h / 2 - 1);
+          ctx.stroke();
+
+          // Wing sheen
+          ctx.fillStyle = "rgba(255,200,120,0.08)";
+          ctx.beginPath();
+          ctx.ellipse(
+            -1.5,
+            -0.5,
+            roach.w / 3,
+            roach.h / 3,
+            -0.2,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+
+          // Head
+          ctx.fillStyle = "#3a2010";
+          ctx.beginPath();
+          ctx.ellipse(roach.w / 2 + 1, 0, 2.5, 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Antennae
+          ctx.strokeStyle = "#5a4030";
+          ctx.lineWidth = 0.5;
+          const antWave = Math.sin(game.frame * 0.1 + roach.x) * 1.5;
+          ctx.beginPath();
+          ctx.moveTo(roach.w / 2 + 2, -1);
+          ctx.quadraticCurveTo(
+            roach.w / 2 + 5,
+            -3 + antWave,
+            roach.w / 2 + 7,
+            -4 + antWave,
+          );
+          ctx.moveTo(roach.w / 2 + 2, 1);
+          ctx.quadraticCurveTo(
+            roach.w / 2 + 5,
+            3 - antWave,
+            roach.w / 2 + 7,
+            4 - antWave,
+          );
+          ctx.stroke();
+
+          ctx.restore();
+        }
+      }
+
+      function drawCat() {
+        ctx.save();
+        ctx.translate(cat.x, cat.y);
+
+        const bob =
+          cat.state === "following" && cat.frame > 0
+            ? Math.sin((cat.frame * Math.PI) / 2) * 2
+            : 0;
+
+        // Scared shiver
+        const shiver =
+          cat.state === "scared" ? Math.sin(game.frame * 0.5) * 2 : 0;
+
+        ctx.translate(shiver, 0);
+        ctx.scale(cat.dir, 1);
+        if (cat.dir < 0) ctx.translate(-cat.w, 0);
+
+        // Shadow
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.beginPath();
+        ctx.ellipse(cat.w / 2, cat.h + 2, 10, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Body
+        ctx.fillStyle = "#FF9800";
+        ctx.fillRect(3, 8 - bob, 18, 10);
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(cat.w / 2, 5 - bob, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ears
+        ctx.beginPath();
+        ctx.moveTo(5, 1 - bob);
+        ctx.lineTo(7, -5 - bob);
+        ctx.lineTo(9, 1 - bob);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(15, 1 - bob);
+        ctx.lineTo(17, -5 - bob);
+        ctx.lineTo(19, 1 - bob);
+        ctx.fill();
+
+        // Inner ears
+        ctx.fillStyle = "#FFB74D";
+        ctx.beginPath();
+        ctx.moveTo(6, 0 - bob);
+        ctx.lineTo(7, -3 - bob);
+        ctx.lineTo(8, 0 - bob);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(16, 0 - bob);
+        ctx.lineTo(17, -3 - bob);
+        ctx.lineTo(18, 0 - bob);
+        ctx.fill();
+
+        // Eyes
+        if (cat.state === "scared") {
+          // Wide scared eyes
+          ctx.fillStyle = "#333";
+          ctx.beginPath();
+          ctx.arc(8, 4 - bob, 2.5, 0, Math.PI * 2);
+          ctx.arc(16, 4 - bob, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#fff";
+          ctx.beginPath();
+          ctx.arc(8.5, 3.5 - bob, 1, 0, Math.PI * 2);
+          ctx.arc(16.5, 3.5 - bob, 1, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (game.catMood >= 80) {
+          // Happy closed eyes
+          ctx.strokeStyle = "#333";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(8, 4 - bob, 2, 0, Math.PI);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(16, 4 - bob, 2, 0, Math.PI);
+          ctx.stroke();
+        } else {
+          // Normal eyes
+          ctx.fillStyle = "#333";
+          ctx.beginPath();
+          ctx.arc(8, 4 - bob, 1.5, 0, Math.PI * 2);
+          ctx.arc(16, 4 - bob, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Nose
+        ctx.fillStyle = "#E91E63";
+        ctx.beginPath();
+        ctx.arc(12, 7 - bob, 1, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Whiskers
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(3, 5 - bob);
+        ctx.lineTo(-2, 4 - bob);
+        ctx.moveTo(3, 7 - bob);
+        ctx.lineTo(-2, 8 - bob);
+        ctx.moveTo(21, 5 - bob);
+        ctx.lineTo(26, 4 - bob);
+        ctx.moveTo(21, 7 - bob);
+        ctx.lineTo(26, 8 - bob);
+        ctx.stroke();
+
+        // Legs
+        ctx.fillStyle = "#FF9800";
+        if (cat.state === "following" && cat.frame > 0) {
+          const legOff = Math.sin((cat.frame * Math.PI) / 2) * 3;
+          ctx.fillRect(5 + legOff, 17 - bob, 3, 5);
+          ctx.fillRect(10 - legOff, 17 - bob, 3, 5);
+          ctx.fillRect(14 + legOff, 17 - bob, 3, 5);
+          ctx.fillRect(17 - legOff, 17 - bob, 3, 5);
+        } else {
+          ctx.fillRect(5, 17, 3, 5);
+          ctx.fillRect(10, 17, 3, 5);
+          ctx.fillRect(14, 17, 3, 5);
+          ctx.fillRect(17, 17, 3, 5);
+        }
+
+        // Paws
+        ctx.fillStyle = "#FFB74D";
+        if (cat.state === "following" && cat.frame > 0) {
+          const legOff = Math.sin((cat.frame * Math.PI) / 2) * 3;
+          ctx.fillRect(5 + legOff, 21 - bob, 3, 2);
+          ctx.fillRect(10 - legOff, 21 - bob, 3, 2);
+          ctx.fillRect(14 + legOff, 21 - bob, 3, 2);
+          ctx.fillRect(17 - legOff, 21 - bob, 3, 2);
+        } else {
+          ctx.fillRect(5, 21, 3, 2);
+          ctx.fillRect(10, 21, 3, 2);
+          ctx.fillRect(14, 21, 3, 2);
+          ctx.fillRect(17, 21, 3, 2);
+        }
+
+        // Tail
+        ctx.strokeStyle = "#FF9800";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(20, 12 - bob);
+        const tailWag =
+          Math.sin(game.frame * (cat.state === "scared" ? 0.3 : 0.1)) *
+          (cat.state === "scared" ? 5 : 8);
+        ctx.quadraticCurveTo(
+          26 + tailWag,
+          6 - bob,
+          24 + tailWag * 0.5,
+          -2 - bob,
+        );
+        ctx.stroke();
+
+        // Mood indicator
+        if (cat.state === "scared") {
+          ctx.fillStyle = "#FF5722";
+          ctx.font = "10px Arial";
+          ctx.fillText("😱", 6, -10);
+        } else if (game.catMood >= 80) {
+          ctx.fillStyle = "#FF69B4";
+          ctx.font = "10px Arial";
+          if (game.frame % 60 < 30) ctx.fillText("💛", 6, -10);
+        }
+
+        ctx.restore();
+      }
+
+      function drawPlayer() {
+        ctx.save();
+        ctx.translate(player.x + player.w / 2, player.y);
+        ctx.scale(player.dir, 1);
+        ctx.translate(-player.w / 2, 0);
+
+        const bob = player.walking
+          ? Math.sin((player.frame * Math.PI) / 2) * 2
+          : 0;
+
+        // Shadow
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.beginPath();
+        ctx.ellipse(16, 48, 14, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Boots
+        ctx.fillStyle = "#5D4037";
+        if (player.walking) {
+          const lo = Math.sin((player.frame * Math.PI) / 2) * 5;
+          ctx.fillRect(8 + lo, 42 - bob, 8, 6);
+          ctx.fillRect(16 - lo, 42 - bob, 8, 6);
+          ctx.fillStyle = "#3E2723";
+          ctx.fillRect(8 + lo, 46 - bob, 8, 2);
+          ctx.fillRect(16 - lo, 46 - bob, 8, 2);
+        } else {
+          ctx.fillRect(8, 42, 8, 6);
+          ctx.fillRect(16, 42, 8, 6);
+          ctx.fillStyle = "#3E2723";
+          ctx.fillRect(8, 46, 8, 2);
+          ctx.fillRect(16, 46, 8, 2);
+        }
+
+        // Legs
+        ctx.fillStyle = "#37474F";
+        if (player.walking) {
+          const lo = Math.sin((player.frame * Math.PI) / 2) * 5;
+          ctx.fillRect(9 + lo, 34 - bob, 7, 10);
+          ctx.fillRect(16 - lo, 34 - bob, 7, 10);
+        } else {
+          ctx.fillRect(9, 34, 7, 10);
+          ctx.fillRect(16, 34, 7, 10);
+        }
+
+        // Body (casual hoodie)
+        ctx.fillStyle = "#5C6BC0";
+        ctx.fillRect(6, 19 - bob, 20, 17);
+        // Hoodie pocket
+        ctx.fillStyle = "#3F51B5";
+        ctx.fillRect(9, 28 - bob, 14, 6);
+        // Zipper line
+        ctx.fillStyle = "#7986CB";
+        ctx.fillRect(15, 19 - bob, 2, 17);
+
+        // Hoodie collar
+        ctx.fillStyle = "#3F51B5";
+        ctx.fillRect(10, 19 - bob, 12, 4);
+
+        // Arms
+        ctx.fillStyle = "#5C6BC0";
+        if (player.walking) {
+          const ao = Math.sin((player.frame * Math.PI) / 2) * 4;
+          ctx.fillRect(3, 21 - bob + ao, 5, 12);
+          ctx.fillRect(24, 21 - bob - ao, 5, 12);
+        } else if (player.sweeping) {
+          // Sweeping animation
+          ctx.fillRect(24, 18 - bob, 5, 14);
+          ctx.fillRect(3, 24 - bob, 5, 8);
+          // Broom
+          ctx.fillStyle = "#8D6E63";
+          ctx.fillRect(28, 14 - bob, 3, 30);
+          ctx.fillStyle = "#FFD54F";
+          ctx.fillRect(25, 40, 9, 6);
+          ctx.fillStyle = "#FFC107";
+          ctx.fillRect(24, 44, 11, 4);
+        } else {
+          ctx.fillRect(3, 23, 5, 10);
+          ctx.fillRect(24, 23, 5, 10);
+        }
+
+        // Hands
+        ctx.fillStyle = "#FFCCBC";
+        if (!player.sweeping) {
+          ctx.fillRect(
+            3,
+            player.walking
+              ? 31 - bob + Math.sin((player.frame * Math.PI) / 2) * 4
+              : 33,
+            5,
+            3,
+          );
+          ctx.fillRect(
+            24,
+            player.walking
+              ? 31 - bob - Math.sin((player.frame * Math.PI) / 2) * 4
+              : 33,
+            5,
+            3,
+          );
+        }
+
+        // Head
+        ctx.fillStyle = "#FFCCBC";
+        ctx.beginPath();
+        ctx.arc(16, 10 - bob, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hair
+        ctx.fillStyle = "#1a1a1a";
+        ctx.beginPath();
+        ctx.arc(16, 6 - bob, 13, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(3, 4 - bob, 6, 14);
+        ctx.fillRect(23, 4 - bob, 6, 14);
+        // Bangs
+        ctx.fillStyle = "#222";
+        ctx.fillRect(5, 1 - bob, 5, 7);
+        ctx.fillRect(9, -1 - bob, 5, 8);
+        ctx.fillRect(14, 0 - bob, 4, 7);
+        ctx.fillRect(18, -1 - bob, 5, 8);
+        ctx.fillRect(22, 1 - bob, 5, 7);
+
+        // Glasses
+        ctx.strokeStyle = "#555";
+        ctx.lineWidth = 1.5;
+        ctx.fillStyle = "rgba(200,230,255,0.25)";
+        ctx.beginPath();
+        ctx.roundRect(8, 9 - bob, 8, 6, 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.roundRect(17, 9 - bob, 8, 6, 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(16, 12 - bob);
+        ctx.lineTo(17, 12 - bob);
+        ctx.stroke();
+
+        // Eyes
+        ctx.fillStyle = "#333";
+        ctx.beginPath();
+        ctx.arc(12, 12 - bob, 1.5, 0, Math.PI * 2);
+        ctx.arc(21, 12 - bob, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(12.5, 11.5 - bob, 0.7, 0, Math.PI * 2);
+        ctx.arc(21.5, 11.5 - bob, 0.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Mouth
+        ctx.strokeStyle = "#555";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(16, 16 - bob, 2, 0.1, Math.PI - 0.1);
+        ctx.stroke();
+
+        // Blush
+        ctx.fillStyle = "rgba(255,138,128,0.3)";
+        ctx.beginPath();
+        ctx.ellipse(9, 15 - bob, 3, 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(23, 15 - bob, 3, 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawCollectibles() {
+        const camL = camera.x - 20,
+          camR = camera.x + CFG.W + 20;
+        for (const c of game.collectibles) {
+          if (c.collected) continue;
+          if (c.x < camL || c.x > camR) continue;
+          const bobY = c.y + Math.sin(game.frame * 0.04 + c.bobOffset) * 5;
+          const glow =
+            (Math.sin(c.sparkle + game.frame * 0.05) + 1) * 0.3 + 0.4;
+
+          ctx.save();
+          ctx.globalAlpha = glow;
+
+          if (c.type === "star") {
+            // Gold star
+            ctx.fillStyle = "#FFD700";
+            const cx = c.x,
+              cy = bobY,
+              r = c.size;
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+              const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+              const outerX = cx + Math.cos(angle) * r;
+              const outerY = cy + Math.sin(angle) * r;
+              const innerAngle = angle + Math.PI / 5;
+              const innerX = cx + Math.cos(innerAngle) * r * 0.4;
+              const innerY = cy + Math.sin(innerAngle) * r * 0.4;
+              if (i === 0) ctx.moveTo(outerX, outerY);
+              else ctx.lineTo(outerX, outerY);
+              ctx.lineTo(innerX, innerY);
+            }
+            ctx.closePath();
+            ctx.fill();
+            // Star outline
+            ctx.strokeStyle = "#FFA000";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          } else if (c.type === "heart") {
+            // Pink heart
+            ctx.fillStyle = "#FF69B4";
+            const cx = c.x,
+              cy = bobY,
+              s = c.size * 0.7;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy + s * 0.3);
+            ctx.bezierCurveTo(
+              cx - s,
+              cy - s * 0.5,
+              cx - s * 0.5,
+              cy - s,
+              cx,
+              cy - s * 0.4,
+            );
+            ctx.bezierCurveTo(
+              cx + s * 0.5,
+              cy - s,
+              cx + s,
+              cy - s * 0.5,
+              cx,
+              cy + s * 0.3,
+            );
+            ctx.fill();
+          } else {
+            // Cat treat (fish shape)
+            ctx.fillStyle = "#FFA726";
+            ctx.beginPath();
+            ctx.ellipse(c.x, bobY, c.size, c.size * 0.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Tail
+            ctx.beginPath();
+            ctx.moveTo(c.x + c.size, bobY);
+            ctx.lineTo(c.x + c.size + 4, bobY - 4);
+            ctx.lineTo(c.x + c.size + 4, bobY + 4);
+            ctx.closePath();
+            ctx.fill();
+          }
+
+          // Subtle sparkle ring
+          ctx.strokeStyle = "rgba(255,255,200,0.3)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(
+            c.x,
+            bobY,
+            c.size + 3 + Math.sin(game.frame * 0.08) * 2,
+            0,
+            Math.PI * 2,
+          );
+          ctx.stroke();
+
+          ctx.restore();
+        }
+      }
+
+      function drawHearts() {
+        for (const h of game.hearts) {
+          const alpha = h.life / h.maxLife;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = "#FF69B4";
+          const cx = h.x,
+            cy = h.y,
+            s = h.size;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy + s * 0.3);
+          ctx.bezierCurveTo(
+            cx - s,
+            cy - s * 0.5,
+            cx - s * 0.5,
+            cy - s,
+            cx,
+            cy - s * 0.4,
+          );
+          ctx.bezierCurveTo(
+            cx + s * 0.5,
+            cy - s,
+            cx + s,
+            cy - s * 0.5,
+            cx,
+            cy + s * 0.3,
+          );
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function drawAmbientParticles() {
+        const camL = camera.x - 10,
+          camR = camera.x + CFG.W + 10;
+        for (const p of game.ambientParticles) {
+          if (p.x < camL || p.x > camR) continue;
+          const alpha = (p.life / p.maxLife) * 0.25;
+          ctx.fillStyle = `rgba(255,240,200,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function drawFloatingTexts() {
+        for (const ft of floatingTexts) {
+          const alpha = ft.life / ft.maxLife;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = "#FFD700";
+          ctx.font = "bold 10px 'VT323', monospace";
+          ctx.textAlign = "center";
+          ctx.strokeStyle = "rgba(0,0,0,0.5)";
+          ctx.lineWidth = 3;
+          ctx.strokeText(ft.text, ft.x, ft.y);
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.textAlign = "left";
+          ctx.restore();
+        }
+      }
+
+      function drawSparkles() {
+        for (const s of game.sparkles) {
+          const alpha = s.life / s.maxLife;
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          // Star shape
+          const cx = s.x,
+            cy = s.y,
+            r = s.size;
+          for (let i = 0; i < 5; i++) {
+            const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+            const outerX = cx + Math.cos(angle) * r;
+            const outerY = cy + Math.sin(angle) * r;
+            const innerAngle = angle + Math.PI / 5;
+            const innerX = cx + Math.cos(innerAngle) * r * 0.4;
+            const innerY = cy + Math.sin(innerAngle) * r * 0.4;
+            if (i === 0) ctx.moveTo(outerX, outerY);
+            else ctx.lineTo(outerX, outerY);
+            ctx.lineTo(innerX, innerY);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function drawDustClouds() {
+        for (const d of game.dustClouds) {
+          const alpha = (d.life / d.maxLife) * 0.4;
+          ctx.fillStyle = `rgba(200,180,150,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(
+            d.x + d.size * 0.5,
+            d.y - d.size * 0.3,
+            d.size * 0.7,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+        }
+      }
+
+      function drawConfetti() {
+        if (!game.confettiActive || game.confetti.length === 0) return;
+        for (const c of game.confetti) {
+          ctx.save();
+          ctx.translate(c.x - camera.x, c.y);
+          ctx.rotate(c.rot);
+          ctx.fillStyle = c.color;
+          ctx.fillRect(-c.size / 2, -c.size / 4, c.size, c.size / 2);
+          ctx.restore();
+        }
+      }
+
+      // ==================== GAME LOOP ====================
+      function gameLoop() {
+        update();
+        render();
+        requestAnimationFrame(gameLoop);
+      }
+
+      gameLoop();
+    </script>
+  </body>
+</html>
