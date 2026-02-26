@@ -1502,8 +1502,8 @@
         canvas.width = CFG.W * dpr;
         canvas.height = CFG.H * dpr;
         if (detectMobile()) {
-          canvas.style.width = '100%';
-          canvas.style.height = '100%';
+          canvas.style.width = "100%";
+          canvas.style.height = "100%";
         } else {
           canvas.style.width = CFG.W + "px";
           canvas.style.height = CFG.H + "px";
@@ -1546,9 +1546,12 @@
 
         // Convert to pixel offset for CSS transform
         mobileCamera.targetX = -targetX * coverScale;
-        mobileCamera.translateX += (mobileCamera.targetX - mobileCamera.translateX) * mobileCamera.smoothSpeed;
+        mobileCamera.translateX +=
+          (mobileCamera.targetX - mobileCamera.translateX) *
+          mobileCamera.smoothSpeed;
 
-        canvas.style.objectPosition = (targetX / (CFG.W - visibleGameWidth) * 100) + '% center';
+        canvas.style.objectPosition =
+          (targetX / (CFG.W - visibleGameWidth)) * 100 + "% center";
       }
 
       // ==================== CAMERA ====================
@@ -2223,6 +2226,17 @@
           if (roach.pauseTimer <= 0) {
             roach.scurrying = true;
             roach.x += roach.dir * roach.speed;
+            
+            // Bounce off walls and clamp position
+            if (roach.x < 50) {
+              roach.x = 50;
+              roach.dir = 1;
+            }
+            if (roach.x > CFG.WORLD_W - 50) {
+              roach.x = CFG.WORLD_W - 50;
+              roach.dir = -1;
+            }
+            
             // Random direction change
             if (Math.random() < 0.02) {
               roach.dir *= -1;
@@ -2234,10 +2248,7 @@
               roach.pauseTimer = 30 + Math.random() * 80;
               roach.scurrying = false;
             }
-            // Bounce off walls
-            if (roach.x < 50 || roach.x > CFG.WORLD_W - 50) {
-              roach.dir *= -1;
-            }
+            
             // Flee from player if close
             const dist = player.x + player.w / 2 - (roach.x + roach.w / 2);
             if (Math.abs(dist) < 80 && Math.abs(dist) > 20) {
@@ -3123,13 +3134,22 @@
             rat.pauseTimer--;
             if (rat.pauseTimer <= 0) {
               rat.x += rat.dir * rat.speed;
+              
+              // Bounce off walls and clamp position
+              if (rat.x < 50) {
+                rat.x = 50;
+                rat.dir = 1;
+              }
+              if (rat.x > CFG.WORLD_W - 50) {
+                rat.x = CFG.WORLD_W - 50;
+                rat.dir = -1;
+              }
+              
               // Random direction change
               if (Math.random() < 0.01) {
                 rat.dir *= -1;
                 rat.pauseTimer = 30 + Math.random() * 60;
               }
-              // Bounce off walls
-              if (rat.x < 50 || rat.x > CFG.WORLD_W - 50) rat.dir *= -1;
             }
           }
 
