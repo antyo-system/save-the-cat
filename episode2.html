@@ -1422,6 +1422,17 @@
         startMusic();
         document.getElementById("hud").style.display = "flex";
         document.getElementById("roomIndicator").style.display = "flex";
+        
+        // Center camera to player immediately
+        const halfW = CFG.W / 2;
+        camera.x = Math.max(
+          0,
+          Math.min(CFG.WORLD_W - CFG.W, player.x - halfW + player.w / 2),
+        );
+        camera.targetX = camera.x;
+        camera.y = 0;
+        camera.targetY = 0;
+        
         showActBanner(1);
       });
 
