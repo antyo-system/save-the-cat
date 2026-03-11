@@ -18,16 +18,16 @@
         box-sizing: border-box;
       }
       :root {
-        --bg: #0a0a1a;
-        --card: rgba(30, 28, 50, 0.85);
-        --gold: #ffd700;
-        --gold-dim: #a08520;
-        --accent: #5c6bc0;
-        --accent-lt: #7986cb;
-        --txt: #e8e6f0;
-        --dim: #8884a8;
-        --ok: #4caf50;
-        --danger: #e74c3c;
+        --bg: #141627;
+        --card: rgba(40, 42, 68, 0.7);
+        --gold: #ffc845;
+        --gold-dim: #b09530;
+        --accent: #6c7bd4;
+        --accent-lt: #8e9ae0;
+        --txt: #edeaf5;
+        --dim: #9994b8;
+        --ok: #5cc066;
+        --danger: #e85d50;
       }
       html,
       body {
@@ -50,33 +50,33 @@
         z-index: 0;
         background: linear-gradient(
           180deg,
-          #05051a 0%,
-          #0a0a2e 40%,
-          #0f1035 70%,
-          #1a1040 100%
+          #0e1028 0%,
+          #141838 40%,
+          #1a1e48 70%,
+          #221a50 100%
         );
       }
       .nebula {
         position: absolute;
         border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.35;
+        filter: blur(100px);
+        opacity: 0.3;
         will-change: opacity;
-        animation: nebPulse 8s ease-in-out infinite alternate;
+        animation: nebPulse 10s ease-in-out infinite alternate;
       }
       .nebula.n1 {
-        width: 300px;
-        height: 300px;
+        width: 350px;
+        height: 350px;
         top: 20%;
         left: 15%;
-        background: rgba(92, 107, 192, 0.15);
+        background: rgba(100, 120, 210, 0.12);
       }
       .nebula.n2 {
-        width: 260px;
-        height: 260px;
+        width: 300px;
+        height: 300px;
         top: 50%;
         right: 10%;
-        background: rgba(156, 39, 176, 0.1);
+        background: rgba(160, 80, 200, 0.08);
         animation-delay: -4s;
       }
       @keyframes nebPulse {
@@ -344,10 +344,9 @@
         font-size: 22px;
         color: var(--gold);
         text-shadow:
-          0 0 10px rgba(255, 215, 0, 0.5),
-          0 0 30px rgba(255, 215, 0, 0.2),
-          0 2px 0 #a08520;
-        letter-spacing: 2px;
+          0 0 12px rgba(255, 200, 69, 0.35),
+          0 0 40px rgba(255, 200, 69, 0.12);
+        letter-spacing: 3px;
         line-height: 1.4;
       }
       .logo-subtitle {
@@ -385,9 +384,9 @@
       .episode-card {
         width: 100%;
         background: var(--card);
-        border: 2px solid rgba(92, 107, 192, 0.3);
-        border-radius: 12px;
-        padding: 16px 20px;
+        border: 1.5px solid rgba(108, 123, 212, 0.2);
+        border-radius: 14px;
+        padding: 18px 22px;
         display: flex;
         align-items: center;
         gap: 16px;
@@ -398,6 +397,7 @@
         text-decoration: none;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
+        backdrop-filter: blur(8px);
       }
       .episode-card::before {
         content: "";
@@ -418,9 +418,10 @@
         left: 100%;
       }
       .episode-card:hover {
-        border-color: var(--gold);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.12);
+        border-color: rgba(255, 200, 69, 0.5);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(255, 200, 69, 0.08);
+        background: rgba(50, 52, 78, 0.75);
       }
       .episode-card:active {
         transform: translateY(0) scale(0.98);
@@ -494,14 +495,14 @@
         text-transform: uppercase;
       }
       .ep-badge.playable {
-        background: rgba(76, 175, 80, 0.2);
+        background: rgba(92, 192, 102, 0.12);
         color: var(--ok);
-        border: 1px solid rgba(76, 175, 80, 0.4);
+        border: 1px solid rgba(92, 192, 102, 0.3);
       }
       .ep-badge.soon {
-        background: rgba(100, 100, 120, 0.2);
-        color: #888;
-        border: 1px solid rgba(100, 100, 120, 0.3);
+        background: rgba(110, 110, 130, 0.15);
+        color: #999;
+        border: 1px solid rgba(110, 110, 130, 0.25);
       }
 
       .ep-arrow {
@@ -548,13 +549,13 @@
         border: 2px solid;
       }
       .btn-exit {
-        background: rgba(231, 76, 60, 0.1);
-        border-color: rgba(231, 76, 60, 0.3);
-        color: #e74c3c;
+        background: rgba(232, 93, 80, 0.08);
+        border-color: rgba(232, 93, 80, 0.2);
+        color: #e85d50;
       }
       .btn-exit:hover {
-        background: rgba(231, 76, 60, 0.2);
-        border-color: #e74c3c;
+        background: rgba(232, 93, 80, 0.15);
+        border-color: rgba(232, 93, 80, 0.5);
         transform: translateY(-1px);
       }
       .btn-exit:active {
@@ -596,8 +597,9 @@
         display: flex;
       }
       .modal-box {
-        background: #1e1c32;
-        border: 2px solid rgba(92, 107, 192, 0.4);
+        background: rgba(30, 30, 55, 0.95);
+        backdrop-filter: blur(16px);
+        border: 1.5px solid rgba(108, 123, 212, 0.25);
         border-radius: 14px;
         padding: 28px 24px;
         max-width: 380px;
@@ -696,7 +698,7 @@
         align-items: center;
         justify-content: center;
         flex-direction: column;
-        gap: 16px;
+        gap: 18px;
       }
       .loading-overlay.active {
         display: flex;

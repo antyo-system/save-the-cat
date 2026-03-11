@@ -20,7 +20,7 @@
       }
 
       body {
-        background: #0f0c29;
+        background: #121430;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -32,11 +32,11 @@
 
       .game-wrapper {
         position: relative;
-        border: 4px solid #3d3d5c;
-        border-radius: 8px;
+        border: 3px solid rgba(70, 70, 110, 0.45);
+        border-radius: 12px;
         box-shadow:
-          0 0 60px rgba(100, 100, 200, 0.4),
-          inset 0 0 30px rgba(0, 0, 0, 0.3);
+          0 0 50px rgba(100, 120, 200, 0.2),
+          inset 0 0 20px rgba(0, 0, 0, 0.15);
       }
 
       /* ===== TOP BAR BUTTONS ===== */
@@ -70,8 +70,8 @@
       .icon-btn {
         width: 40px;
         height: 40px;
-        background: rgba(0, 0, 0, 0.6);
-        border: 2px solid rgba(90, 90, 138, 0.8);
+        background: rgba(10, 10, 30, 0.45);
+        border: 1.5px solid rgba(100, 100, 160, 0.45);
         border-radius: 10px;
         color: #fff;
         font-size: 18px;
@@ -80,13 +80,13 @@
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(6px);
         -webkit-tap-highlight-color: transparent;
       }
       .icon-btn:hover {
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(10, 10, 30, 0.65);
         transform: scale(1.08);
-        border-color: #8a8aba;
+        border-color: rgba(140, 140, 200, 0.5);
       }
       .icon-btn:active {
         transform: scale(0.95);
@@ -108,11 +108,11 @@
       }
 
       .hud-card {
-        background: rgba(0, 0, 0, 0.55);
-        border: 2px solid rgba(90, 90, 138, 0.6);
+        background: rgba(10, 10, 30, 0.45);
+        border: 1.5px solid rgba(100, 100, 160, 0.35);
         border-radius: 10px;
         padding: 8px 12px;
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(6px);
         min-width: 140px;
       }
 
@@ -220,12 +220,12 @@
         position: absolute;
         top: 56px;
         right: 12px;
-        background: rgba(0, 0, 0, 0.6);
-        border: 2px solid rgba(90, 90, 138, 0.6);
+        background: rgba(10, 10, 30, 0.5);
+        border: 1.5px solid rgba(100, 100, 160, 0.35);
         border-radius: 10px;
         padding: 10px 14px;
         z-index: 90;
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(6px);
         max-width: 180px;
         display: none;
       }
@@ -325,17 +325,18 @@
       }
 
       .dialog-box {
-        background: linear-gradient(145deg, #2a2a4a, #1e1e38);
-        border: 3px solid #5a5a8a;
-        border-radius: 12px;
+        background: rgba(36, 36, 68, 0.95);
+        backdrop-filter: blur(12px);
+        border: 2px solid rgba(100, 100, 160, 0.3);
+        border-radius: 14px;
         padding: 22px 26px;
         max-width: 400px;
         width: 100%;
         color: #fff;
         font-family: "VT323", monospace;
         box-shadow:
-          0 12px 40px rgba(0, 0, 0, 0.6),
-          0 0 20px rgba(90, 90, 138, 0.2);
+          0 12px 40px rgba(0, 0, 0, 0.4),
+          0 0 15px rgba(100, 100, 160, 0.1);
         animation: dialogPop 0.25s ease-out;
         max-height: 90vh;
         overflow-y: auto;
@@ -391,23 +392,23 @@
         min-width: 90px;
       }
       .dialog-btn.primary {
-        background: linear-gradient(135deg, #4a7c59, #3a6c49);
+        background: linear-gradient(135deg, #4a8c5c, #3a7a4c);
         color: white;
-        box-shadow: 0 3px 10px rgba(74, 124, 89, 0.4);
+        box-shadow: 0 3px 12px rgba(74, 140, 92, 0.25);
       }
       .dialog-btn.primary:hover {
-        background: linear-gradient(135deg, #5a9c69, #4a8c59);
+        background: linear-gradient(135deg, #5aaa6c, #4a9a5c);
         transform: translateY(-2px);
       }
       .dialog-btn.primary:active {
         transform: translateY(0);
       }
       .dialog-btn.secondary {
-        background: linear-gradient(135deg, #4a4a6a, #3a3a5a);
+        background: rgba(70, 70, 110, 0.55);
         color: #ccc;
       }
       .dialog-btn.secondary:hover {
-        background: linear-gradient(135deg, #5a5a7a, #4a4a6a);
+        background: rgba(90, 90, 130, 0.65);
       }
 
       /* ===== INTRO OVERLAY ===== */
@@ -417,7 +418,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #0f0c29, #1a1040, #24243e);
+        background: linear-gradient(135deg, #121230, #1e1848, #1e1e40);
         display: flex;
         align-items: flex-start;
         justify-content: flex-start;
@@ -623,7 +624,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        background: linear-gradient(135deg, #161832, #1a2040);
         display: none;
         align-items: center;
         justify-content: center;
@@ -696,8 +697,8 @@
         animation: fadeIn 1s ease-out 1s backwards;
       }
       .stat-box {
-        background: rgba(0, 0, 0, 0.4);
-        border: 2px solid rgba(255, 215, 0, 0.3);
+        background: rgba(0, 0, 0, 0.3);
+        border: 1.5px solid rgba(255, 215, 0, 0.2);
         border-radius: 10px;
         padding: 12px 20px;
         text-align: center;
@@ -751,7 +752,7 @@
       }
 
       .prompt-icon {
-        background: linear-gradient(135deg, #ffd700, #ffa000);
+        background: linear-gradient(135deg, #ffc845, #ffa000);
         color: #000;
         width: 26px;
         height: 26px;
@@ -801,8 +802,8 @@
       .mobile-btn {
         width: 56px;
         height: 56px;
-        background: rgba(61, 61, 92, 0.85);
-        border: 3px solid rgba(90, 90, 138, 0.9);
+        background: rgba(55, 55, 90, 0.7);
+        border: 2px solid rgba(100, 100, 160, 0.55);
         border-radius: 14px;
         color: #fff;
         font-size: 24px;
@@ -815,30 +816,31 @@
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         transition: all 0.1s;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         pointer-events: auto;
+        backdrop-filter: blur(6px);
       }
       .mobile-btn:active {
         background: #5a5a8a;
         transform: scale(0.92);
       }
       .mobile-btn.action {
-        background: rgba(74, 124, 89, 0.85);
+        background: rgba(74, 140, 92, 0.65);
         font-size: 18px;
       }
       .mobile-btn.action:active {
         background: #5a9c69;
       }
       .mobile-btn.jump {
-        background: rgba(56, 96, 176, 0.85);
-        border-color: rgba(90, 130, 200, 0.9);
+        background: rgba(65, 105, 185, 0.65);
+        border-color: rgba(100, 140, 210, 0.55);
       }
       .mobile-btn.jump:active {
         background: #5a82c8;
       }
       .mobile-btn.special {
-        background: rgba(183, 100, 28, 0.85);
-        border-color: rgba(220, 140, 60, 0.9);
+        background: rgba(190, 115, 45, 0.65);
+        border-color: rgba(220, 150, 70, 0.55);
       }
       .mobile-btn.special:active {
         background: #c68828;
@@ -892,7 +894,7 @@
         body {
           padding: 0;
           justify-content: flex-start;
-          background: #1a1a2e;
+          background: #161832;
         }
         .game-wrapper {
           width: 100vw;
@@ -2226,7 +2228,7 @@
           if (roach.pauseTimer <= 0) {
             roach.scurrying = true;
             roach.x += roach.dir * roach.speed;
-            
+
             // Bounce off walls and clamp position
             if (roach.x < 50) {
               roach.x = 50;
@@ -2236,7 +2238,7 @@
               roach.x = CFG.WORLD_W - 50;
               roach.dir = -1;
             }
-            
+
             // Random direction change
             if (Math.random() < 0.02) {
               roach.dir *= -1;
@@ -2248,7 +2250,7 @@
               roach.pauseTimer = 30 + Math.random() * 80;
               roach.scurrying = false;
             }
-            
+
             // Flee from player if close
             const dist = player.x + player.w / 2 - (roach.x + roach.w / 2);
             if (Math.abs(dist) < 80 && Math.abs(dist) > 20) {
@@ -3134,7 +3136,7 @@
             rat.pauseTimer--;
             if (rat.pauseTimer <= 0) {
               rat.x += rat.dir * rat.speed;
-              
+
               // Bounce off walls and clamp position
               if (rat.x < 50) {
                 rat.x = 50;
@@ -3144,7 +3146,7 @@
                 rat.x = CFG.WORLD_W - 50;
                 rat.dir = -1;
               }
-              
+
               // Random direction change
               if (Math.random() < 0.01) {
                 rat.dir *= -1;

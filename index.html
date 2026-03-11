@@ -23,7 +23,7 @@
       }
 
       body {
-        background: #1a1a2e;
+        background: #161832;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -35,9 +35,9 @@
 
       .game-wrapper {
         position: relative;
-        border: 4px solid #3d3d5c;
-        border-radius: 8px;
-        box-shadow: 0 0 40px rgba(100, 100, 200, 0.3);
+        border: 3px solid rgba(70, 70, 110, 0.5);
+        border-radius: 12px;
+        box-shadow: 0 0 50px rgba(100, 120, 200, 0.15);
       }
 
       .top-bar {
@@ -70,9 +70,9 @@
       .icon-btn {
         width: 40px;
         height: 40px;
-        background: rgba(0, 0, 0, 0.5);
-        border: 2px solid #5a5a8a;
-        border-radius: 8px;
+        background: rgba(10, 10, 30, 0.4);
+        border: 1.5px solid rgba(100, 100, 160, 0.4);
+        border-radius: 10px;
         color: #fff;
         font-size: 20px;
         cursor: pointer;
@@ -81,11 +81,13 @@
         justify-content: center;
         transition: all 0.2s;
         -webkit-tap-highlight-color: transparent;
+        backdrop-filter: blur(6px);
       }
 
       .icon-btn:hover {
-        background: rgba(0, 0, 0, 0.7);
-        transform: scale(1.1);
+        background: rgba(10, 10, 30, 0.6);
+        transform: scale(1.08);
+        border-color: rgba(140, 140, 200, 0.5);
       }
 
       .icon-btn:active {
@@ -97,9 +99,9 @@
       }
 
       .time-toggle {
-        background: rgba(0, 0, 0, 0.5);
-        border: 2px solid #5a5a8a;
-        border-radius: 8px;
+        background: rgba(10, 10, 30, 0.4);
+        border: 1.5px solid rgba(100, 100, 160, 0.4);
+        border-radius: 10px;
         color: #fff;
         font-size: 12px;
         cursor: pointer;
@@ -110,10 +112,11 @@
         transition: all 0.2s;
         -webkit-tap-highlight-color: transparent;
         font-family: "Press Start 2P", cursive;
+        backdrop-filter: blur(6px);
       }
 
       .time-toggle:hover {
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(10, 10, 30, 0.6);
         transform: scale(1.05);
       }
 
@@ -172,15 +175,16 @@
       }
 
       .dialog-box {
-        background: #2a2a4a;
-        border: 4px solid #5a5a8a;
-        border-radius: 8px;
-        padding: 20px 25px;
+        background: rgba(36, 36, 68, 0.95);
+        backdrop-filter: blur(12px);
+        border: 2px solid rgba(100, 100, 160, 0.35);
+        border-radius: 12px;
+        padding: 22px 26px;
         max-width: 380px;
         width: 100%;
         color: #fff;
         font-family: "VT323", monospace;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
         animation: dialogPop 0.2s ease-out;
         max-height: 90vh;
         overflow-y: auto;
@@ -251,12 +255,13 @@
       }
 
       .dialog-btn.primary {
-        background: #4a7c59;
+        background: linear-gradient(135deg, #4a8c5c, #3a7a4c);
         color: white;
+        box-shadow: 0 3px 12px rgba(74, 140, 92, 0.25);
       }
 
       .dialog-btn.primary:hover {
-        background: #5a9c69;
+        background: linear-gradient(135deg, #5aaa6c, #4a9a5c);
         transform: translateY(-2px);
       }
 
@@ -266,16 +271,16 @@
       }
 
       .dialog-btn.secondary {
-        background: #4a4a6a;
+        background: rgba(70, 70, 110, 0.6);
         color: #ccc;
       }
 
       .dialog-btn.secondary:hover {
-        background: #5a5a7a;
+        background: rgba(90, 90, 130, 0.7);
       }
 
       .dialog-btn.secondary:active {
-        background: #3a3a5a;
+        background: rgba(55, 55, 90, 0.7);
       }
 
       .whatsapp-btn {
@@ -322,10 +327,10 @@
         font-size: 14px;
         padding: 12px 15px;
         width: 100%;
-        background: #1a1a2e;
-        border: 3px solid #5a5a8a;
-        border-radius: 4px;
-        color: #ffd700;
+        background: rgba(20, 20, 40, 0.7);
+        border: 2px solid rgba(100, 100, 160, 0.4);
+        border-radius: 8px;
+        color: #ffc845;
         text-align: center;
         text-transform: uppercase;
         letter-spacing: 3px;
@@ -333,8 +338,8 @@
 
       .code-input:focus {
         outline: none;
-        border-color: #8a8aba;
-        box-shadow: 0 0 10px rgba(138, 138, 186, 0.3);
+        border-color: rgba(140, 140, 200, 0.6);
+        box-shadow: 0 0 12px rgba(140, 140, 200, 0.15);
       }
 
       .code-input::placeholder {
@@ -349,7 +354,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: #1a1a2e;
+        background: #161832;
         display: none;
         align-items: center;
         justify-content: center;
@@ -370,15 +375,15 @@
       .ending-text {
         font-family: "VT323", monospace;
         font-size: 18px;
-        color: #aaa;
+        color: #bbb;
         text-align: center;
         line-height: 1.5;
         max-width: 680px;
-        padding: 25px 30px;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 15px;
-        border: 2px solid rgba(136, 204, 255, 0.3);
-        box-shadow: 0 0 30px rgba(136, 204, 255, 0.2);
+        padding: 28px 32px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 16px;
+        border: 1.5px solid rgba(136, 204, 255, 0.2);
+        box-shadow: 0 0 40px rgba(136, 204, 255, 0.1);
       }
 
       .ending-text .main {
@@ -493,7 +498,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        background: linear-gradient(135deg, #121230, #2a2660, #1e1e40);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -694,9 +699,9 @@
       .mobile-btn {
         width: 58px;
         height: 58px;
-        background: rgba(61, 61, 92, 0.85);
-        border: 3px solid rgba(90, 90, 138, 0.9);
-        border-radius: 12px;
+        background: rgba(55, 55, 90, 0.75);
+        border: 2px solid rgba(100, 100, 160, 0.6);
+        border-radius: 14px;
         color: #fff;
         font-size: 28px;
         cursor: pointer;
@@ -708,9 +713,10 @@
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         transition: all 0.1s;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         font-family: "Press Start 2P", cursive;
         font-size: 12px;
+        backdrop-filter: blur(6px);
       }
 
       .mobile-btn:active {
@@ -720,7 +726,7 @@
       }
 
       .mobile-btn.action {
-        background: rgba(74, 124, 89, 0.85);
+        background: rgba(74, 140, 92, 0.7);
         font-size: 20px;
       }
 
@@ -729,8 +735,8 @@
       }
 
       .mobile-btn.jump {
-        background: rgba(56, 96, 176, 0.85);
-        border-color: rgba(90, 130, 200, 0.9);
+        background: rgba(65, 105, 185, 0.7);
+        border-color: rgba(100, 140, 210, 0.6);
       }
 
       .mobile-btn.jump:active {
@@ -738,8 +744,8 @@
       }
 
       .mobile-btn.attack {
-        background: rgba(183, 28, 28, 0.85);
-        border-color: rgba(220, 60, 60, 0.9);
+        background: rgba(190, 50, 50, 0.7);
+        border-color: rgba(225, 75, 75, 0.6);
       }
 
       .mobile-btn.attack:active {
